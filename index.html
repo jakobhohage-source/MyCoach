@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KickIQ – Professionelle Fußball-Trainingsplattform</title>
+<title>MyCoach – Professionelle Fußball-Trainingsplattform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --pitch: #1e5c2e;
@@ -906,7 +908,7 @@ body{
     <div class="login-field-lines"></div>
     <div class="login-arc" style="width:500px;height:500px;right:-200px;top:50%;transform:translateY(-50%)"></div>
     <div class="login-arc" style="width:280px;height:280px;right:-60px;top:50%;transform:translateY(-50%)"></div>
-    <div class="login-logo-big">Kick<em>IQ</em></div>
+    <div class="login-logo-big">My<em>Coach</em></div>
     <div class="login-tagline">Professionelle Trainingsplattform</div>
     <div class="login-features">
       <div class="login-feat"><div class="login-feat-icon">📚</div>500+ annotierte Übungen & Drills</div>
@@ -916,34 +918,67 @@ body{
     </div>
   </div>
   <div class="login-right">
-    <h2>Willkommen zurück</h2>
-    <p>Melde dich an, um deine Trainingseinheiten zu verwalten.</p>
-    <div class="form-group">
-      <label class="form-label">E-Mail oder Benutzername</label>
-      <input class="form-input" type="text" placeholder="trainer@verein.de" value="max.mustermann@svtest.de">
+    <!-- Tab switch -->
+    <div style="display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <button id="tabLogin" onclick="switchAuthTab('login')"
+        style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid var(--gold);color:var(--text);font-family:'Oswald',sans-serif;font-size:16px;cursor:pointer;font-weight:600">Einloggen</button>
+      <button id="tabRegister" onclick="switchAuthTab('register')"
+        style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-dim);font-family:'Oswald',sans-serif;font-size:16px;cursor:pointer">Registrieren</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Passwort</label>
-      <input class="form-input" type="password" value="demo1234">
+
+    <!-- Login form -->
+    <div id="formLogin">
+      <h2 style="margin-bottom:6px">Willkommen zurück</h2>
+      <p style="color:var(--text-dim);margin-bottom:22px;font-size:14px">Melde dich an, um deine Trainingseinheiten zu verwalten.</p>
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="trainer@verein.de">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Passwort</label>
+        <input class="form-input" type="password" id="loginPassword" placeholder="••••••••">
+      </div>
+      <div id="loginError" style="color:#e8614e;font-size:13px;margin-bottom:12px;display:none"></div>
+      <button class="btn-login" onclick="doLogin()" id="btnLogin">Einloggen →</button>
+      <div class="login-divider">oder</div>
+      <button class="btn-guest" onclick="doGuestLogin()">Als Gast fortfahren (Demo)</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Meine Rolle</label>
-      <select class="form-select" id="roleSelect">
-        <option value="jugend">Jugendtrainer (Verein)</option>
-        <option value="profi">Profi / Semiprofessioneller Trainer</option>
-        <option value="hobby">Hobbytrainer / Freizeitfußball</option>
-      </select>
+
+    <!-- Register form -->
+    <div id="formRegister" style="display:none">
+      <h2 style="margin-bottom:6px">Account erstellen</h2>
+      <p style="color:var(--text-dim);margin-bottom:22px;font-size:14px">Kostenlos starten — keine Kreditkarte nötig.</p>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" type="text" id="regName" placeholder="Max Mustermann">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" id="regEmail" placeholder="trainer@verein.de">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Passwort</label>
+        <input class="form-input" type="password" id="regPassword" placeholder="Min. 6 Zeichen">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Meine Rolle</label>
+        <select class="form-select" id="regRole">
+          <option value="jugend">Jugendtrainer (Verein)</option>
+          <option value="profi">Profi / Semiprofessioneller Trainer</option>
+          <option value="hobby">Hobbytrainer / Freizeitfußball</option>
+        </select>
+      </div>
+      <div id="regError" style="color:#e8614e;font-size:13px;margin-bottom:12px;display:none"></div>
+      <div id="regSuccess" style="color:#5dda8c;font-size:13px;margin-bottom:12px;display:none"></div>
+      <button class="btn-login" onclick="doRegister()" id="btnRegister">Account erstellen →</button>
     </div>
-    <button class="btn-login" onclick="doLogin()">Einloggen →</button>
-    <div class="login-divider">oder</div>
-    <button class="btn-guest" onclick="doLogin()">Als Gast fortfahren (Demo)</button>
   </div>
 </div>
 
 <!-- ═══════════ APP ═══════════ -->
 <div id="appShell">
   <div class="topbar">
-    <div class="tb-logo">⚽ <span>Kick</span>IQ</div>
+    <div class="tb-logo">⚽ <span>My</span>Coach</div>
     <div class="tb-nav">
       <button class="tb-link active" onclick="showView('home')"><span class="tb-icon">🏠</span>Dashboard</button>
       <button class="tb-link" onclick="showView('bibliothek')"><span class="tb-icon">📚</span>Bibliothek</button>
@@ -955,6 +990,8 @@ body{
       <div class="user-pill">
         <div class="user-avatar" id="userAvatar">M</div>
         <span id="userName">Max M.</span>
+        <button onclick="doLogout()" title="Abmelden"
+          style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0 4px;margin-left:4px">↩</button>
       </div>
     </div>
   </div>
@@ -1080,7 +1117,7 @@ body{
           <div class="export-row">
             <button class="export-btn gold" onclick="toast('📋 PDF wird erstellt…','✔')">Als PDF exportieren</button>
             <button class="export-btn outline" onclick="toast('🔗 Link kopiert!','📎')">Link teilen</button>
-            <button class="export-btn outline" onclick="toast('💾 Gespeichert','✔')">Speichern</button>
+            <button class="export-btn outline" onclick="saveTrainingPlan()">💾 Speichern</button>
           </div>
         </div>
         <div class="planer-side">
@@ -1352,20 +1389,111 @@ let filterState = {cat:'',lvl:'',players:'',dur:''};
 /* ════════════════════════════════════
    LOGIN
 ════════════════════════════════════ */
-function doLogin(){
+/* ════════════════════════════════════
+   SUPABASE CONFIG
+════════════════════════════════════ */
+const SUPABASE_URL = 'https://qnjebmbvkzssxaunzllm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuamVibWJ2a3pzc3hhdW56bGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTI5NDQsImV4cCI6MjA4ODcyODk0NH0.4gGjPkwxlpSDla2ZolBjzJ35rnrY6_P-D7Zfi2iEuVY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null; // logged-in user object
+
+/* ── Auth tab switch ── */
+function switchAuthTab(tab){
+  const isLogin = tab==='login';
+  document.getElementById('formLogin').style.display = isLogin?'block':'none';
+  document.getElementById('formRegister').style.display = isLogin?'none':'block';
+  document.getElementById('tabLogin').style.borderBottomColor = isLogin?'var(--gold)':'transparent';
+  document.getElementById('tabLogin').style.color = isLogin?'var(--text)':'var(--text-dim)';
+  document.getElementById('tabRegister').style.borderBottomColor = isLogin?'transparent':'var(--gold)';
+  document.getElementById('tabRegister').style.color = isLogin?'var(--text-dim)':'var(--text)';
+}
+
+/* ── Register ── */
+async function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const role = document.getElementById('regRole').value;
+  const errEl = document.getElementById('regError');
+  const okEl = document.getElementById('regSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+  if(!name||!email||!password){errEl.textContent='Bitte alle Felder ausfüllen.';errEl.style.display='block';return;}
+  if(password.length<6){errEl.textContent='Passwort muss mindestens 6 Zeichen haben.';errEl.style.display='block';return;}
+  document.getElementById('btnRegister').textContent='…';
+  const {data,error} = await sb.auth.signUp({
+    email, password,
+    options:{data:{name, role}}
+  });
+  document.getElementById('btnRegister').textContent='Account erstellen →';
+  if(error){errEl.textContent=error.message;errEl.style.display='block';return;}
+  okEl.textContent='✅ Bestätigungs-E-Mail gesendet! Bitte E-Mail prüfen und bestätigen, dann einloggen.';
+  okEl.style.display='block';
+}
+
+/* ── Login ── */
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display='none';
+  if(!email||!password){errEl.textContent='Bitte E-Mail und Passwort eingeben.';errEl.style.display='block';return;}
+  document.getElementById('btnLogin').textContent='…';
+  const {data,error} = await sb.auth.signInWithPassword({email,password});
+  document.getElementById('btnLogin').textContent='Einloggen →';
+  if(error){errEl.textContent='Falsche E-Mail oder Passwort.';errEl.style.display='block';return;}
+  currentUser = data.user;
+  enterApp(data.user);
+}
+
+/* ── Guest / Demo login ── */
+function doGuestLogin(){
+  currentUser = null;
+  enterApp(null);
+}
+
+/* ── Logout ── */
+async function doLogout(){
+  await sb.auth.signOut();
+  currentUser = null;
+  savedExercises = [];
+  document.getElementById('appShell').classList.remove('visible');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginScreen').style.opacity='1';
+}
+
+/* ── Enter app ── */
+function enterApp(user){
   const roles = {jugend:'Jugendtrainer',profi:'Profi-Trainer',hobby:'Hobbytrainer'};
-  const sel = document.getElementById('roleSelect').value;
-  document.getElementById('roleLabel').textContent = roles[sel] || 'Trainer';
+  const meta = user?.user_metadata||{};
+  const name = meta.name || user?.email?.split('@')[0] || 'Gast';
+  const role = meta.role || 'jugend';
+  document.getElementById('roleLabel').textContent = roles[role]||'Trainer';
+  document.getElementById('userName').textContent = name.split(' ').map((w,i)=>i===0?w:w[0]+'.').join(' ');
+  document.getElementById('userAvatar').textContent = name[0].toUpperCase();
   document.getElementById('loginScreen').style.opacity='0';
   document.getElementById('loginScreen').style.transition='opacity 0.4s';
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appShell').classList.add('visible');
     renderDrills(DRILLS);
     renderPlaner();
     renderSideDrills(DRILLS);
+    if(user){
+      await loadSavedExercises();
+      await loadTrainingPlans();
+    }
   },400);
 }
+
+/* ── Check existing session on load ── */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(session?.user){
+    currentUser = session.user;
+    enterApp(session.user);
+  }
+});
 
 /* ════════════════════════════════════
    NAVIGATION
@@ -2155,16 +2283,18 @@ function saveBoard(){
 
 function closeSaveDialog(){document.getElementById('saveDialogOverlay').style.display='none';}
 
-/* ── Saved exercises store ── */
+/* ════════════════════════════════════
+   CLOUD SAVE / LOAD — TAKTIKEN
+════════════════════════════════════ */
 let savedExercises=[];
 
-function confirmSave(){
+async function confirmSave(){
   const name=document.getElementById('saveExName').value.trim()||'Unbenannte Übung';
   const fieldNames={full:'Klassisches Feld',half:'Halbfeld',small:'Kleinfeld'};
   const now=new Date();
   const timeStr=now.toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 
-  // Capture thumbnail from canvas
+  // Capture thumbnail
   let thumb='';
   if(canvas){
     const tc=document.createElement('canvas');tc.width=96;tc.height=64;
@@ -2174,12 +2304,119 @@ function confirmSave(){
     thumb=tc.toDataURL('image/png');
   }
 
-  const ex={id:Date.now(),name,field:fieldNames[selectedFieldType]||'–',time:timeStr,thumb,
-    movCount:movements.length,entityCount:entities.length};
+  const boardData = {
+    paths: paths.map(p=>({...p,pts:p.pts})),
+    movements: movements.map(m=>({...m})),
+    entities: entities.map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count})),
+    fieldType: selectedFieldType
+  };
+
+  const ex={
+    id: Date.now(),
+    name,
+    field: fieldNames[selectedFieldType]||'–',
+    time: timeStr,
+    thumb,
+    movCount: movements.length,
+    entityCount: entities.length,
+    boardData
+  };
+
+  // Save to Supabase if logged in
+  if(currentUser){
+    const prog=document.getElementById('saveProgress');
+    prog.style.display='block'; prog.textContent='☁️ Wird gespeichert…';
+    const {data,error} = await sb.from('tactics').insert({
+      user_id: currentUser.id,
+      name,
+      field_type: selectedFieldType,
+      board_data: boardData,
+      thumbnail: thumb,
+      created_at: new Date().toISOString()
+    }).select().single();
+    if(error){
+      prog.textContent='❌ Fehler: '+error.message;
+      setTimeout(()=>prog.style.display='none',3000);
+    } else {
+      ex.id = data.id; // use DB id
+      ex.supabaseId = data.id;
+      prog.style.display='none';
+    }
+  }
+
   savedExercises.unshift(ex);
   renderSavedExercises();
   closeSaveDialog();
-  toast(`"${name}" gespeichert`,'💾');
+  toast(`"${name}" gespeichert${currentUser?' (Cloud)':'(lokal)'}`, '💾');
+}
+
+async function loadSavedExercises(){
+  if(!currentUser) return;
+  const {data,error} = await sb.from('tactics')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at',{ascending:false});
+  if(error||!data) return;
+  savedExercises = data.map(r=>({
+    id: r.id,
+    supabaseId: r.id,
+    name: r.name,
+    field: ({full:'Klassisches Feld',half:'Halbfeld',small:'Kleinfeld'})[r.field_type]||r.field_type,
+    time: new Date(r.created_at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    thumb: r.thumbnail,
+    movCount: r.board_data?.movements?.length||0,
+    entityCount: r.board_data?.entities?.length||0,
+    boardData: r.board_data
+  }));
+  renderSavedExercises();
+}
+
+async function deleteSavedEx(e, id){
+  e.stopPropagation();
+  const ex = savedExercises.find(x=>x.id===id);
+  if(ex?.supabaseId && currentUser){
+    await sb.from('tactics').delete().eq('id', ex.supabaseId);
+  }
+  savedExercises = savedExercises.filter(x=>x.id!==id);
+  renderSavedExercises();
+  toast('Übung gelöscht','🗑');
+}
+
+/* ════════════════════════════════════
+   CLOUD SAVE / LOAD — TRAININGSPLÄNE
+════════════════════════════════════ */
+async function saveTrainingPlan(){
+  if(!currentUser){ toast('Bitte einloggen zum Speichern','⚠️'); return; }
+  const planData = {
+    phases: PHASES.map(ph=>({...ph, items:[...ph.items]})),
+    meta: {
+      title: document.getElementById('planTitle')?.value||'Trainingsplan',
+      date: document.getElementById('planDate')?.value||'',
+      location: document.getElementById('planLocation')?.value||''
+    }
+  };
+  const {error} = await sb.from('training_plans').upsert({
+    user_id: currentUser.id,
+    name: planData.meta.title,
+    plan_data: planData,
+    updated_at: new Date().toISOString()
+  },{onConflict:'user_id,name'});
+  if(error) toast('Fehler: '+error.message,'❌');
+  else toast('Trainingsplan gespeichert ☁️','💾');
+}
+
+async function loadTrainingPlans(){
+  if(!currentUser) return;
+  const {data,error} = await sb.from('training_plans')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('updated_at',{ascending:false})
+    .limit(1);
+  if(error||!data?.length) return;
+  const plan = data[0].plan_data;
+  if(plan?.phases) plan.phases.forEach((ph,i)=>{ if(PHASES[i]) PHASES[i].items=ph.items||[]; });
+  renderPlaner();
+  toast('Letzter Trainingsplan geladen ☁️','📋');
 }
 
 function renderSavedExercises(){
@@ -2203,12 +2440,6 @@ function renderSavedExercises(){
 }
 
 function openSavedEx(id){showView('board');toast('Übung wird geladen…','✏️');}
-function deleteSavedEx(e,id){
-  e.stopPropagation();
-  savedExercises=savedExercises.filter(x=>x.id!==id);
-  renderSavedExercises();
-  toast('Übung gelöscht','🗑');
-}
 
 /* ── Video export (canvas recording) ── */
 function exportVideo(){
