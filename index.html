@@ -991,7 +991,7 @@ body{
         <div class="user-avatar" id="userAvatar">M</div>
         <span id="userName">Max M.</span>
         <button onclick="doLogout()" title="Abmelden"
-          style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0 4px;margin-left:4px">↩</button>
+          style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);cursor:pointer;font-size:12px;padding:4px 10px;margin-left:8px;border-radius:6px;font-family:'Source Sans 3',sans-serif">Abmelden</button>
       </div>
     </div>
   </div>
@@ -1465,12 +1465,14 @@ async function doLogout(){
 /* ── Enter app ── */
 function enterApp(user){
   const roles = {jugend:'Jugendtrainer',profi:'Profi-Trainer',hobby:'Hobbytrainer'};
-  const meta = user?.user_metadata||{};
-  const name = meta.name || user?.email?.split('@')[0] || 'Gast';
+  const meta = user?.user_metadata || {};
+  // Name: prefer metadata name, fall back to email prefix, fall back to 'Gast'
+  const rawName = meta.name || meta.full_name || (user?.email ? user.email.split('@')[0] : '') || 'Gast';
   const role = meta.role || 'jugend';
-  document.getElementById('roleLabel').textContent = roles[role]||'Trainer';
-  document.getElementById('userName').textContent = name.split(' ').map((w,i)=>i===0?w:w[0]+'.').join(' ');
-  document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+  document.getElementById('roleLabel').textContent = roles[role] || 'Trainer';
+  // Show full name, not abbreviated
+  document.getElementById('userName').textContent = rawName;
+  document.getElementById('userAvatar').textContent = rawName[0].toUpperCase();
   document.getElementById('loginScreen').style.opacity='0';
   document.getElementById('loginScreen').style.transition='opacity 0.4s';
   setTimeout(async ()=>{
