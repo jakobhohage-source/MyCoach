@@ -536,8 +536,10 @@ body{
 ═══════════════════════════════════════════ */
 .field-picker{
   flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+  align-items:center;justify-content:flex-start;
   background:var(--ink);padding:40px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
 .field-picker h2{
   font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;
@@ -902,6 +904,18 @@ body{
 /* ═══════════════════════════════════════════
    MOBILE OPTIMIERUNG (iPhone/Safari)
 ═══════════════════════════════════════════ */
+
+/* Fix iOS bounce/overscroll globally */
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+#appShell { height: 100dvh; }
+
+/* Mobile nav hidden by default (shown via JS) */
+.mobile-nav { display: none; }
+
 @media (max-width: 768px) {
 
   /* ── Login ── */
@@ -912,22 +926,21 @@ body{
     border-left: none;
     justify-content: flex-start;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .login-right h2 { font-size: 26px; }
 
-  /* ── Topbar → Icon-only nav ── */
+  /* ── Topbar → hide desktop nav ── */
   .topbar { height: 52px; padding: 0 12px; }
-  .tb-logo { font-size: 18px; margin-right: 0; }
-  .tb-nav { flex: 1; justify-content: center; }
-  .tb-link { padding: 0 10px; font-size: 0; gap: 0; }
-  .tb-link .tb-icon { font-size: 20px; }
+  .tb-logo { font-size: 18px; margin-right: 0; cursor: pointer; }
+  .topbar .tb-nav { display: none; }
   .tb-right { gap: 6px; }
   .badge-role { display: none; }
   .user-pill { padding: 4px 8px 4px 4px; gap: 6px; font-size: 12px; }
   #userName { display: none; }
   .user-pill button { font-size: 11px; padding: 3px 7px; }
 
-  /* ── Bottom nav bar for mobile ── */
+  /* ── Bottom nav bar ── */
   .mobile-nav {
     display: flex !important;
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -943,15 +956,57 @@ body{
     color: var(--text-dim); font-size: 10px;
     font-family: 'Source Sans 3', sans-serif;
     cursor: pointer; transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
   }
   .mobile-nav-btn .mn-icon { font-size: 22px; }
   .mobile-nav-btn.active { color: var(--gold-light); }
-  .topbar .tb-nav { display: none; }
 
-  /* App body needs padding for bottom nav */
+  /* App body padding for bottom nav */
   .app-body { padding-bottom: 60px; }
 
+  /* All scrollable views need -webkit-overflow-scrolling */
+  .home-inner, .lib-main, .lib-sidebar,
+  .planer-main, .planer-side, .field-picker {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* ── Sidebar drawer for Bibliothek & Planer ── */
+  .lib-sidebar-overlay, .planer-side-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.55);
+  }
+  .lib-sidebar-overlay.open, .planer-side-overlay.open { display: block; }
+
+  .lib-layout { grid-template-columns: 1fr; position: relative; }
+  .lib-sidebar {
+    position: fixed; left: 0; top: 52px; bottom: 60px;
+    width: 280px; z-index: 400;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lib-sidebar.open { transform: translateX(0); }
+
+  .planer-outer { grid-template-columns: 1fr; position: relative; }
+  .planer-side {
+    position: fixed; left: 0; top: 52px; bottom: 60px;
+    width: 280px; z-index: 400;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    border-left: none; border-right: 1px solid var(--border);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .planer-side.open { transform: translateX(0); }
+
+  /* Logo tap opens drawer */
+  .tb-logo { user-select: none; }
+
   /* ── Home ── */
+  .home-inner { overflow-y: auto; }
   .home-hero { padding: 28px 20px 24px; }
   .home-hero h1 { font-size: 36px; }
   .home-hero-sub { font-size: 14px; margin-bottom: 20px; }
@@ -963,80 +1018,34 @@ body{
   .home-grid { grid-template-columns: 1fr; }
   .home-aside { border-left: none; border-top: 1px solid var(--border); padding: 24px 20px; }
   .home-section { padding: 24px 20px; }
-  .cat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
 
-  /* ── Bibliothek ── */
-  .bib-inner { flex-direction: column !important; }
-  .bib-sidebar {
-    width: 100% !important; border-right: none !important;
-    border-bottom: 1px solid var(--border);
-    padding: 16px !important;
-  }
-  .bib-sidebar .filter-section { margin-bottom: 12px; }
-  .drill-grid { grid-template-columns: 1fr !important; padding: 16px !important; }
+  /* ── Bibliothek main ── */
+  .lib-main { padding: 16px; overflow-y: auto; }
+  .drills-grid { grid-template-columns: 1fr; }
 
   /* ── Trainingsplaner ── */
-  .planer-inner { flex-direction: column !important; }
-  .planer-sidebar {
-    width: 100% !important; border-left: none !important;
-    border-top: 1px solid var(--border);
-    max-height: 280px;
-  }
-  .planer-main { padding: 16px !important; }
-  .planer-meta { grid-template-columns: 1fr 1fr !important; }
+  .planer-main { padding: 16px; overflow-y: auto; }
+  .planer-meta-row { gap: 8px; }
 
-  /* ── Zeichenboard ── */
-  .board-toolbar {
-    flex-wrap: wrap;
-    height: auto !important;
-    padding: 6px 8px !important;
-    gap: 4px;
-    overflow-x: auto;
-  }
-  .board-toolbar2 {
-    flex-wrap: wrap;
-    height: auto !important;
-    padding: 4px 8px !important;
-    gap: 4px;
-    overflow-x: auto;
-  }
-  .ttbtn { padding: 6px 8px !important; font-size: 12px !important; }
-  .entity-btn { padding: 6px 8px !important; font-size: 12px !important; }
-  .tb-label { font-size: 10px !important; }
-  .tb-sep { height: 20px !important; }
+  /* ── Field Picker ── */
+  .field-picker { padding: 24px 16px 80px; justify-content: flex-start; }
+  .fp-grid { flex-direction: column; align-items: center; width: 100%; }
+  .fp-card { width: 100%; max-width: 340px; }
+  .fp-start-btn { width: 100%; max-width: 340px; }
 
-  /* Field picker cards stacked */
-  .field-picker-cards {
-    flex-direction: column !important;
-    gap: 12px !important;
-    padding: 16px !important;
-  }
-  .field-card { width: 100% !important; }
+  /* ── Board toolbar ── */
+  .board-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 6px 8px; }
+  .board-toolbar-row2 { flex-wrap: wrap; padding: 4px 8px 6px; }
 
-  /* Playback bar compact */
-  .playback-bar { padding: 6px 10px !important; gap: 6px !important; flex-wrap: wrap; }
-  .pb-time { font-size: 11px !important; }
-
-  /* Board status bar */
-  .board-status { font-size: 11px !important; padding: 4px 10px !important; }
-  #bsHint { display: none; }
-
-  /* Dialogs full-screen on mobile */
-  .group-dialog {
-    width: calc(100vw - 32px) !important;
-    margin: 16px;
-  }
-  .save-dialog {
-    width: calc(100vw - 32px) !important;
-    padding: 24px 20px !important;
-  }
+  /* ── Dialogs ── */
+  .group-dialog { width: calc(100vw - 32px) !important; }
+  .save-dialog { width: calc(100vw - 32px) !important; padding: 24px 20px !important; }
 }
 
 /* Landscape phone */
 @media (max-width: 768px) and (orientation: landscape) {
   .mobile-nav { height: 48px; }
   .app-body { padding-bottom: 48px; }
-  .board-toolbar, .board-toolbar2 { padding: 3px 8px !important; }
 }</style>
 </head>
 <body>
@@ -1117,7 +1126,7 @@ body{
 <!-- ═══════════ APP ═══════════ -->
 <div id="appShell">
   <div class="topbar">
-    <div class="tb-logo">⚽ <span>My</span>Coach</div>
+    <div class="tb-logo" onclick="toggleDrawer()">⚽ <span>My</span>Coach</div>
     <div class="tb-nav">
       <button class="tb-link active" onclick="showView('home')"><span class="tb-icon">🏠</span>Dashboard</button>
       <button class="tb-link" onclick="showView('bibliothek')"><span class="tb-icon">📚</span>Bibliothek</button>
@@ -1158,7 +1167,11 @@ body{
         </div>
         <div class="home-grid">
           <div class="home-section">
-            <div class="sec-title">Kategorien</div>
+            <div class="sec-title" style="margin-bottom:12px">Gespeicherte Übungen</div>
+            <div id="savedExercisesList" class="saved-exercises-list">
+              <div class="saved-empty">Noch keine gespeicherten Übungen.<br>Speichere eine Taktik im Zeichenboard mit 💾.</div>
+            </div>
+            <div class="sec-title" style="margin-top:28px">Kategorien</div>
             <div class="cat-grid">
               <div class="cat-tile" style="--tc:#d4a017" onclick="showView('bibliothek')"><div class="cat-tile-icon">⚡</div><div class="cat-tile-name">Passspiel</div><div class="cat-tile-count">87 Übungen</div></div>
               <div class="cat-tile" style="--tc:#c0392b" onclick="showView('bibliothek')"><div class="cat-tile-icon">🥅</div><div class="cat-tile-name">Torschuss</div><div class="cat-tile-count">63 Übungen</div></div>
@@ -1176,10 +1189,6 @@ body{
               <div class="recent-item" onclick="showView('board')"><div class="recent-icon">✏️</div><div class="recent-meta"><div class="recent-name">Standardsituation Ecke</div><div class="recent-sub">Zeichenboard · vor 2 Tagen</div></div></div>
               <div class="recent-item" onclick="showView('bibliothek')"><div class="recent-icon">🧠</div><div class="recent-meta"><div class="recent-name">4-4-2 Abwehrsystem</div><div class="recent-sub">Übung · vor 3 Tagen</div></div></div>
             </div>
-            <div class="sec-title" style="margin-top:24px">Gespeicherte Übungen</div>
-            <div id="savedExercisesList" class="saved-exercises-list">
-              <div class="saved-empty">Noch keine gespeicherten Übungen.<br>Speichere eine Taktik im Zeichenboard mit 💾.</div>
-            </div>
           </div>
         </div>
       </div>
@@ -1188,7 +1197,8 @@ body{
     <!-- BIBLIOTHEK -->
     <div id="view-bibliothek" class="view">
       <div class="lib-layout">
-        <div class="lib-sidebar">
+        <div class="lib-sidebar-overlay" id="libOverlay" onclick="closeDrawer()"></div>
+        <div class="lib-sidebar" id="libSidebar">
           <div class="search-wrap"><input type="text" placeholder="Übung suchen…" oninput="filterDrills(this.value)" id="libSearch"></div>
           <div class="filter-sec">
             <div class="filter-label">Kategorie</div>
@@ -1243,6 +1253,7 @@ body{
     <!-- PLANER -->
     <div id="view-planer" class="view">
       <div class="planer-outer">
+        <div class="planer-side-overlay" id="planerOverlay" onclick="closeDrawer()"></div>
         <div class="planer-main">
           <h2>Trainingsplaner</h2>
           <div class="planer-meta-row">
@@ -1259,7 +1270,7 @@ body{
             <button class="export-btn outline" onclick="saveTrainingPlan()">💾 Speichern</button>
           </div>
         </div>
-        <div class="planer-side">
+        <div class="planer-side" id="planerSide">
           <div class="planer-side-head">Übungen</div>
           <div class="side-search"><input type="text" placeholder="Drill suchen…" oninput="filterSideDrills(this.value)" id="sideSearch"></div>
           <div id="sideDrillList"></div>
@@ -1545,12 +1556,38 @@ let filterState = {cat:'',lvl:'',players:'',dur:''};
    LOGIN
 ════════════════════════════════════ */
 /* ════════════════════════════════════
-   MOBILE NAV
+   MOBILE NAV & DRAWER
 ════════════════════════════════════ */
 function setMobileNav(view){
   document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
   const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard'};
   document.getElementById(map[view])?.classList.add('active');
+  closeDrawer();
+}
+
+let currentView = 'home';
+function toggleDrawer(){
+  if(window.innerWidth > 768) return;
+  if(currentView === 'bibliothek'){
+    const s = document.getElementById('libSidebar');
+    const o = document.getElementById('libOverlay');
+    const isOpen = s.classList.contains('open');
+    s.classList.toggle('open', !isOpen);
+    o.classList.toggle('open', !isOpen);
+  } else if(currentView === 'planer'){
+    const s = document.getElementById('planerSide');
+    const o = document.getElementById('planerOverlay');
+    const isOpen = s.classList.contains('open');
+    s.classList.toggle('open', !isOpen);
+    o.classList.toggle('open', !isOpen);
+  }
+}
+
+function closeDrawer(){
+  document.getElementById('libSidebar')?.classList.remove('open');
+  document.getElementById('libOverlay')?.classList.remove('open');
+  document.getElementById('planerSide')?.classList.remove('open');
+  document.getElementById('planerOverlay')?.classList.remove('open');
 }
 
 function initMobileNav(){
@@ -1559,7 +1596,9 @@ function initMobileNav(){
   }
 }
 window.addEventListener('resize',()=>{
-  document.getElementById('mobileNav').style.display = window.innerWidth<=768?'flex':'none';
+  const isMobile = window.innerWidth<=768;
+  document.getElementById('mobileNav').style.display = isMobile?'flex':'none';
+  if(!isMobile) closeDrawer();
 });
 
 /* ════════════════════════════════════
@@ -1675,6 +1714,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
    NAVIGATION
 ════════════════════════════════════ */
 function showView(name){
+  currentView = name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tb-link').forEach(l=>l.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
