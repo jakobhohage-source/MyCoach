@@ -2656,7 +2656,93 @@ function renderSavedExercises(){
     </div>`).join('');
 }
 
-function openSavedEx(id){showView('board');toast('Übung wird geladen…','✏️');}
+function openSavedEx(id){
+  const ex = savedExercises.find(x=>x.id===id);
+  if(!ex||!ex.boardData){showView('board');return;}
+  const bd = ex.boardData;
+
+  // 1. Navigate to board
+  showView('board');
+
+  // 2. Hide field picker, set field type
+  const ft = bd.fieldType||'full';
+  selectedFieldType = ft;
+  document.getElementById('fieldPicker').style.display='none';
+
+  // 3. Init board (or reinit if already open)
+  if(!boardInited){
+    initBoard(ft);
+  } else {
+    // Reinit field SVG for potentially different field type
+    const fd=FIELD_SVGS[ft]||FIELD_SVGS.full;
+    const svg=document.getElementById('fieldSvg');
+    svg.setAttribute('viewBox',fd.vb);
+    svg.style.background=fd.bg;
+    svg.innerHTML=fd.content;
+  }
+
+  // 4. Clear existing board state
+  pbStop();
+  paths=[];
+  movements=[];
+  entities=[];
+  entityIdCounter=0;
+  document.getElementById('playerLayer').innerHTML='';
+
+  // 5. Restore paths (freehand drawings)
+  if(Array.isArray(bd.paths)) paths = bd.paths.map(p=>({...p}));
+
+  // 6. Restore entities
+  const area = document.getElementById('boardArea');
+  if(Array.isArray(bd.entities)){
+    bd.entities.forEach(e=>{
+      entityIdCounter = Math.max(entityIdCounter, e.id||0);
+      const wrap=document.createElement('div');
+      wrap.className='field-entity';
+      wrap.style.left=e.x+'%';
+      wrap.style.top=e.y+'%';
+      wrap.dataset.eid=e.id;
+
+      let inner='';
+      if(e.type==='attacker') inner=playerHTML(e.color||'#e8614e',e.label||'A',false);
+      else if(e.type==='defender') inner=playerHTML(e.color||'#4fa3e0',e.label||'V',false);
+      else if(e.type==='gk') inner=playerHTML(e.color||'#f0bc2e',e.label||'T',true);
+      else if(e.type==='cone') inner='<div class="fe-cone">🔶</div>';
+      else if(e.type==='pole') inner='<div class="fe-pole"></div>';
+      else if(e.type==='ball') inner='<div class="fe-ball">⚽</div>';
+      else if(e.type==='pylon') inner='<div class="fe-pylon">🔺</div>';
+      else if(e.type==='group'){
+        const count=e.count||4;const color=e.color||'#e8614e';const label=e.label||'Gruppe';
+        const dots=Array.from({length:Math.min(count,5)},(_,i)=>
+          `<div style="width:22px;height:22px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.8);margin-left:${i>0?'-6px':'0'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'Oswald',sans-serif;color:${isLight(color)?'#111':'#fff'};position:relative;z-index:${i+1}">${i+1}</div>`).join('');
+        inner=`<div class="fe-group"><div class="fe-group-circles" style="display:flex">${dots}</div><div class="fe-group-badge">${label} (${count})</div></div>`;
+      }
+      else if(e.type==='merge'){
+        inner=`<div class="fe-merge" style="width:24px;height:24px;border-radius:50%;background:rgba(240,188,46,0.25);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px">✦</div>`;
+      }
+      wrap.innerHTML=inner;
+      const ent={id:e.id,type:e.type,el:wrap,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count};
+      entities.push(ent);
+      makeDraggableEntity(wrap,ent,area);
+      wrap.addEventListener('click',ev=>{ev.stopPropagation();if(movementMode)selectEntityAsSource(ent);});
+      document.getElementById('playerLayer').appendChild(wrap);
+    });
+  }
+
+  // 7. Restore movements
+  if(Array.isArray(bd.movements)){
+    movements = bd.movements.map(m=>({...m}));
+  }
+
+  // 8. Redraw and update UI
+  setTimeout(()=>{
+    resizeBoard();
+    computeSequencing();
+    updateBoardStatus();
+    updatePlaybackUI();
+    toast(`"${ex.name}" geladen`,'✏️');
+  },80);
+}
 
 /* ── Video export (canvas recording) ── */
 function exportVideo(){
