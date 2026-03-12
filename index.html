@@ -898,7 +898,146 @@ body{
 ::-webkit-scrollbar-track{background:var(--ink);}
 ::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:3px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--pitch-mid);}
-</style>
+
+/* ═══════════════════════════════════════════
+   MOBILE OPTIMIERUNG (iPhone/Safari)
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Login ── */
+  #loginScreen { flex-direction: column; }
+  .login-left { display: none; }
+  .login-right {
+    width: 100%; padding: 40px 24px 32px;
+    border-left: none;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+  .login-right h2 { font-size: 26px; }
+
+  /* ── Topbar → Icon-only nav ── */
+  .topbar { height: 52px; padding: 0 12px; }
+  .tb-logo { font-size: 18px; margin-right: 0; }
+  .tb-nav { flex: 1; justify-content: center; }
+  .tb-link { padding: 0 10px; font-size: 0; gap: 0; }
+  .tb-link .tb-icon { font-size: 20px; }
+  .tb-right { gap: 6px; }
+  .badge-role { display: none; }
+  .user-pill { padding: 4px 8px 4px 4px; gap: 6px; font-size: 12px; }
+  #userName { display: none; }
+  .user-pill button { font-size: 11px; padding: 3px 7px; }
+
+  /* ── Bottom nav bar for mobile ── */
+  .mobile-nav {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 60px; z-index: 500;
+    background: var(--ink2);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-nav-btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; border: none; background: transparent;
+    color: var(--text-dim); font-size: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    cursor: pointer; transition: color 0.15s;
+  }
+  .mobile-nav-btn .mn-icon { font-size: 22px; }
+  .mobile-nav-btn.active { color: var(--gold-light); }
+  .topbar .tb-nav { display: none; }
+
+  /* App body needs padding for bottom nav */
+  .app-body { padding-bottom: 60px; }
+
+  /* ── Home ── */
+  .home-hero { padding: 28px 20px 24px; }
+  .home-hero h1 { font-size: 36px; }
+  .home-hero-sub { font-size: 14px; margin-bottom: 20px; }
+  .hero-btns { gap: 8px; }
+  .hbtn { padding: 10px 18px; font-size: 14px; }
+  .home-stats { grid-template-columns: repeat(2, 1fr); }
+  .hstat { padding: 16px 12px; }
+  .hstat-n { font-size: 28px; }
+  .home-grid { grid-template-columns: 1fr; }
+  .home-aside { border-left: none; border-top: 1px solid var(--border); padding: 24px 20px; }
+  .home-section { padding: 24px 20px; }
+  .cat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+
+  /* ── Bibliothek ── */
+  .bib-inner { flex-direction: column !important; }
+  .bib-sidebar {
+    width: 100% !important; border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    padding: 16px !important;
+  }
+  .bib-sidebar .filter-section { margin-bottom: 12px; }
+  .drill-grid { grid-template-columns: 1fr !important; padding: 16px !important; }
+
+  /* ── Trainingsplaner ── */
+  .planer-inner { flex-direction: column !important; }
+  .planer-sidebar {
+    width: 100% !important; border-left: none !important;
+    border-top: 1px solid var(--border);
+    max-height: 280px;
+  }
+  .planer-main { padding: 16px !important; }
+  .planer-meta { grid-template-columns: 1fr 1fr !important; }
+
+  /* ── Zeichenboard ── */
+  .board-toolbar {
+    flex-wrap: wrap;
+    height: auto !important;
+    padding: 6px 8px !important;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .board-toolbar2 {
+    flex-wrap: wrap;
+    height: auto !important;
+    padding: 4px 8px !important;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .ttbtn { padding: 6px 8px !important; font-size: 12px !important; }
+  .entity-btn { padding: 6px 8px !important; font-size: 12px !important; }
+  .tb-label { font-size: 10px !important; }
+  .tb-sep { height: 20px !important; }
+
+  /* Field picker cards stacked */
+  .field-picker-cards {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+  .field-card { width: 100% !important; }
+
+  /* Playback bar compact */
+  .playback-bar { padding: 6px 10px !important; gap: 6px !important; flex-wrap: wrap; }
+  .pb-time { font-size: 11px !important; }
+
+  /* Board status bar */
+  .board-status { font-size: 11px !important; padding: 4px 10px !important; }
+  #bsHint { display: none; }
+
+  /* Dialogs full-screen on mobile */
+  .group-dialog {
+    width: calc(100vw - 32px) !important;
+    margin: 16px;
+  }
+  .save-dialog {
+    width: calc(100vw - 32px) !important;
+    padding: 24px 20px !important;
+  }
+}
+
+/* Landscape phone */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-nav { height: 48px; }
+  .app-body { padding-bottom: 48px; }
+  .board-toolbar, .board-toolbar2 { padding: 3px 8px !important; }
+}</style>
 </head>
 <body>
 
@@ -1356,6 +1495,22 @@ body{
     </div><!-- end view-board -->
 
   </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav" id="mobileNav" style="display:none">
+    <button class="mobile-nav-btn active" id="mnHome" onclick="showView('home');setMobileNav('home')">
+      <span class="mn-icon">🏠</span>Dashboard
+    </button>
+    <button class="mobile-nav-btn" id="mnBib" onclick="showView('bibliothek');setMobileNav('bibliothek')">
+      <span class="mn-icon">📚</span>Bibliothek
+    </button>
+    <button class="mobile-nav-btn" id="mnPlan" onclick="showView('planer');setMobileNav('planer')">
+      <span class="mn-icon">📋</span>Planer
+    </button>
+    <button class="mobile-nav-btn" id="mnBoard" onclick="showView('board');setMobileNav('board')">
+      <span class="mn-icon">✏️</span>Board
+    </button>
+  </nav>
 </div>
 
 <div class="toast" id="toastEl"><span class="toast-icon" id="toastIcon">✔</span><span id="toastMsg"></span></div>
@@ -1389,6 +1544,24 @@ let filterState = {cat:'',lvl:'',players:'',dur:''};
 /* ════════════════════════════════════
    LOGIN
 ════════════════════════════════════ */
+/* ════════════════════════════════════
+   MOBILE NAV
+════════════════════════════════════ */
+function setMobileNav(view){
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+  const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard'};
+  document.getElementById(map[view])?.classList.add('active');
+}
+
+function initMobileNav(){
+  if(window.innerWidth<=768){
+    document.getElementById('mobileNav').style.display='flex';
+  }
+}
+window.addEventListener('resize',()=>{
+  document.getElementById('mobileNav').style.display = window.innerWidth<=768?'flex':'none';
+});
+
 /* ════════════════════════════════════
    SUPABASE CONFIG
 ════════════════════════════════════ */
@@ -1478,6 +1651,7 @@ function enterApp(user){
   setTimeout(async ()=>{
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appShell').classList.add('visible');
+    initMobileNav();
     renderDrills(DRILLS);
     renderPlaner();
     renderSideDrills(DRILLS);
@@ -1506,6 +1680,7 @@ function showView(name){
   document.getElementById('view-'+name).classList.add('active');
   const idx = ['home','bibliothek','planer','board'].indexOf(name);
   document.querySelectorAll('.tb-link')[idx]?.classList.add('active');
+  setMobileNav(name);
   if(name==='board'){
     // Always show field picker first (unless board already initialised)
     if(!boardInited){
