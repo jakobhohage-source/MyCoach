@@ -1850,8 +1850,8 @@ html, body {
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Gewünschter Zeitraum</label>
-      <input class="form-input" type="text" id="fmDate" placeholder="z.B. März 2026, KW 12, flexibel…">
+      <label class="form-label">Gewünschtes Datum</label>
+      <input class="form-input" type="date" id="fmDate" style="color-scheme:dark">
     </div>
     <div class="form-group">
       <label class="form-label">Heimspiel oder Auswärts?</label>
@@ -3584,7 +3584,7 @@ async function submitFriendlyRequest(){
   const club = meta.club;
   const errEl= document.getElementById('fmError');
   errEl.style.display='none';
-  if(!date){ errEl.textContent='Bitte einen Zeitraum angeben.'; errEl.style.display='block'; return; }
+  if(!date){ errEl.textContent='Bitte ein Datum auswählen.'; errEl.style.display='block'; return; }
   if(!club||!club.name){ errEl.textContent='Bitte zuerst deinen Verein im Profil eintragen.'; errEl.style.display='block'; return; }
   const {error} = await sb.from('friendly_requests').insert({
     user_id: currentUser.id,
@@ -3632,6 +3632,7 @@ async function loadFriendlyRequests(){
   if(!items.length){ list.innerHTML='<div class="comm-empty">Keine Testspiel-Anfragen gefunden.</div>'; return; }
 
   const homeMap={both:'Heim & Auswärts',home:'Heimspiel',away:'Auswärts'};
+  const fmtDate = d => { if(!d) return ''; try{ return new Date(d).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'long',year:'numeric'}); } catch(e){ return d; } };
   list.innerHTML = items.map(i=>{
     const dist = (myLat&&myLng&&i.lat&&i.lng)
       ? `<span class="comm-badge green">${Math.round(haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
@@ -3640,7 +3641,7 @@ async function loadFriendlyRequests(){
       <div class="comm-card-header">
         <div>
           <div class="comm-card-title">${escHtml(i.club_name)}${i.club_team?` – ${escHtml(i.club_team)}`:''}  </div>
-          <div class="comm-card-meta">${escHtml(i.age_group)} · ${escHtml(i.date_range)} · ${homeMap[i.home_pref]||i.home_pref}</div>
+          <div class="comm-card-meta">${escHtml(i.age_group)} · ${fmtDate(i.date_range)} · ${homeMap[i.home_pref]||i.home_pref}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">${dist}<span class="comm-badge">${escHtml(i.age_group)}</span></div>
       </div>
