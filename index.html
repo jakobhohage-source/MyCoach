@@ -1046,6 +1046,26 @@ html, body {
 @media (max-width: 768px) and (orientation: landscape) {
   .mobile-nav { height: 48px; }
   .app-body { padding-bottom: 48px; }
+}
+
+/* ── Desktop: undo any mobile overrides ── */
+@media (min-width: 769px) {
+  .lib-sidebar-overlay, .planer-side-overlay { display: none !important; }
+  .lib-layout { grid-template-columns: 240px 1fr; }
+  .lib-sidebar {
+    position: static; transform: none; width: auto;
+    border-right: 1px solid var(--border);
+    transition: none;
+  }
+  .planer-outer { grid-template-columns: 1fr 300px; }
+  .planer-side {
+    position: static; transform: none; width: auto;
+    border-left: 1px solid var(--border); border-right: none;
+    transition: none;
+  }
+  .mobile-nav { display: none !important; }
+  .app-body { padding-bottom: 0; }
+  .topbar .tb-nav { display: flex; }
 }</style>
 </head>
 <body>
