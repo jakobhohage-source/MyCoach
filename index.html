@@ -1210,10 +1210,8 @@ html, body {
           <label class="form-label">Mannschaft / Liga</label>
           <input class="form-input" type="text" id="regClubTeam" placeholder="z.B. 1. Mannschaft · Kreisliga A">
         </div>
-        <div class="form-group">
-          <label class="form-label">fussball.de Link <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
-          <input class="form-input" type="url" id="regClubUrl" placeholder="https://www.fussball.de/verein/...">
-          <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Suche deinen Verein auf <a href="https://www.fussball.de" target="_blank" style="color:var(--gold)">fussball.de</a> und füge den Link hier ein.</div>
+        <div style="font-size:12px;color:var(--text-dim);padding:10px;background:var(--ink3);border-radius:6px">
+          💡 Den fussball.de Widget-Code kannst du nach der Registrierung in deinem Profil einrichten.
         </div>
       </div>
       <div id="clubFieldsHobby" style="display:none">
@@ -1685,21 +1683,27 @@ html, body {
               <div style="color:var(--text-dim);font-size:14px;margin-top:2px" id="vereinTeam">1. Mannschaft · Kreisliga A</div>
             </div>
             <div style="display:flex;gap:10px;align-items:center">
-              <a id="vereinFussballLink" href="#" target="_blank" style="display:none" class="hbtn hbtn-gold" onclick="">Auf fussball.de öffnen ↗</a>
               <button onclick="openProfilModal()" class="hbtn hbtn-ghost">Verein bearbeiten</button>
             </div>
           </div>
 
-          <!-- fussball.de eingebettet -->
-          <div id="vereinLinkSection" style="display:none">
+          <!-- fussball.de Widget -->
+          <div id="vereinWidgetSection" style="display:none">
             <div class="profil-card" style="margin-bottom:20px">
-              <div class="profil-card-title" style="margin-bottom:14px">📅 Spielplan & Tabelle</div>
-              <p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:16px">
-                Spielplan und Tabelle werden direkt auf fussball.de gepflegt. Klicke auf den Button um die aktuelle Übersicht deines Vereins zu öffnen.
-              </p>
-              <a id="vereinFussballBtn" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;padding:11px 22px;border-radius:8px;text-decoration:none;letter-spacing:.5px">
-                🌐 Vereinsseite auf fussball.de öffnen
-              </a>
+              <div class="profil-card-title" style="margin-bottom:16px">📅 Spielplan &amp; Tabelle</div>
+              <div id="vereinWidgetContainer">
+                <!-- Widget wird hier dynamisch geladen -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Kein Widget-Code hinterlegt -->
+          <div id="vereinNoWidget" style="display:none">
+            <div class="profil-card" style="margin-bottom:20px;text-align:center;padding:32px 20px">
+              <div style="font-size:32px;margin-bottom:10px">📋</div>
+              <div style="font-size:15px;font-weight:600;margin-bottom:8px">Noch kein Widget eingebunden</div>
+              <div style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Füge deinen fussball.de Widget-Code im Profil ein, um Spielplan und Tabelle hier anzuzeigen.</div>
+              <button onclick="openProfilModal()" class="hbtn hbtn-gold" style="font-size:13px;padding:9px 18px">Widget-Code einfügen</button>
             </div>
           </div>
 
@@ -1763,10 +1767,26 @@ html, body {
             <label class="form-label">Mannschaft / Liga</label>
             <input class="form-input" type="text" id="profilClubTeam" placeholder="z.B. 1. Mannschaft · Kreisliga A">
           </div>
+
+          <!-- Widget Code -->
+          <div style="background:var(--ink3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--gold)">📋 fussball.de Widget einbinden</div>
+            <ol style="font-size:12px;color:var(--text-dim);line-height:1.8;padding-left:18px;margin-bottom:10px">
+              <li>Gehe auf <a href="https://next.fussball.de/widgets" target="_blank" style="color:var(--gold)">next.fussball.de/widgets</a> und logge dich ein</li>
+              <li>Klicke „Neues Widget erstellen" → Typ <strong style="color:var(--text)">„Mannschaft"</strong></li>
+              <li>Wähle deinen Verein und deine Mannschaft aus</li>
+              <li>Trage bei „Website" ein: <strong style="color:var(--text)">jakobhohage-source.github.io</strong></li>
+              <li>Speichern → „Code anzeigen" → beide Codes hier einfügen</li>
+            </ol>
+          </div>
+
           <div class="form-group">
-            <label class="form-label">fussball.de Link <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
-            <input class="form-input" type="url" id="profilClubUrl" placeholder="https://www.fussball.de/verein/...">
-            <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Suche deinen Verein auf <a href="https://www.fussball.de" target="_blank" style="color:var(--gold)">fussball.de</a> und füge den Link hier ein.</div>
+            <label class="form-label">Widget &lt;head&gt;-Code</label>
+            <textarea class="form-input" id="profilWidgetHead" rows="3" placeholder='<script src="https://next.fussball.de/...">' style="font-family:monospace;font-size:12px;resize:vertical"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Widget &lt;body&gt;-Code</label>
+            <textarea class="form-input" id="profilWidgetBody" rows="3" placeholder='<div id="widget-..." ...></div>' style="font-family:monospace;font-size:12px;resize:vertical"></textarea>
           </div>
         </div>
         <div id="profilClubFieldsHobby" style="display:none">
@@ -1925,32 +1945,60 @@ function updateVereinView(club){
   const empty   = document.getElementById('vereinEmpty');
   const content = document.getElementById('vereinContent');
   if(!club || !club.name){
-    if(empty) empty.style.display='block';
+    if(empty)   empty.style.display='block';
     if(content) content.style.display='none';
     return;
   }
-  if(empty) empty.style.display='none';
+  if(empty)   empty.style.display='none';
   if(content) content.style.display='block';
+
   document.getElementById('vereinName').textContent = club.name;
   document.getElementById('vereinTeam').textContent = club.team || (club.type==='hobby' ? 'Hobbyteam' : '');
-  const linkSection  = document.getElementById('vereinLinkSection');
-  const hobbySection = document.getElementById('vereinHobbySection');
-  const fussballBtn  = document.getElementById('vereinFussballBtn');
-  const fussballLink = document.getElementById('vereinFussballLink');
+
+  const widgetSection = document.getElementById('vereinWidgetSection');
+  const noWidget      = document.getElementById('vereinNoWidget');
+  const hobbySection  = document.getElementById('vereinHobbySection');
+  const fussballLink  = document.getElementById('vereinFussballLink');
+
+  // Hide all sections first
+  if(widgetSection) widgetSection.style.display='none';
+  if(noWidget)      noWidget.style.display='none';
+  if(hobbySection)  hobbySection.style.display='none';
+  if(fussballLink)  fussballLink.style.display='none';
+
   if(club.type==='official'){
-    if(linkSection) linkSection.style.display = club.url ? 'block' : 'none';
-    if(hobbySection) hobbySection.style.display='none';
-    if(club.url){
-      fussballBtn.href  = club.url;
-      fussballLink.href = club.url;
-      fussballLink.style.display='inline-flex';
+    if(club.widgetHead && club.widgetBody){
+      // Inject head script if not already loaded
+      const headId = 'fussball-widget-head';
+      if(!document.getElementById(headId)){
+        const tmp = document.createElement('div');
+        tmp.innerHTML = club.widgetHead;
+        tmp.querySelectorAll('script').forEach(s=>{
+          const ns = document.createElement('script');
+          if(s.src){ ns.src=s.src; ns.async=true; }
+          else { ns.textContent=s.textContent; }
+          ns.id = headId;
+          document.head.appendChild(ns);
+        });
+      }
+      // Inject body widget
+      const container = document.getElementById('vereinWidgetContainer');
+      if(container){
+        container.innerHTML = club.widgetBody;
+        // Re-execute any inline scripts in the widget body
+        container.querySelectorAll('script').forEach(s=>{
+          const ns = document.createElement('script');
+          if(s.src){ ns.src=s.src; ns.async=true; }
+          else { ns.textContent=s.textContent; }
+          s.parentNode.replaceChild(ns, s);
+        });
+      }
+      if(widgetSection) widgetSection.style.display='block';
     } else {
-      fussballLink.style.display='none';
+      if(noWidget) noWidget.style.display='block';
     }
-  } else {
-    if(linkSection)  linkSection.style.display='none';
+  } else if(club.type==='hobby'){
     if(hobbySection) hobbySection.style.display='block';
-    fussballLink.style.display='none';
   }
 }
 
@@ -1976,9 +2024,13 @@ async function saveProfilData(){
   const cType = document.getElementById('profilClubType').value;
   let club = null;
   if(cType==='official'){
-    club = {type:'official', name:document.getElementById('profilClubName').value.trim(),
-            team:document.getElementById('profilClubTeam').value.trim(),
-            url:document.getElementById('profilClubUrl').value.trim()};
+    club = {
+      type:'official',
+      name: document.getElementById('profilClubName').value.trim(),
+      team: document.getElementById('profilClubTeam').value.trim(),
+      widgetHead: document.getElementById('profilWidgetHead').value.trim(),
+      widgetBody: document.getElementById('profilWidgetBody').value.trim()
+    };
   } else if(cType==='hobby'){
     club = {type:'hobby', name:document.getElementById('profilClubNameHobby').value.trim()};
   }
@@ -2029,7 +2081,8 @@ function prefillProfil(meta){
     if(club.type==='official'){
       if(club.name) document.getElementById('profilClubName').value=club.name;
       if(club.team) document.getElementById('profilClubTeam').value=club.team;
-      if(club.url)  document.getElementById('profilClubUrl').value=club.url;
+      if(club.widgetHead) document.getElementById('profilWidgetHead').value=club.widgetHead;
+      if(club.widgetBody) document.getElementById('profilWidgetBody').value=club.widgetBody;
     } else if(club.type==='hobby'){
       if(club.name) document.getElementById('profilClubNameHobby').value=club.name;
     }
@@ -2052,9 +2105,10 @@ async function doRegister(){
   const cType = document.getElementById('regClubType').value;
   let club = null;
   if(cType==='official'){
-    club = {type:'official', name:document.getElementById('regClubName').value.trim(),
+    club = {type:'official',
+            name:document.getElementById('regClubName').value.trim(),
             team:document.getElementById('regClubTeam').value.trim(),
-            url:document.getElementById('regClubUrl').value.trim()};
+            widgetHead:'', widgetBody:''};
   } else if(cType==='hobby'){
     club = {type:'hobby', name:document.getElementById('regClubNameHobby').value.trim()};
   }
