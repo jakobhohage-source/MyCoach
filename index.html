@@ -39,6 +39,36 @@ body{
 }
 
 /* ═══════════════════════════════════════════
+   COMMUNITY
+═══════════════════════════════════════════ */
+.community-layout{padding:24px;max-width:860px;margin:0 auto;height:100%;overflow-y:auto;}
+.comm-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;}
+.comm-tab{background:none;border:none;color:var(--text-dim);font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;}
+.comm-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.comm-panel{display:none;}
+.comm-panel.active{display:block;}
+.comm-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.comm-new-btn{background:var(--gold);color:#000;border:none;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;padding:9px 18px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+.comm-new-btn:hover{background:var(--gold-light);}
+.comm-list{display:flex;flex-direction:column;gap:12px;}
+.comm-empty{color:var(--text-dim);font-size:14px;padding:32px;text-align:center;}
+.comm-card{background:var(--ink3);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.comm-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.comm-card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;color:var(--text);}
+.comm-card-meta{font-size:12px;color:var(--text-dim);margin-bottom:10px;}
+.comm-card-body{font-size:14px;color:var(--text-dim);line-height:1.55;}
+.comm-card-footer{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.comm-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;background:rgba(212,160,23,0.15);color:var(--gold);}
+.comm-badge.blue{background:rgba(36,113,163,0.2);color:#5dade2;}
+.comm-badge.green{background:rgba(39,174,96,0.15);color:#5dda8c;}
+.comm-contact-btn{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Source Sans 3',sans-serif;font-size:13px;padding:5px 12px;border-radius:6px;cursor:pointer;margin-left:auto;}
+.comm-contact-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.2);}
+/* Nominatim dropdown */
+.nom-result{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);}
+.nom-result:last-child{border-bottom:none;}
+.nom-result:hover{background:var(--ink3);}
+
+/* ═══════════════════════════════════════════
    PROFIL
 ═══════════════════════════════════════════ */
 .profil-card{
@@ -1236,6 +1266,7 @@ html, body {
       <button class="tb-link" onclick="showView('bibliothek')"><span class="tb-icon">📚</span>Bibliothek</button>
       <button class="tb-link" onclick="showView('planer')"><span class="tb-icon">📋</span>Trainingsplaner</button>
       <button class="tb-link" onclick="showView('board')"><span class="tb-icon">✏️</span>Zeichenboard</button>
+      <button class="tb-link" onclick="showView('community')"><span class="tb-icon">👥</span>Community</button>
     </div>
     <div class="tb-right">
       <span class="badge-role" id="roleLabel">Jugendtrainer</span>
@@ -1662,7 +1693,62 @@ html, body {
       </div>
     </div><!-- end view-board -->
 
-    <!-- MEIN VEREIN -->
+    <!-- COMMUNITY -->
+    <div id="view-community" class="view">
+      <div class="community-layout">
+
+        <!-- Tabs -->
+        <div class="comm-tabs">
+          <button class="comm-tab active" id="ctabTestspiele" onclick="switchCommTab('testspiele')">⚽ Testspiele</button>
+          <button class="comm-tab" id="ctabPinnwand" onclick="switchCommTab('pinnwand')">📌 Pinnwand</button>
+        </div>
+
+        <!-- TESTSPIELE -->
+        <div id="comm-testspiele" class="comm-panel active">
+          <div class="comm-toolbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <label class="form-label" style="margin:0">Umkreis:</label>
+              <select class="form-select" id="radiusFilter" onchange="loadFriendlyRequests()" style="width:140px;padding:6px 10px">
+                <option value="9999">Alle</option>
+                <option value="25">25 km</option>
+                <option value="50" selected>50 km</option>
+                <option value="100">100 km</option>
+              </select>
+              <select class="form-select" id="ageFilter" onchange="loadFriendlyRequests()" style="width:140px;padding:6px 10px">
+                <option value="">Alle Altersklassen</option>
+                <option>Herren</option>
+                <option>Damen</option>
+                <option>A-Junioren (U19)</option>
+                <option>B-Junioren (U17)</option>
+                <option>C-Junioren (U15)</option>
+                <option>D-Junioren (U13)</option>
+                <option>E-Junioren (U11)</option>
+                <option>F-Junioren (U9)</option>
+                <option>Sonstige</option>
+              </select>
+            </div>
+            <button class="comm-new-btn" onclick="openFriendlyModal()">+ Testspiel anfragen</button>
+          </div>
+          <div id="friendlyList" class="comm-list">
+            <div class="comm-empty">Lade Testspiel-Anfragen…</div>
+          </div>
+        </div>
+
+        <!-- PINNWAND -->
+        <div id="comm-pinnwand" class="comm-panel">
+          <div class="comm-toolbar">
+            <span style="color:var(--text-dim);font-size:14px">Austausch für Trainer — Fragen, Tipps, Erfahrungen</span>
+            <button class="comm-new-btn" onclick="openPostModal()">+ Beitrag schreiben</button>
+          </div>
+          <div id="pinnwandList" class="comm-list">
+            <div class="comm-empty">Lade Beiträge…</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MEIN VEREIN (placeholder comment) -->
   </div>
 
   <!-- ═══ PROFIL MODAL ═══ -->
@@ -1706,6 +1792,14 @@ html, body {
             <label class="form-label">Mannschaft / Liga</label>
             <input class="form-input" type="text" id="profilClubTeam" placeholder="z.B. 1. Mannschaft · Kreisliga A">
           </div>
+          <div class="form-group" style="position:relative">
+            <label class="form-label">Adresse Vereinsheim <span style="color:var(--text-dim);font-weight:400">(optional – für Testspielsuche)</span></label>
+            <input class="form-input" type="text" id="profilClubAddress" placeholder="Straße, Stadt…" autocomplete="off" oninput="nominatimSearch(this.value)">
+            <div id="nominatimResults" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--ink2);border:1px solid var(--border);border-radius:0 0 8px 8px;z-index:999;max-height:200px;overflow-y:auto"></div>
+            <input type="hidden" id="profilClubLat">
+            <input type="hidden" id="profilClubLng">
+            <div id="profilClubAddressConfirmed" style="font-size:12px;color:#5dda8c;margin-top:4px;display:none">✓ Adresse gespeichert</div>
+          </div>
         </div>
         <div id="profilClubFieldsHobby" style="display:none">
           <div class="form-group">
@@ -1734,7 +1828,64 @@ html, body {
     <button class="mobile-nav-btn" id="mnBoard" onclick="showView('board');setMobileNav('board')">
       <span class="mn-icon">✏️</span>Board
     </button>
+    <button class="mobile-nav-btn" id="mnCommunity" onclick="showView('community');setMobileNav('community')">
+      <span class="mn-icon">👥</span>Community
+    </button>
   </nav>
+</div>
+
+<!-- ═══ TESTSPIEL MODAL ═══ -->
+<div id="friendlyModalOverlay" onclick="if(event.target===this)closeFriendlyModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:8000;align-items:center;justify-content:center">
+  <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;width:min(480px,95vw);max-height:88vh;overflow-y:auto;padding:28px;position:relative">
+    <button onclick="closeFriendlyModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer">✕</button>
+    <div style="font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;margin-bottom:20px">⚽ Testspiel anfragen</div>
+    <div class="form-group">
+      <label class="form-label">Altersklasse / Mannschaft</label>
+      <select class="form-select" id="fmAge">
+        <option>Herren</option><option>Damen</option>
+        <option>A-Junioren (U19)</option><option>B-Junioren (U17)</option>
+        <option>C-Junioren (U15)</option><option>D-Junioren (U13)</option>
+        <option>E-Junioren (U11)</option><option>F-Junioren (U9)</option>
+        <option>Sonstige</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Gewünschter Zeitraum</label>
+      <input class="form-input" type="text" id="fmDate" placeholder="z.B. März 2026, KW 12, flexibel…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Heimspiel oder Auswärts?</label>
+      <select class="form-select" id="fmHome">
+        <option value="both">Beides möglich</option>
+        <option value="home">Heimspiel bevorzugt</option>
+        <option value="away">Auswärts bevorzugt</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nachricht <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+      <textarea class="form-input" id="fmMessage" rows="3" placeholder="Weitere Infos zur Mannschaft, Wünsche…" style="resize:vertical"></textarea>
+    </div>
+    <div id="fmError" style="color:#e8614e;font-size:13px;margin-bottom:10px;display:none"></div>
+    <button class="btn-login" style="max-width:100%" onclick="submitFriendlyRequest()">Anfrage veröffentlichen</button>
+  </div>
+</div>
+
+<!-- ═══ POST MODAL ═══ -->
+<div id="postModalOverlay" onclick="if(event.target===this)closePostModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:8000;align-items:center;justify-content:center">
+  <div style="background:var(--ink2);border:1px solid var(--border);border-radius:14px;width:min(480px,95vw);max-height:88vh;overflow-y:auto;padding:28px;position:relative">
+    <button onclick="closePostModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer">✕</button>
+    <div style="font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;margin-bottom:20px">📌 Beitrag schreiben</div>
+    <div class="form-group">
+      <label class="form-label">Titel</label>
+      <input class="form-input" type="text" id="pmTitle" placeholder="Worum geht es?">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Beitrag</label>
+      <textarea class="form-input" id="pmBody" rows="5" placeholder="Deine Frage, Erfahrung oder Tipp…" style="resize:vertical"></textarea>
+    </div>
+    <div id="pmError" style="color:#e8614e;font-size:13px;margin-bottom:10px;display:none"></div>
+    <button class="btn-login" style="max-width:100%" onclick="submitPost()">Veröffentlichen</button>
+  </div>
 </div>
 
 <div class="toast" id="toastEl"><span class="toast-icon" id="toastIcon">✔</span><span id="toastMsg"></span></div>
@@ -1773,7 +1924,7 @@ let filterState = {cat:'',lvl:'',players:'',dur:''};
 ════════════════════════════════════ */
 function setMobileNav(view){
   document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
-  const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard'};
+  const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard',community:'mnCommunity'};
   document.getElementById(map[view])?.classList.add('active');
   closeDrawer();
 }
@@ -1882,7 +2033,10 @@ async function saveProfilData(){
     club = {
       type:'official',
       name: document.getElementById('profilClubName').value.trim(),
-      team: document.getElementById('profilClubTeam').value.trim()
+      team: document.getElementById('profilClubTeam').value.trim(),
+      address: document.getElementById('profilClubAddress').value.trim(),
+      lat: document.getElementById('profilClubLat').value||null,
+      lng: document.getElementById('profilClubLng').value||null
     };
   } else if(cType==='hobby'){
     club = {type:'hobby', name:document.getElementById('profilClubNameHobby').value.trim()};
@@ -1930,6 +2084,9 @@ function prefillProfil(meta){
     if(club.type==='official'){
       if(club.name) document.getElementById('profilClubName').value=club.name;
       if(club.team) document.getElementById('profilClubTeam').value=club.team;
+      if(club.address){ document.getElementById('profilClubAddress').value=club.address; document.getElementById('profilClubAddressConfirmed').style.display='block'; }
+      if(club.lat)  document.getElementById('profilClubLat').value=club.lat;
+      if(club.lng)  document.getElementById('profilClubLng').value=club.lng;
     } else if(club.type==='hobby'){
       if(club.name) document.getElementById('profilClubNameHobby').value=club.name;
     }
@@ -2046,7 +2203,7 @@ function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tb-link').forEach(l=>l.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const idx = ['home','bibliothek','planer','board'].indexOf(name);
+  const idx = ['home','bibliothek','planer','board','community'].indexOf(name);
   document.querySelectorAll('.tb-link')[idx]?.classList.add('active');
   setMobileNav(name);
   if(name==='board'){
@@ -2055,6 +2212,7 @@ function showView(name){
       document.getElementById('boardOuter').style.display='none';
     }
   }
+  if(name==='community') loadCommunity();
 }
 
 /* ════════════════════════════════════
@@ -3360,8 +3518,214 @@ function isLight(hex){
 
 
 /* ════════════════════════════════════
-   TOAST
+   NOMINATIM ADDRESS SEARCH
 ════════════════════════════════════ */
+let nomTimer;
+async function nominatimSearch(val){
+  clearTimeout(nomTimer);
+  const res = document.getElementById('nominatimResults');
+  if(val.length < 3){ res.style.display='none'; return; }
+  nomTimer = setTimeout(async ()=>{
+    try{
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&limit=5&countrycodes=de,at,ch`,
+        {headers:{'Accept-Language':'de'}});
+      const data = await r.json();
+      if(!data.length){ res.style.display='none'; return; }
+      res.innerHTML = data.map(d=>`
+        <div class="nom-result" onclick="selectAddress('${d.display_name.replace(/'/g,"\\'")}',${d.lat},${d.lon})">
+          ${d.display_name}
+        </div>`).join('');
+      res.style.display='block';
+    } catch(e){ res.style.display='none'; }
+  }, 400);
+}
+
+function selectAddress(name, lat, lng){
+  document.getElementById('profilClubAddress').value = name;
+  document.getElementById('profilClubLat').value = lat;
+  document.getElementById('profilClubLng').value = lng;
+  document.getElementById('nominatimResults').style.display='none';
+  document.getElementById('profilClubAddressConfirmed').style.display='block';
+}
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#profilClubAddress') && !e.target.closest('#nominatimResults'))
+    document.getElementById('nominatimResults').style.display='none';
+});
+
+/* ════════════════════════════════════
+   COMMUNITY — TABS
+════════════════════════════════════ */
+function switchCommTab(tab){
+  document.querySelectorAll('.comm-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.comm-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('ctab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  document.getElementById('comm-'+tab).classList.add('active');
+}
+
+function loadCommunity(){
+  loadFriendlyRequests();
+  loadPosts();
+}
+
+/* ════════════════════════════════════
+   COMMUNITY — TESTSPIELE
+════════════════════════════════════ */
+function openFriendlyModal(){ document.getElementById('friendlyModalOverlay').style.display='flex'; }
+function closeFriendlyModal(){ document.getElementById('friendlyModalOverlay').style.display='none'; }
+
+async function submitFriendlyRequest(){
+  if(!currentUser){ showToast('⚠️','Bitte einloggen.'); return; }
+  const age  = document.getElementById('fmAge').value;
+  const date = document.getElementById('fmDate').value.trim();
+  const home = document.getElementById('fmHome').value;
+  const msg  = document.getElementById('fmMessage').value.trim();
+  const meta = currentUser.user_metadata||{};
+  const club = meta.club;
+  const errEl= document.getElementById('fmError');
+  errEl.style.display='none';
+  if(!date){ errEl.textContent='Bitte einen Zeitraum angeben.'; errEl.style.display='block'; return; }
+  if(!club||!club.name){ errEl.textContent='Bitte zuerst deinen Verein im Profil eintragen.'; errEl.style.display='block'; return; }
+  const {error} = await sb.from('friendly_requests').insert({
+    user_id: currentUser.id,
+    club_name: club.name,
+    club_team: club.team||'',
+    lat: club.lat||null,
+    lng: club.lng||null,
+    age_group: age,
+    date_range: date,
+    home_pref: home,
+    message: msg
+  });
+  if(error){ errEl.textContent='Fehler: '+error.message; errEl.style.display='block'; return; }
+  closeFriendlyModal();
+  showToast('✅','Testspiel-Anfrage veröffentlicht!');
+  loadFriendlyRequests();
+}
+
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lat2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+async function loadFriendlyRequests(){
+  const list = document.getElementById('friendlyList');
+  list.innerHTML='<div class="comm-empty">Lade…</div>';
+  const {data,error} = await sb.from('friendly_requests').select('*').order('created_at',{ascending:false});
+  if(error||!data){ list.innerHTML='<div class="comm-empty">Fehler beim Laden.</div>'; return; }
+
+  const radius = parseInt(document.getElementById('radiusFilter').value);
+  const ageF   = document.getElementById('ageFilter').value;
+  const myClub = currentUser?.user_metadata?.club;
+  const myLat  = myClub?.lat, myLng = myClub?.lng;
+
+  let items = data;
+  if(ageF) items = items.filter(i=>i.age_group===ageF);
+  if(myLat && myLng && radius < 9999){
+    items = items.filter(i=>{
+      if(!i.lat||!i.lng) return true; // show if no coords
+      return haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)) <= radius;
+    });
+  }
+
+  if(!items.length){ list.innerHTML='<div class="comm-empty">Keine Testspiel-Anfragen gefunden.</div>'; return; }
+
+  const homeMap={both:'Heim & Auswärts',home:'Heimspiel',away:'Auswärts'};
+  list.innerHTML = items.map(i=>{
+    const dist = (myLat&&myLng&&i.lat&&i.lng)
+      ? `<span class="comm-badge green">${Math.round(haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
+    const isOwn = currentUser && i.user_id===currentUser.id;
+    return `<div class="comm-card">
+      <div class="comm-card-header">
+        <div>
+          <div class="comm-card-title">${escHtml(i.club_name)}${i.club_team?` – ${escHtml(i.club_team)}`:''}  </div>
+          <div class="comm-card-meta">${escHtml(i.age_group)} · ${escHtml(i.date_range)} · ${homeMap[i.home_pref]||i.home_pref}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">${dist}<span class="comm-badge">${escHtml(i.age_group)}</span></div>
+      </div>
+      ${i.message?`<div class="comm-card-body">${escHtml(i.message)}</div>`:''}
+      <div class="comm-card-footer">
+        <span style="font-size:12px;color:var(--text-dim)">${timeAgo(i.created_at)}</span>
+        ${!isOwn?`<button class="comm-contact-btn" onclick="contactFriendly('${i.id}','${escHtml(i.club_name)}')">Kontakt aufnehmen</button>`:'<span style="font-size:12px;color:var(--text-dim);margin-left:auto">Deine Anfrage</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function contactFriendly(id, clubName){
+  showToast('📧', `Kontaktanfrage an ${clubName} — coming soon`);
+}
+
+/* ════════════════════════════════════
+   COMMUNITY — PINNWAND
+════════════════════════════════════ */
+function openPostModal(){ document.getElementById('postModalOverlay').style.display='flex'; }
+function closePostModal(){ document.getElementById('postModalOverlay').style.display='none'; }
+
+async function submitPost(){
+  if(!currentUser){ showToast('⚠️','Bitte einloggen.'); return; }
+  const title = document.getElementById('pmTitle').value.trim();
+  const body  = document.getElementById('pmBody').value.trim();
+  const errEl = document.getElementById('pmError');
+  errEl.style.display='none';
+  if(!title){ errEl.textContent='Bitte einen Titel eingeben.'; errEl.style.display='block'; return; }
+  if(!body) { errEl.textContent='Bitte einen Beitrag schreiben.'; errEl.style.display='block'; return; }
+  const meta = currentUser.user_metadata||{};
+  const {error} = await sb.from('community_posts').insert({
+    user_id: currentUser.id,
+    author_name: meta.name||'Trainer',
+    club_name: meta.club?.name||'',
+    title, body
+  });
+  if(error){ errEl.textContent='Fehler: '+error.message; errEl.style.display='block'; return; }
+  document.getElementById('pmTitle').value='';
+  document.getElementById('pmBody').value='';
+  closePostModal();
+  showToast('✅','Beitrag veröffentlicht!');
+  loadPosts();
+}
+
+async function loadPosts(){
+  const list = document.getElementById('pinnwandList');
+  list.innerHTML='<div class="comm-empty">Lade…</div>';
+  const {data,error} = await sb.from('community_posts').select('*').order('created_at',{ascending:false});
+  if(error||!data){ list.innerHTML='<div class="comm-empty">Fehler beim Laden.</div>'; return; }
+  if(!data.length){ list.innerHTML='<div class="comm-empty">Noch keine Beiträge. Sei der Erste!</div>'; return; }
+  list.innerHTML = data.map(p=>{
+    const isOwn = currentUser && p.user_id===currentUser.id;
+    return `<div class="comm-card">
+      <div class="comm-card-header">
+        <div>
+          <div class="comm-card-title">${escHtml(p.title)}</div>
+          <div class="comm-card-meta">${escHtml(p.author_name)}${p.club_name?' · '+escHtml(p.club_name):''} · ${timeAgo(p.created_at)}</div>
+        </div>
+        ${isOwn?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;line-height:1">🗑</button>`:''}
+      </div>
+      <div class="comm-card-body">${escHtml(p.body)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function deletePost(id){
+  if(!confirm('Beitrag löschen?')) return;
+  await sb.from('community_posts').delete().eq('id',id);
+  loadPosts();
+}
+
+/* ════════════════════════════════════
+   HELPERS
+════════════════════════════════════ */
+function escHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeAgo(iso){
+  const s=Math.floor((Date.now()-new Date(iso))/1000);
+  if(s<60) return 'gerade eben';
+  if(s<3600) return Math.floor(s/60)+' Min. ago';
+  if(s<86400) return Math.floor(s/3600)+' Std. ago';
+  return Math.floor(s/86400)+' Tagen ago';
+}
+
+
 let toastTimer;
 function toast(msg,icon='✔'){
   const el=document.getElementById('toastEl');
