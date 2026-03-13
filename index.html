@@ -210,6 +210,17 @@ body{
   transition:border-color 0.2s;
 }
 .form-input:focus{border-color:var(--gold);}
+/* Date input — iOS öffnet nativen Datepicker, Desktop zeigt Kalender */
+input[type="date"].form-input{
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+}
+/* iOS Safari: text color fix */
+input[type="date"].form-input::-webkit-date-and-time-value{
+  color: var(--text);
+  text-align: left;
+}
 .form-select{
   width:100%;padding:13px 16px;
   border-radius:8px;border:1px solid var(--border);
@@ -1851,7 +1862,7 @@ html, body {
     </div>
     <div class="form-group">
       <label class="form-label">Gewünschtes Datum</label>
-      <input class="form-input" type="date" id="fmDate" style="color-scheme:dark">
+      <input class="form-input" type="date" id="fmDate">
     </div>
     <div class="form-group">
       <label class="form-label">Heimspiel oder Auswärts?</label>
