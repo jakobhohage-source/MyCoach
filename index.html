@@ -39,8 +39,65 @@ body{
 }
 
 /* ═══════════════════════════════════════════
-   LOGIN
+   PROFIL
 ═══════════════════════════════════════════ */
+.profil-card{
+  background:var(--ink3);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.profil-card-title{
+  font-family:'Oswald',sans-serif;
+  font-size:15px;
+  font-weight:500;
+  color:var(--gold);
+  letter-spacing:.5px;
+}
+
+/* ═══════════════════════════════════════════
+   CLUB WIDGET
+═══════════════════════════════════════════ */
+.club-widget-card{
+  background:var(--ink3);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-top:10px;
+}
+.club-widget-name{
+  font-family:'Oswald',sans-serif;
+  font-size:17px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.club-widget-team{
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:12px;
+}
+.club-widget-link{
+  display:block;
+  font-size:13px;
+  color:var(--gold);
+  text-decoration:none;
+  margin-bottom:10px;
+}
+.club-widget-link:hover{text-decoration:underline;}
+.club-widget-edit{
+  background:none;
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  font-size:12px;
+  padding:5px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:'Source Sans 3',sans-serif;
+}
+.club-widget-edit:hover{color:var(--text);border-color:rgba(255,255,255,0.2);}
+
+
 #loginScreen{
   position:fixed;inset:0;z-index:9999;
   display:flex;
@@ -1136,6 +1193,35 @@ html, body {
           <option value="hobby">Hobbytrainer / Freizeitfußball</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Verein <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+        <select class="form-select" id="regClubType" onchange="toggleClubFields()">
+          <option value="">— Kein Verein angeben —</option>
+          <option value="official">Verein im offiziellen Spielbetrieb</option>
+          <option value="hobby">Hobbyteam / Freizeitmannschaft</option>
+        </select>
+      </div>
+      <div id="clubFieldsOfficial" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Vereinsname</label>
+          <input class="form-input" type="text" id="regClubName" placeholder="z.B. SV Musterstadt 1920">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mannschaft / Liga</label>
+          <input class="form-input" type="text" id="regClubTeam" placeholder="z.B. 1. Mannschaft · Kreisliga A">
+        </div>
+        <div class="form-group">
+          <label class="form-label">fussball.de Link <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+          <input class="form-input" type="url" id="regClubUrl" placeholder="https://www.fussball.de/verein/...">
+          <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Suche deinen Verein auf <a href="https://www.fussball.de" target="_blank" style="color:var(--gold)">fussball.de</a> und füge den Link hier ein.</div>
+        </div>
+      </div>
+      <div id="clubFieldsHobby" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Teamname</label>
+          <input class="form-input" type="text" id="regClubNameHobby" placeholder="z.B. Freitagskicker Berlin">
+        </div>
+      </div>
       <div id="regError" style="color:#e8614e;font-size:13px;margin-bottom:12px;display:none"></div>
       <div id="regSuccess" style="color:#5dda8c;font-size:13px;margin-bottom:12px;display:none"></div>
       <button class="btn-login" onclick="doRegister()" id="btnRegister">Account erstellen →</button>
@@ -1152,6 +1238,7 @@ html, body {
       <button class="tb-link" onclick="showView('bibliothek')"><span class="tb-icon">📚</span>Bibliothek</button>
       <button class="tb-link" onclick="showView('planer')"><span class="tb-icon">📋</span>Trainingsplaner</button>
       <button class="tb-link" onclick="showView('board')"><span class="tb-icon">✏️</span>Zeichenboard</button>
+      <button class="tb-link" onclick="showView('profil')"><span class="tb-icon">👤</span>Profil</button>
     </div>
     <div class="tb-right">
       <span class="badge-role" id="roleLabel">Jugendtrainer</span>
@@ -1202,6 +1289,17 @@ html, body {
             </div>
           </div>
           <div class="home-aside">
+            <div id="clubWidget" style="display:none;margin-bottom:24px">
+              <div class="sec-title">Mein Verein</div>
+              <div class="club-widget-card">
+                <div class="club-widget-name" id="cwName"></div>
+                <div class="club-widget-team" id="cwTeam"></div>
+                <a id="cwLink" href="#" target="_blank" class="club-widget-link" style="display:none">
+                  Spielplan &amp; Tabelle auf fussball.de →
+                </a>
+                <button onclick="showView('profil')" class="club-widget-edit">Verein bearbeiten</button>
+              </div>
+            </div>
             <div class="sec-title">Zuletzt geöffnet</div>
             <div class="recent-list">
               <div class="recent-item" onclick="showView('planer')"><div class="recent-icon">📋</div><div class="recent-meta"><div class="recent-name">Dienstagstraining U17</div><div class="recent-sub">Trainingsplan · Heute</div></div></div>
@@ -1555,6 +1653,67 @@ html, body {
       </div>
     </div><!-- end view-board -->
 
+    <!-- PROFIL -->
+    <div id="view-profil" class="view">
+      <div class="home-inner" style="max-width:680px">
+        <div class="sec-title" style="font-size:20px;margin-bottom:24px">Mein Profil</div>
+
+        <!-- Persönliche Infos -->
+        <div class="profil-card">
+          <div class="profil-card-title">👤 Persönliche Daten</div>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">Name</label>
+            <input class="form-input" type="text" id="profilName" placeholder="Max Mustermann">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rolle</label>
+            <select class="form-select" id="profilRole">
+              <option value="jugend">Jugendtrainer (Verein)</option>
+              <option value="profi">Profi / Semiprofessioneller Trainer</option>
+              <option value="hobby">Hobbytrainer / Freizeitfußball</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Verein -->
+        <div class="profil-card" style="margin-top:16px">
+          <div class="profil-card-title">⚽ Mein Verein</div>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">Vereinstyp</label>
+            <select class="form-select" id="profilClubType" onchange="toggleProfilClubFields()">
+              <option value="">— Kein Verein —</option>
+              <option value="official">Verein im offiziellen Spielbetrieb</option>
+              <option value="hobby">Hobbyteam / Freizeitmannschaft</option>
+            </select>
+          </div>
+          <div id="profilClubFieldsOfficial" style="display:none">
+            <div class="form-group">
+              <label class="form-label">Vereinsname</label>
+              <input class="form-input" type="text" id="profilClubName" placeholder="z.B. SV Musterstadt 1920">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mannschaft / Liga</label>
+              <input class="form-input" type="text" id="profilClubTeam" placeholder="z.B. 1. Mannschaft · Kreisliga A">
+            </div>
+            <div class="form-group">
+              <label class="form-label">fussball.de Link <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+              <input class="form-input" type="url" id="profilClubUrl" placeholder="https://www.fussball.de/verein/...">
+              <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Suche deinen Verein auf <a href="https://www.fussball.de" target="_blank" style="color:var(--gold)">fussball.de</a> und füge den Link hier ein.</div>
+            </div>
+          </div>
+          <div id="profilClubFieldsHobby" style="display:none">
+            <div class="form-group">
+              <label class="form-label">Teamname</label>
+              <input class="form-input" type="text" id="profilClubNameHobby" placeholder="z.B. Freitagskicker Berlin">
+            </div>
+          </div>
+        </div>
+
+        <div id="profilMsg" style="font-size:13px;margin-top:12px;display:none"></div>
+        <button class="btn-login" style="margin-top:16px;max-width:220px" onclick="saveProfilData()">Änderungen speichern</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Mobile Bottom Navigation -->
@@ -1570,6 +1729,9 @@ html, body {
     </button>
     <button class="mobile-nav-btn" id="mnBoard" onclick="showView('board');setMobileNav('board')">
       <span class="mn-icon">✏️</span>Board
+    </button>
+    <button class="mobile-nav-btn" id="mnProfil" onclick="showView('profil');setMobileNav('profil')">
+      <span class="mn-icon">👤</span>Profil
     </button>
   </nav>
 </div>
@@ -1610,7 +1772,7 @@ let filterState = {cat:'',lvl:'',players:'',dur:''};
 ════════════════════════════════════ */
 function setMobileNav(view){
   document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
-  const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard'};
+  const map={home:'mnHome',bibliothek:'mnBib',planer:'mnPlan',board:'mnBoard',profil:'mnProfil'};
   document.getElementById(map[view])?.classList.add('active');
   closeDrawer();
 }
@@ -1671,7 +1833,80 @@ function switchAuthTab(tab){
   document.getElementById('tabRegister').style.color = isLogin?'var(--text-dim)':'var(--text)';
 }
 
-/* ── Register ── */
+/* ── Toggle club fields in register ── */
+function toggleClubFields(){
+  const t = document.getElementById('regClubType').value;
+  document.getElementById('clubFieldsOfficial').style.display = t==='official' ? 'block' : 'none';
+  document.getElementById('clubFieldsHobby').style.display    = t==='hobby'    ? 'block' : 'none';
+}
+
+/* ── Toggle club fields in profil ── */
+function toggleProfilClubFields(){
+  const t = document.getElementById('profilClubType').value;
+  document.getElementById('profilClubFieldsOfficial').style.display = t==='official' ? 'block' : 'none';
+  document.getElementById('profilClubFieldsHobby').style.display    = t==='hobby'    ? 'block' : 'none';
+}
+
+/* ── Save profil data ── */
+async function saveProfilData(){
+  if(!currentUser){showToast('⚠️','Nur für eingeloggte Nutzer verfügbar.');return;}
+  const name  = document.getElementById('profilName').value.trim();
+  const role  = document.getElementById('profilRole').value;
+  const cType = document.getElementById('profilClubType').value;
+  let club = null;
+  if(cType==='official'){
+    club = {type:'official', name:document.getElementById('profilClubName').value.trim(),
+            team:document.getElementById('profilClubTeam').value.trim(),
+            url:document.getElementById('profilClubUrl').value.trim()};
+  } else if(cType==='hobby'){
+    club = {type:'hobby', name:document.getElementById('profilClubNameHobby').value.trim()};
+  }
+  const msgEl = document.getElementById('profilMsg');
+  msgEl.style.display='none';
+  const {error} = await sb.auth.updateUser({data:{name, role, club}});
+  if(error){msgEl.style.color='#e8614e';msgEl.textContent='Fehler: '+error.message;msgEl.style.display='block';return;}
+  currentUser.user_metadata = {...currentUser.user_metadata, name, role, club};
+  updateClubWidget(club);
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+  msgEl.style.color='#5dda8c';msgEl.textContent='✅ Gespeichert!';msgEl.style.display='block';
+  setTimeout(()=>msgEl.style.display='none', 3000);
+}
+
+/* ── Update club widget on dashboard ── */
+function updateClubWidget(club){
+  const w = document.getElementById('clubWidget');
+  if(!club || !club.name){w.style.display='none';return;}
+  w.style.display='block';
+  document.getElementById('cwName').textContent = club.name;
+  document.getElementById('cwTeam').textContent = club.team || (club.type==='hobby' ? 'Hobbyteam' : '');
+  const lnk = document.getElementById('cwLink');
+  if(club.url){lnk.href=club.url;lnk.style.display='block';}
+  else{lnk.style.display='none';}
+}
+
+/* ── Prefill profil form ── */
+function prefillProfil(meta){
+  if(!meta) return;
+  if(meta.name) document.getElementById('profilName').value = meta.name;
+  if(meta.role){const s=document.getElementById('profilRole');for(let o of s.options)if(o.value===meta.role)o.selected=true;}
+  const club = meta.club;
+  if(club){
+    const s=document.getElementById('profilClubType');
+    for(let o of s.options)if(o.value===club.type)o.selected=true;
+    toggleProfilClubFields();
+    if(club.type==='official'){
+      if(club.name) document.getElementById('profilClubName').value=club.name;
+      if(club.team) document.getElementById('profilClubTeam').value=club.team;
+      if(club.url)  document.getElementById('profilClubUrl').value=club.url;
+    } else if(club.type==='hobby'){
+      if(club.name) document.getElementById('profilClubNameHobby').value=club.name;
+    }
+    updateClubWidget(club);
+  }
+}
+
+
 async function doRegister(){
   const name = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
@@ -1682,14 +1917,23 @@ async function doRegister(){
   errEl.style.display='none'; okEl.style.display='none';
   if(!name||!email||!password){errEl.textContent='Bitte alle Felder ausfüllen.';errEl.style.display='block';return;}
   if(password.length<6){errEl.textContent='Passwort muss mindestens 6 Zeichen haben.';errEl.style.display='block';return;}
+  const cType = document.getElementById('regClubType').value;
+  let club = null;
+  if(cType==='official'){
+    club = {type:'official', name:document.getElementById('regClubName').value.trim(),
+            team:document.getElementById('regClubTeam').value.trim(),
+            url:document.getElementById('regClubUrl').value.trim()};
+  } else if(cType==='hobby'){
+    club = {type:'hobby', name:document.getElementById('regClubNameHobby').value.trim()};
+  }
   document.getElementById('btnRegister').textContent='…';
   const {data,error} = await sb.auth.signUp({
     email, password,
-    options:{data:{name, role}}
+    options:{data:{name, role, club}}
   });
   document.getElementById('btnRegister').textContent='Account erstellen →';
   if(error){errEl.textContent=error.message;errEl.style.display='block';return;}
-  okEl.textContent='✅ Bestätigungs-E-Mail gesendet! Bitte E-Mail prüfen und bestätigen, dann einloggen.';
+  okEl.textContent='✅ Account erstellt! Bitte einloggen.';
   okEl.style.display='block';
 }
 
@@ -1747,6 +1991,7 @@ function enterApp(user){
     if(user){
       await loadSavedExercises();
       await loadTrainingPlans();
+      prefillProfil(meta);
     }
   },400);
 }
@@ -1768,11 +2013,10 @@ function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tb-link').forEach(l=>l.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const idx = ['home','bibliothek','planer','board'].indexOf(name);
+  const idx = ['home','bibliothek','planer','board','profil'].indexOf(name);
   document.querySelectorAll('.tb-link')[idx]?.classList.add('active');
   setMobileNav(name);
   if(name==='board'){
-    // Always show field picker first (unless board already initialised)
     if(!boardInited){
       document.getElementById('fieldPicker').style.display='flex';
       document.getElementById('boardOuter').style.display='none';
