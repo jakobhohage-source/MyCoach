@@ -53,6 +53,8 @@ body{
 .comm-list{display:flex;flex-direction:column;gap:12px;}
 .comm-empty{color:var(--text-dim);font-size:14px;padding:32px;text-align:center;}
 .comm-card{background:var(--ink3);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.comm-card-own{border-color:var(--gold);background:rgba(212,160,23,0.06);}
+.comm-own-badge{display:inline-block;font-size:11px;font-weight:700;color:var(--gold);background:rgba(212,160,23,0.15);padding:3px 8px;border-radius:4px;margin-bottom:6px;letter-spacing:0.3px;}
 .comm-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
 .comm-card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;color:var(--text);}
 .comm-card-meta{font-size:12px;color:var(--text-dim);margin-bottom:10px;}
@@ -3608,7 +3610,11 @@ async function submitFriendlyRequest(){
     home_pref: home,
     message: msg
   });
-  if(error){ errEl.textContent='Fehler: '+error.message; errEl.style.display='block'; return; }
+  if(error){ errEl.textContent='Fehler: '+error.message+' (Code: '+(error.code||'?')+')'; errEl.style.display='block'; return; }
+  // Formular zurücksetzen
+  document.getElementById('fmDate').value='';
+  document.getElementById('fmMessage').value='';
+  document.getElementById('fmHome').value='both';
   closeFriendlyModal();
   showToast('✅','Testspiel-Anfrage veröffentlicht!');
   loadFriendlyRequests();
@@ -3624,7 +3630,30 @@ async function loadFriendlyRequests(){
   const list = document.getElementById('friendlyList');
   list.innerHTML='<div class="comm-empty">Lade…</div>';
   const {data,error} = await sb.from('friendly_requests').select('*').order('created_at',{ascending:false});
-  if(error||!data){ list.innerHTML='<div class="comm-empty">Fehler beim Laden.</div>'; return; }
+  if(error){
+    list.innerHTML=`<div class="comm-empty" style="color:#e8614e">
+      ⚠️ Fehler: ${escHtml(error.message)}<br>
+      <span style="font-size:12px;margin-top:8px;display:block;color:var(--text-dim)">
+        Bitte im Supabase SQL Editor ausführen:<br><br>
+        <code style="background:var(--ink);padding:4px 8px;border-radius:4px;font-size:11px;display:inline-block;text-align:left;line-height:1.8">
+          create table friendly_requests (<br>
+          &nbsp;id uuid primary key default gen_random_uuid(),<br>
+          &nbsp;user_id uuid references auth.users not null,<br>
+          &nbsp;club_name text not null,<br>
+          &nbsp;club_team text, lat numeric, lng numeric,<br>
+          &nbsp;age_group text, date_range text,<br>
+          &nbsp;home_pref text, message text,<br>
+          &nbsp;created_at timestamptz default now());<br>
+          alter table friendly_requests enable row level security;<br>
+          create policy "read" on friendly_requests for select using (true);<br>
+          create policy "insert" on friendly_requests for insert with check (auth.uid() = user_id);<br>
+          create policy "delete" on friendly_requests for delete using (auth.uid() = user_id);
+        </code>
+      </span>
+    </div>`;
+    return;
+  }
+  if(!data){ list.innerHTML='<div class="comm-empty">Keine Daten.</div>'; return; }
 
   const radius = parseInt(document.getElementById('radiusFilter').value);
   const ageF   = document.getElementById('ageFilter').value;
@@ -3635,7 +3664,9 @@ async function loadFriendlyRequests(){
   if(ageF) items = items.filter(i=>i.age_group===ageF);
   if(myLat && myLng && radius < 9999){
     items = items.filter(i=>{
-      if(!i.lat||!i.lng) return true; // show if no coords
+      // Eigene Anfragen immer anzeigen
+      if(currentUser && i.user_id===currentUser.id) return true;
+      if(!i.lat||!i.lng) return true;
       return haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)) <= radius;
     });
   }
@@ -3645,28 +3676,39 @@ async function loadFriendlyRequests(){
   const homeMap={both:'Heim & Auswärts',home:'Heimspiel',away:'Auswärts'};
   const fmtDate = d => { if(!d) return ''; try{ return new Date(d).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'long',year:'numeric'}); } catch(e){ return d; } };
   list.innerHTML = items.map(i=>{
-    const dist = (myLat&&myLng&&i.lat&&i.lng)
-      ? `<span class="comm-badge green">${Math.round(haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
     const isOwn = currentUser && i.user_id===currentUser.id;
-    return `<div class="comm-card">
+    const dist = (!isOwn && myLat && myLng && i.lat && i.lng)
+      ? `<span class="comm-badge green">${Math.round(haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
+    return `<div class="comm-card${isOwn?' comm-card-own':''}">
       <div class="comm-card-header">
-        <div>
+        <div style="flex:1;min-width:0">
+          ${isOwn?'<div class="comm-own-badge">⭐ Meine Anfrage</div>':''}
           <div class="comm-card-title">${escHtml(i.club_name)}${i.club_team?` – ${escHtml(i.club_team)}`:''}  </div>
           <div class="comm-card-meta">${escHtml(i.age_group)} · ${fmtDate(i.date_range)} · ${homeMap[i.home_pref]||i.home_pref}</div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">${dist}<span class="comm-badge">${escHtml(i.age_group)}</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">
+          ${dist}
+          ${isOwn
+            ? `<button onclick="deleteFriendlyRequest('${i.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;line-height:1;padding:0">🗑</button>`
+            : `<span class="comm-badge">${escHtml(i.age_group)}</span>`
+          }
+        </div>
       </div>
       ${i.message?`<div class="comm-card-body">${escHtml(i.message)}</div>`:''}
       <div class="comm-card-footer">
         <span style="font-size:12px;color:var(--text-dim)">${timeAgo(i.created_at)}</span>
-        ${!isOwn?`<button class="comm-contact-btn" onclick="contactFriendly('${i.id}','${escHtml(i.club_name)}')">Kontakt aufnehmen</button>`:'<span style="font-size:12px;color:var(--text-dim);margin-left:auto">Deine Anfrage</span>'}
+        ${!isOwn?`<button class="comm-contact-btn" onclick="contactFriendly('${i.id}','${escHtml(i.club_name)}')">Kontakt aufnehmen</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
-function contactFriendly(id, clubName){
-  showToast('📧', `Kontaktanfrage an ${clubName} — coming soon`);
+async function deleteFriendlyRequest(id){
+  if(!confirm('Anfrage löschen?')) return;
+  const {error} = await sb.from('friendly_requests').delete().eq('id',id);
+  if(error){ toast('Fehler beim Löschen','❌'); return; }
+  toast('Anfrage gelöscht','🗑');
+  loadFriendlyRequests();
 }
 
 /* ════════════════════════════════════
