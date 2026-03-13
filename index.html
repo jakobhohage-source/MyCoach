@@ -2066,9 +2066,9 @@ function switchAuthTab(tab){
   const isLogin = tab==='login';
   document.getElementById('formLogin').style.display = isLogin?'block':'none';
   document.getElementById('formRegister').style.display = isLogin?'none':'block';
-  document.getElementById('tabLogin').style.borderBottomColor = isLogin?''#111827':'transparent';
+  document.getElementById('tabLogin').style.borderBottomColor = isLogin?'#111827':'transparent';
   document.getElementById('tabLogin').style.color = isLogin?'#111827':'#9ca3af';
-  document.getElementById('tabRegister').style.borderBottomColor = isLogin?'transparent':''#111827';
+  document.getElementById('tabRegister').style.borderBottomColor = isLogin?'transparent':'#111827';
   document.getElementById('tabRegister').style.color = isLogin?'#9ca3af':'#111827';
 }
 
