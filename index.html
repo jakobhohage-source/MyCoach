@@ -1571,11 +1571,21 @@ html, body {
         <div class="board-toolbar-wrap">
           <div class="board-toolbar">
             <span class="tb-label">Werkzeug</span>
-            <div class="ttbtn on" id="tool-arrow" onclick="setTool('arrow')" title="Pfeil (Laufweg)">↗</div>
-            <div class="ttbtn" id="tool-line" onclick="setTool('line')" title="Gerade Linie">╱</div>
-            <div class="ttbtn" id="tool-dashed" onclick="setTool('dashed')" title="Gestrichelt">╌</div>
-            <div class="ttbtn" id="tool-distance" onclick="setTool('distance')" title="Entfernung messen">📏</div>
-            <div class="ttbtn" id="tool-eraser" onclick="setTool('eraser')" title="Radierer">◻</div>
+            <div class="ttbtn on" id="tool-arrow" onclick="setTool('arrow')" title="Pfeil (Laufweg)">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="14" x2="13" y2="3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><polyline points="7,3 13,3 13,9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <div class="ttbtn" id="tool-line" onclick="setTool('line')" title="Gerade Linie">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="14" x2="14" y2="2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="ttbtn" id="tool-dashed" onclick="setTool('dashed')" title="Gestrichelt">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="14" x2="14" y2="2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 2.5"/></svg>
+            </div>
+            <div class="ttbtn" id="tool-distance" onclick="setTool('distance')" title="Entfernung messen">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="5" x2="2" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="14" y1="5" x2="14" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="ttbtn" id="tool-eraser" onclick="setTool('eraser')" title="Radierer">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9.5 3L13 6.5L6.5 13H3V9.5L9.5 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="6" y1="6" x2="10" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
             <div class="tb-sep"></div>
             <span class="tb-label">Farbe</span>
             <div class="cdot on" style="background:#fff" onclick="setColor('#fff',this)"></div>
@@ -1590,58 +1600,78 @@ html, body {
             <div class="stroke-opt on" onclick="setSize(4,this)">━</div>
             <div class="stroke-opt" onclick="setSize(7,this)">▬</div>
             <div class="tb-sep"></div>
-            <div class="ttbtn" onclick="undoBoard()" title="Rückgängig">↩</div>
-            <div class="ttbtn" onclick="clearBoard()" title="Board leeren">🗑</div>
-            <div class="ttbtn" onclick="saveBoard()" title="Speichern">💾</div>
-            <div id="modePill" class="mode-pill mode-draw" style="margin-left:12px">✏️ Zeichnen</div>
+            <div class="ttbtn" onclick="undoBoard()" title="Rückgängig">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 7C3 4.8 4.8 3 7 3C9.8 3 12 5.2 12 8C12 10.8 9.8 13 7 13H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><polyline points="5,4.5 3,7 5,9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <div class="ttbtn" onclick="clearBoard()" title="Board leeren">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="3,5 13,5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 5V3H10V5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 5L4.5 13H11.5L12 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="7.5" x2="7" y2="10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="9" y1="7.5" x2="9" y2="10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <div class="ttbtn" onclick="saveBoard()" title="Speichern">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2H11L13 4V13C13 13.6 12.6 14 12 14H4C3.4 14 3 13.6 3 13V2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><rect x="5.5" y="2" width="5" height="4" rx="0.5" stroke="currentColor" stroke-width="1.4"/><rect x="5" y="9" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="1.4"/></svg>
+            </div>
+            <div id="modePill" class="mode-pill mode-draw" style="margin-left:12px">Zeichnen</div>
           </div>
 
           <!-- TOOLBAR ROW 2: Spieler + Utensilien + Laufwege -->
           <div class="board-toolbar-row2">
             <!-- SPIELER -->
             <span class="tb-label">Spieler</span>
-            <button class="entity-btn" id="btn-add-att" onclick="placeEntity('attacker')">🔴 Angreifer</button>
-            <button class="entity-btn" id="btn-add-def" onclick="placeEntity('defender')">🔵 Verteidiger</button>
-            <button class="entity-btn" id="btn-add-gk" onclick="placeEntity('gk')">🟡 Torwart</button>
-            <button class="entity-btn" id="btn-add-group" onclick="openGroupDialog()">👥 Gruppe…</button>
+            <button class="entity-btn" id="btn-add-att" onclick="placeEntity('attacker')">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e8614e;margin-right:5px;vertical-align:middle;border:1.5px solid rgba(255,255,255,0.6)"></span>Angreifer</button>
+            <button class="entity-btn" id="btn-add-def" onclick="placeEntity('defender')">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4fa3e0;margin-right:5px;vertical-align:middle;border:1.5px solid rgba(255,255,255,0.6)"></span>Verteidiger</button>
+            <button class="entity-btn" id="btn-add-gk" onclick="placeEntity('gk')">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2px dashed #f0bc2e;margin-right:5px;vertical-align:middle"></span>Torwart</button>
+            <button class="entity-btn" id="btn-add-group" onclick="openGroupDialog()">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="11" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M1 14c0-2.2 2.2-4 5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Gruppe…</button>
             <div class="tb-sep"></div>
             <!-- UTENSILIEN -->
             <span class="tb-label">Utensilien</span>
-            <button class="entity-btn" onclick="placeEntity('cone')">🔶 Hütchen</button>
-            <button class="entity-btn" onclick="placeEntity('pole')">🟠 Stange</button>
-            <button class="entity-btn" id="btn-add-ball" onclick="placeEntity('ball')">⚽ Ball</button>
-            <button class="entity-btn" onclick="placeEntity('pylon')">🔺 Pylone</button>
+            <button class="entity-btn" id="btn-add-cone" onclick="placeEntity('cone')">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><polygon points="8,2 14,14 2,14" stroke="#f0a040" stroke-width="1.6" stroke-linejoin="round" fill="rgba(240,160,64,0.25)"/></svg>Hütchen</button>
+            <button class="entity-btn" onclick="placeEntity('pole')">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="7" y="1" width="3" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Stange</button>
+            <button class="entity-btn" id="btn-add-ball" onclick="placeEntity('ball')">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M5 4.5 Q8 7 11 4.5M5 11.5 Q8 9 11 11.5M8 2 L8 14" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>Ball</button>
+            <button class="entity-btn" onclick="placeEntity('pylon')">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><polygon points="8,1 15,15 1,15" stroke="#e05020" stroke-width="1.6" stroke-linejoin="round" fill="rgba(224,80,32,0.25)"/><line x1="4" y1="10" x2="12" y2="10" stroke="#e05020" stroke-width="1.2"/></svg>Pylone</button>
+            <!-- Hütchen-Abstand Toggle -->
+            <button class="entity-btn" id="btn-cone-dist" onclick="toggleConeDistances()" title="Abstände zwischen Hütchen ein-/ausblenden" style="border-style:dashed">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="2" y1="5" x2="2" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="14" y1="5" x2="14" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Abstände</button>
             <div class="tb-sep"></div>
             <!-- BEWEGUNGEN -->
             <span class="tb-label">Bewegungen</span>
-            <button class="entity-btn" id="btn-run-mode" onclick="setMovementMode('run')"
-              title="Spieler auswählen → Laufweg-Typ wählen → auf Feld zeichnen">🏃 Laufweg</button>
-            <!-- Ballweg split-button: click arrow to pick sub-type -->
+            <button class="entity-btn" id="btn-run-mode" onclick="setMovementMode('run')" title="Laufweg zeichnen">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><path d="M3 13 Q6 9 9 11 Q12 13 13 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/><polyline points="10,5 13,8 10,11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Laufweg</button>
             <div class="split-btn-wrap" style="display:flex;gap:0">
               <button class="entity-btn" id="btn-ball-mode" style="border-radius:7px 0 0 7px;border-right:none"
-                onclick="setMovementMode('ballpath')" title="Ball auswählen → aktuellen Ballweg-Typ zeichnen">⚽ <span id="ballModeLabel">Pass</span></button>
+                onclick="setMovementMode('ballpath')" title="Ballweg zeichnen">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 5.5L10.5 10.5M10.5 5.5L5.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span id="ballModeLabel">Pass</span></button>
               <button class="entity-btn" id="btn-ball-mode-arrow" style="border-radius:0 7px 7px 0;padding:0 7px;font-size:11px"
-                onclick="toggleBallTypeMenu(this)" title="Ballweg-Typ wählen">▾</button>
+                onclick="toggleBallTypeMenu(this)" title="Ballweg-Typ">▾</button>
             </div>
-            <!-- hidden dropdown -->
             <div id="ballTypeMenu" style="display:none;position:absolute;z-index:200;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:6px;box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:170px;top:calc(100% + 4px)">
               <div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;padding:3px 8px 6px">Ballweg-Typ</div>
               <button class="balltype-opt on" data-btype="pass" onclick="setBallType('pass',this)">↗ Pass <span style="opacity:.5;font-size:10px">— schnell, gerade</span></button>
               <button class="balltype-opt" data-btype="cross" onclick="setBallType('cross',this)">⌒ Flanke <span style="opacity:.5;font-size:10px">— Bogen, mittel</span></button>
-              <button class="balltype-opt" data-btype="shot" onclick="setBallType('shot',this)">💥 Schuss <span style="opacity:.5;font-size:10px">— sehr schnell</span></button>
+              <button class="balltype-opt" data-btype="shot" onclick="setBallType('shot',this)">↯ Schuss <span style="opacity:.5;font-size:10px">— sehr schnell</span></button>
             </div>
             <div class="tb-sep"></div>
             <span class="tb-label">Weg-Typ</span>
-            <button class="entity-btn on" id="mtype-straight" onclick="setMoveType('straight',this)" title="Gerade Linie">╱ Gerade</button>
-            <button class="entity-btn" id="mtype-arc" onclick="setMoveType('arc',this)" title="Bogen">⌒ Bogen</button>
-            <button class="entity-btn" id="mtype-free" onclick="setMoveType('free',this)" title="Freihand-Weg (geglättet)">〜 Freihand</button>
+            <button class="entity-btn on" id="mtype-straight" onclick="setMoveType('straight',this)">╱ Gerade</button>
+            <button class="entity-btn" id="mtype-arc" onclick="setMoveType('arc',this)">⌒ Bogen</button>
+            <button class="entity-btn" id="mtype-free" onclick="setMoveType('free',this)">〜 Freihand</button>
             <div class="tb-sep"></div>
-            <button class="entity-btn" onclick="setMovementMode(null)" id="btn-select-mode">✋ Auswählen</button>
+            <button class="entity-btn" onclick="setMovementMode(null)" id="btn-select-mode">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><path d="M3 2L13 8L8 9.5L6 14L3 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg>Auswählen</button>
             <div class="tb-sep"></div>
             <span class="tb-label">Zoom</span>
-            <button class="entity-btn" onclick="adjustZoom(0.25)" title="Einzoomen">🔍+</button>
-            <button class="entity-btn" onclick="adjustZoom(-0.25)" title="Auszoomen">🔍−</button>
-            <button class="entity-btn" onclick="resetZoom()" title="Zoom zurücksetzen">↺ Reset</button>
+            <button class="entity-btn" onclick="adjustZoom(0.25)" title="Einzoomen">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="7" y1="4.5" x2="7" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+            <button class="entity-btn" onclick="adjustZoom(-0.25)" title="Auszoomen">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+            <button class="entity-btn" onclick="resetZoom()" title="Zoom zurücksetzen">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><path d="M3 8 A5 5 0 1 1 5 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><polyline points="3,5 3,8 6,8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
           </div>
         </div>
 
@@ -2766,7 +2796,7 @@ const FIELD_SVGS={
     <path d="M0 670 A10 10 0 0 1 10 680"   fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
     <path d="M1040 680 A10 10 0 0 0 1050 670" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
     <!-- Maßstab-Label -->
-    <text x="520" y="670" font-family="sans-serif" font-size="18" fill="rgba(255,255,255,0.4)" text-anchor="middle">105 × 68 m</text>`},
+`},
 
   // Halbfeld: 52.5×68m (Viewbox 525×680)
   half:{vb:'0 0 525 680',bg:'#2d7a3a',
@@ -2795,7 +2825,7 @@ const FIELD_SVGS={
     <!-- Eckfahnen-Bögen -->
     <path d="M0 10 A10 10 0 0 0 10 0"  fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
     <path d="M0 670 A10 10 0 0 1 10 680" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
-    <text x="260" y="665" font-family="sans-serif" font-size="18" fill="rgba(255,255,255,0.4)" text-anchor="middle">52.5 × 68 m</text>`},
+`},
 
   // Kleinfeld: 40×25m (Viewbox 400×250) — typisches Trainingsfeld
   small:{vb:'0 0 400 250',bg:'#2d7a3a',
@@ -2817,7 +2847,7 @@ const FIELD_SVGS={
     <!-- Strafräume 6m × 10m = 60×100px -->
     <rect x="0"   y="75"  width="60" height="100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
     <rect x="340" y="75"  width="60" height="100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
-    <text x="198" y="243" font-family="sans-serif" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">40 × 25 m</text>`}
+`}
 };
 
 /* ════════════════════════════════════
@@ -3149,6 +3179,7 @@ function redraw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   paths.forEach(drawSinglePath);
   renderMovementPaths();
+  renderConeDistances();
 }
 
 function drawSinglePath(p){
@@ -3280,16 +3311,80 @@ function setBallType(type, el){
   document.getElementById('mtype-'+pt)?.classList.add('on');
 }
 
+let showConeDistances = false;
+let lastConeId = null; // track last placed cone for chaining
+
+function toggleConeDistances(){
+  showConeDistances = !showConeDistances;
+  const btn = document.getElementById('btn-cone-dist');
+  if(btn) btn.classList.toggle('on', showConeDistances);
+  redraw();
+  toast(showConeDistances ? 'Abstände eingeblendet' : 'Abstände ausgeblendet', showConeDistances ? '📐' : '');
+}
+
+function renderConeDistances(){
+  if(!showConeDistances) return;
+  const area = document.getElementById('boardArea');
+  const W = area.offsetWidth, H = area.offsetHeight;
+  const cones = entities.filter(e => e.type === 'cone');
+  if(cones.length < 2) return;
+
+  ctx.save();
+  ctx.setLineDash([4, 3]);
+  ctx.strokeStyle = 'rgba(240,188,46,0.6)';
+  ctx.lineWidth = 1;
+  ctx.font = 'bold 11px system-ui,sans-serif';
+  ctx.fillStyle = '#f0bc2e';
+  ctx.textAlign = 'center';
+
+  for(let i = 0; i < cones.length; i++){
+    for(let j = i+1; j < cones.length; j++){
+      const a = cones[i], b = cones[j];
+      const ax = a.x/100*W, ay = a.y/100*H;
+      const bx = b.x/100*W, by = b.y/100*H;
+      const px_dist = Math.hypot(bx-ax, by-ay);
+      const mx = (ax+bx)/2*currentFieldMeta.metersW/W * W/W; // just midpoint
+      // Meter distance
+      const dmx = (bx-ax)/W * currentFieldMeta.metersW;
+      const dmy = (by-ay)/H * currentFieldMeta.metersH;
+      const meters = Math.sqrt(dmx*dmx + dmy*dmy).toFixed(1);
+      // Only draw if reasonably close (< 40m)
+      if(parseFloat(meters) > 40) continue;
+
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+
+      // Label at midpoint
+      const lx = (ax+bx)/2, ly = (ay+by)/2;
+      const bg_w = ctx.measureText(meters+' m').width + 8;
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(lx - bg_w/2, ly - 10, bg_w, 16);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#f0bc2e';
+      ctx.fillText(meters+' m', lx, ly+2);
+    }
+  }
+  ctx.restore();
+  ctx.setLineDash([]);
+}
+
 function placeEntity(type){
   const area=document.getElementById('boardArea');
   let x=Math.random()*60+20, y=Math.random()*50+25;
 
-  // GK goes to nearest goal line (left side by default)
-  if(type==='gk'){
-    // Place on left goal line, vertically centered
-    x=2.5;
-    y=50; // vertically center
+  // Chain cones: place near last cone
+  if(type==='cone' && lastConeId !== null){
+    const prev = entities.find(e=>e.id===lastConeId);
+    if(prev){
+      x = Math.min(95, prev.x + 8 + Math.random()*4);
+      y = prev.y + (Math.random()-0.5)*6;
+    }
   }
+
+  if(type==='gk'){ x=2.5; y=50; }
 
   const id=++entityIdCounter;
   const wrap=document.createElement('div');wrap.className='field-entity';
@@ -3298,16 +3393,28 @@ function placeEntity(type){
   if(type==='attacker'){color='#e8614e';label='A';inner=playerHTML(color,'A',false);}
   else if(type==='defender'){color='#4fa3e0';label='V';inner=playerHTML(color,'V',false);}
   else if(type==='gk'){color='#f0bc2e';label='T';inner=playerHTML(color,'T',true);}
-  else if(type==='cone'){inner='<div class="fe-cone">🔶</div>';}
+  else if(type==='cone'){
+    lastConeId = id;
+    inner=`<div class="fe-cone"><svg viewBox="0 0 28 28" width="28" height="28"><polygon points="14,3 24,24 4,24" fill="#f09a30" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linejoin="round"/><line x1="7" y1="17" x2="21" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
+  }
   else if(type==='pole'){inner='<div class="fe-pole"></div>';}
-  else if(type==='ball'){inner='<div class="fe-ball">⚽</div>';}
-  else if(type==='pylon'){inner='<div class="fe-pylon">🔺</div>';}
+  else if(type==='ball'){
+    inner=`<div class="fe-ball"><svg viewBox="0 0 28 28" width="28" height="28"><circle cx="14" cy="14" r="11" fill="#f5f5f5" stroke="#bbb" stroke-width="1.2"/><path d="M10 8 Q14 12 18 8M10 20 Q14 16 18 20M14 3 L14 25" stroke="#888" stroke-width="0.9" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 7 17M25 14 Q21 11 21 17" stroke="#888" stroke-width="0.9" fill="none"/></svg></div>`;
+  }
+  else if(type==='pylon'){
+    inner=`<div class="fe-pylon"><svg viewBox="0 0 36 36" width="36" height="36"><polygon points="18,3 31,32 5,32" fill="#e04010" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/><line x1="9" y1="22" x2="27" y2="22" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><line x1="12" y1="15" x2="24" y2="15" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
+  }
   wrap.innerHTML=inner;
   const ent={id,type,el:wrap,x,y,color,label};entities.push(ent);
   makeDraggableEntity(wrap,ent,area);
-  wrap.addEventListener('click',e=>{e.stopPropagation();if(movementMode)selectEntityAsSource(ent);});
+  wrap.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(movementMode) selectEntityAsSource(ent);
+    else if(type==='cone') lastConeId=id; // click cone to set as chain anchor
+  });
   document.getElementById('playerLayer').appendChild(wrap);
-  updateBoardStatus();return ent;
+  updateBoardStatus();
+  return ent;
 }
 
 function playerHTML(color,label,isGK){
@@ -3721,10 +3828,10 @@ function openSavedEx(id){
       if(e.type==='attacker') inner=playerHTML(e.color||'#e8614e',e.label||'A',false);
       else if(e.type==='defender') inner=playerHTML(e.color||'#4fa3e0',e.label||'V',false);
       else if(e.type==='gk') inner=playerHTML(e.color||'#f0bc2e',e.label||'T',true);
-      else if(e.type==='cone') inner='<div class="fe-cone">🔶</div>';
+      else if(e.type==='cone') inner=`<div class="fe-cone"><svg viewBox="0 0 28 28" width="28" height="28"><polygon points="14,3 24,24 4,24" fill="#f09a30" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linejoin="round"/><line x1="7" y1="17" x2="21" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
       else if(e.type==='pole') inner='<div class="fe-pole"></div>';
-      else if(e.type==='ball') inner='<div class="fe-ball">⚽</div>';
-      else if(e.type==='pylon') inner='<div class="fe-pylon">🔺</div>';
+      else if(e.type==='ball') inner=`<div class="fe-ball"><svg viewBox="0 0 28 28" width="28" height="28"><circle cx="14" cy="14" r="11" fill="#f5f5f5" stroke="#bbb" stroke-width="1.2"/><path d="M10 8 Q14 12 18 8M10 20 Q14 16 18 20M14 3 L14 25" stroke="#888" stroke-width="0.9" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 7 17M25 14 Q21 11 21 17" stroke="#888" stroke-width="0.9" fill="none"/></svg></div>`;
+      else if(e.type==='pylon') inner=`<div class="fe-pylon"><svg viewBox="0 0 36 36" width="36" height="36"><polygon points="18,3 31,32 5,32" fill="#e04010" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/><line x1="9" y1="22" x2="27" y2="22" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><line x1="12" y1="15" x2="24" y2="15" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
       else if(e.type==='group'){
         const count=e.count||4;const color=e.color||'#e8614e';const label=e.label||'Gruppe';
         const dots=Array.from({length:Math.min(count,5)},(_,i)=>
