@@ -1571,10 +1571,10 @@ html, body {
         <div class="board-toolbar-wrap">
           <div class="board-toolbar">
             <span class="tb-label">Werkzeug</span>
-            <div class="ttbtn on" id="tool-pen" onclick="setTool('pen')" title="Freihand">✏️</div>
-            <div class="ttbtn" id="tool-arrow" onclick="setTool('arrow')" title="Pfeil (Laufweg)">↗</div>
+            <div class="ttbtn on" id="tool-arrow" onclick="setTool('arrow')" title="Pfeil (Laufweg)">↗</div>
             <div class="ttbtn" id="tool-line" onclick="setTool('line')" title="Gerade Linie">╱</div>
             <div class="ttbtn" id="tool-dashed" onclick="setTool('dashed')" title="Gestrichelt">╌</div>
+            <div class="ttbtn" id="tool-distance" onclick="setTool('distance')" title="Entfernung messen">📏</div>
             <div class="ttbtn" id="tool-eraser" onclick="setTool('eraser')" title="Radierer">◻</div>
             <div class="tb-sep"></div>
             <span class="tb-label">Farbe</span>
@@ -1634,9 +1634,14 @@ html, body {
             <span class="tb-label">Weg-Typ</span>
             <button class="entity-btn on" id="mtype-straight" onclick="setMoveType('straight',this)" title="Gerade Linie">╱ Gerade</button>
             <button class="entity-btn" id="mtype-arc" onclick="setMoveType('arc',this)" title="Bogen">⌒ Bogen</button>
-            <button class="entity-btn" id="mtype-slalom" onclick="setMoveType('slalom',this)" title="Slalom/Zickzack">〜 Slalom</button>
+            <button class="entity-btn" id="mtype-free" onclick="setMoveType('free',this)" title="Freihand-Weg (geglättet)">〜 Freihand</button>
             <div class="tb-sep"></div>
             <button class="entity-btn" onclick="setMovementMode(null)" id="btn-select-mode">✋ Auswählen</button>
+            <div class="tb-sep"></div>
+            <span class="tb-label">Zoom</span>
+            <button class="entity-btn" onclick="adjustZoom(0.25)" title="Einzoomen">🔍+</button>
+            <button class="entity-btn" onclick="adjustZoom(-0.25)" title="Auszoomen">🔍−</button>
+            <button class="entity-btn" onclick="resetZoom()" title="Zoom zurücksetzen">↺ Reset</button>
           </div>
         </div>
 
@@ -1669,7 +1674,7 @@ html, body {
         </div>
 
         <div class="board-status-bar">
-          <span id="bsTool">✏️ Zeichnen</span>
+          <span id="bsTool">↗ Pfeil</span>
           <span><span class="status-dot" id="bsColorDot" style="background:#fff"></span><span id="bsColorName">Weiß</span></span>
           <span id="bsStats">Objekte: 0 · Zeichnungen: 0 · Bewegungen: 0</span>
           <span style="margin-left:auto;color:#9ca3af" id="bsHint">Spieler/Ball auswählen → Weg-Typ → auf Feld klicken &amp; ziehen</span>
@@ -1743,13 +1748,19 @@ html, body {
           <div class="comm-toolbar">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
               <label class="form-label" style="margin:0">Umkreis:</label>
-              <select class="form-select" id="radiusFilter" onchange="loadFriendlyRequests()" style="width:140px;padding:6px 10px">
+              <select class="form-select" id="radiusFilter" onchange="loadFriendlyRequests()" style="width:110px;padding:6px 10px">
                 <option value="9999">Alle</option>
+                <option value="5">5 km</option>
+                <option value="10">10 km</option>
+                <option value="15">15 km</option>
                 <option value="25">25 km</option>
                 <option value="50" selected>50 km</option>
-                <option value="100">100 km</option>
               </select>
-              <select class="form-select" id="ageFilter" onchange="loadFriendlyRequests()" style="width:140px;padding:6px 10px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <label class="form-label" style="margin:0">PLZ:</label>
+                <input class="form-input" id="plzSearch" type="text" placeholder="z.B. 80331" maxlength="5" style="width:100px;padding:6px 10px" oninput="onPlzInput(this.value)">
+              </div>
+              <select class="form-select" id="ageFilter" onchange="loadFriendlyRequests()" style="width:160px;padding:6px 10px">
                 <option value="">Alle Altersklassen</option>
                 <option>Herren</option>
                 <option>Damen</option>
@@ -1973,6 +1984,42 @@ html, body {
     <div style="font-size:15px;color:#111827;line-height:1.6;white-space:pre-wrap;border-top:1px solid #e5e7eb;padding-top:16px" id="msgDetailBody"></div>
     <div style="margin-top:20px;display:flex;gap:10px">
       <button id="msgReplyBtn" class="comm-new-btn" onclick="replyToMessage()" style="display:none;align-items:center;gap:6px">↩ Antworten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Übungs-Detail Modal -->
+<div id="drillDetailOverlay" onclick="if(event.target===this)closeDrillDetail()" style="display:none;position:fixed;inset:0;background:rgba(17,24,39,0.5);z-index:8700;align-items:center;justify-content:center">
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;width:min(560px,95vw);max-height:88vh;overflow-y:auto;position:relative">
+    <!-- Pitch header -->
+    <div id="ddPitch" style="height:180px;background:linear-gradient(160deg,#0d2e18,#1e5c2e);position:relative;border-radius:14px 14px 0 0;overflow:hidden">
+      <svg viewBox="0 0 560 180" style="width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+        <rect width="560" height="180" fill="none"/>
+        <rect x="28" y="12" width="504" height="156" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <line x1="280" y1="12" x2="280" y2="168" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="280" cy="90" r="40" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="280" cy="90" r="3" fill="rgba(255,255,255,0.5)"/>
+        <rect x="28" y="50" width="70" height="80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <rect x="462" y="50" width="70" height="80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      </svg>
+      <span id="ddLvlBadge" style="position:absolute;top:12px;right:14px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,0.3);color:#fff;letter-spacing:0.3px"></span>
+      <button onclick="closeDrillDetail()" style="position:absolute;top:12px;left:14px;background:rgba(0,0,0,0.3);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    </div>
+    <!-- Body -->
+    <div style="padding:24px 28px 28px">
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px" id="ddCat"></div>
+      <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:#111827;margin-bottom:16px" id="ddTitle"></div>
+      <!-- Meta row -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="ddMeta"></div>
+      <!-- Description -->
+      <div style="font-size:14px;color:#374151;line-height:1.7;border-top:1px solid #f3f4f6;padding-top:16px;margin-bottom:16px" id="ddDesc"></div>
+      <!-- Tags -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px" id="ddTags"></div>
+      <!-- Actions -->
+      <div style="display:flex;gap:10px">
+        <button class="btn-login" id="ddAddBtn" style="max-width:200px;padding:11px 20px;font-size:15px" onclick="ddAddToPlaner()">+ Zum Planer</button>
+        <button onclick="closeDrillDetail()" style="flex:1;padding:11px;border-radius:8px;border:1px solid #e5e7eb;background:transparent;color:#6b7280;font-family:'Source Sans 3',sans-serif;font-size:14px;cursor:pointer">Schließen</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2518,10 +2565,37 @@ function renderDrills(list){
         <div class="dc-tags">${d.tags.map(t=>`<span class="dc-tag">${t}</span>`).join('')}</div>
       </div>
       <div class="dc-actions">
-        <button class="dc-btn" onclick="toast('${d.name} geöffnet','📖')">Details</button>
+        <button class="dc-btn" onclick="openDrillDetail(${d.id})">Details</button>
         <button class="dc-btn primary" onclick="addDrillToPlaner(${d.id});toast('Zu Hauptteil 1 hinzugefügt','✔')">+ Planer</button>
       </div>
     </div>`).join('');
+}
+
+let _ddDrillId=null;
+function openDrillDetail(id){
+  const d=DRILLS.find(x=>x.id===id);
+  if(!d)return;
+  _ddDrillId=id;
+  document.getElementById('ddCat').textContent=d.cat;
+  document.getElementById('ddTitle').textContent=d.icon+' '+d.name;
+  document.getElementById('ddDesc').textContent=d.desc;
+  const lvlColor={A:'#065f46',F:'#92400e',P:'#991b1b'}[d.lvl[0]]||'#374151';
+  document.getElementById('ddLvlBadge').textContent=d.lvl;
+  document.getElementById('ddMeta').innerHTML=
+    `<span style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:#374151">👥 ${d.players} Spieler</span>
+     <span style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:#374151">⏱ ${d.dur} Min</span>
+     <span style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:${lvlColor}">${d.lvl}</span>`;
+  document.getElementById('ddTags').innerHTML=d.tags.map(t=>`<span class="dc-tag" style="font-size:12px;padding:3px 10px">${t}</span>`).join('');
+  document.getElementById('drillDetailOverlay').style.display='flex';
+}
+function closeDrillDetail(){
+  document.getElementById('drillDetailOverlay').style.display='none';
+  _ddDrillId=null;
+}
+function ddAddToPlaner(){
+  if(_ddDrillId!=null) addDrillToPlaner(_ddDrillId);
+  toast('Zum Planer hinzugefügt','✔');
+  closeDrillDetail();
 }
 
 function filterDrills(q){
@@ -2641,77 +2715,116 @@ function startBoard(){
 }
 
 const FIELD_SVGS={
-  full:{vb:'0 0 100 65',bg:'#2d7a3a',content:`
-    <rect x="0" y="0" width="100" height="65" fill="#2d7a3a"/>
-    <rect x="2.5" y="3" width="10.8" height="59" fill="#2f8040"/>
-    <rect x="13.3" y="3" width="10.8" height="59" fill="#2a7038"/>
-    <rect x="24.1" y="3" width="10.8" height="59" fill="#2f8040"/>
-    <rect x="34.9" y="3" width="10.8" height="59" fill="#2a7038"/>
-    <rect x="45.7" y="3" width="10.8" height="59" fill="#2f8040"/>
-    <rect x="56.5" y="3" width="10.8" height="59" fill="#2a7038"/>
-    <rect x="67.3" y="3" width="10.8" height="59" fill="#2f8040"/>
-    <rect x="78.1" y="3" width="10.8" height="59" fill="#2a7038"/>
-    <rect x="88.9" y="3" width="8.6" height="59" fill="#2f8040"/>
-    <rect x="2.5" y="3" width="95" height="59" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.4"/>
-    <line x1="50" y1="3" x2="50" y2="62" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="50" cy="32.5" r="9.15" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="50" cy="32.5" r="0.5" fill="rgba(255,255,255,0.85)"/>
-    <rect x="2.5" y="13.84" width="15.7" height="37.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="2.5" y="24.84" width="5.2" height="15.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="12.8" cy="32.5" r="0.5" fill="rgba(255,255,255,0.85)"/>
-    <path d="M18.2 25.5 A9.15 9.15 0 0 1 18.2 39.5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="81.8" y="13.84" width="15.7" height="37.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="92.3" y="24.84" width="5.2" height="15.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="87.2" cy="32.5" r="0.5" fill="rgba(255,255,255,0.85)"/>
-    <path d="M81.8 25.5 A9.15 9.15 0 0 0 81.8 39.5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="0.7" y="28.6" width="1.8" height="7.8" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.85)" stroke-width="0.3"/>
-    <rect x="97.5" y="28.6" width="1.8" height="7.8" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.85)" stroke-width="0.3"/>
-    <path d="M2.5 5.2 A2 2 0 0 0 4.5 3" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <path d="M95.5 3 A2 2 0 0 0 97.5 5.2" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <path d="M2.5 59.8 A2 2 0 0 1 4.5 62" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <path d="M97.5 59.8 A2 2 0 0 0 95.5 62" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>`},
-  half:{vb:'0 0 75 65',bg:'#2d7a3a',content:`
-    <rect width="75" height="65" fill="#2d7a3a"/>
-    <rect x="0"    y="0" width="8.3" height="65" fill="#2f8040"/>
-    <rect x="8.3"  y="0" width="8.3" height="65" fill="#2a7038"/>
-    <rect x="16.6" y="0" width="8.3" height="65" fill="#2f8040"/>
-    <rect x="24.9" y="0" width="8.3" height="65" fill="#2a7038"/>
-    <rect x="33.2" y="0" width="8.3" height="65" fill="#2f8040"/>
-    <rect x="41.5" y="0" width="8.3" height="65" fill="#2a7038"/>
-    <rect x="49.8" y="0" width="8.3" height="65" fill="#2f8040"/>
-    <rect x="58.1" y="0" width="8.3" height="65" fill="#2a7038"/>
-    <rect x="66.4" y="0" width="8.6" height="65" fill="#2f8040"/>
-    <rect x="2.5" y="3" width="69.5" height="59" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.4"/>
-    <path d="M72 19.3 A9.15 9.15 0 0 0 72 45.7" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="72" cy="32.5" r="0.5" fill="rgba(255,255,255,0.85)"/>
-    <rect x="2.5" y="13.84" width="15.7" height="37.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="2.5" y="24.84" width="5.2" height="15.32" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <circle cx="12.8" cy="32.5" r="0.5" fill="rgba(255,255,255,0.85)"/>
-    <path d="M18.2 25.5 A9.15 9.15 0 0 1 18.2 39.5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <rect x="0.7" y="28.6" width="1.8" height="7.8" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.85)" stroke-width="0.3"/>
-    <path d="M2.5 5.2 A2 2 0 0 0 4.5 3" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>
-    <path d="M2.5 59.8 A2 2 0 0 1 4.5 62" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="0.35"/>`},
-  small:{vb:'0 0 90 60',bg:'#1e5c2e',content:`
-    <rect x="0" y="0" width="18" height="60" fill="rgba(255,255,255,0.022)"/><rect x="36" y="0" width="18" height="60" fill="rgba(255,255,255,0.022)"/><rect x="72" y="0" width="18" height="60" fill="rgba(255,255,255,0.022)"/>
-    <rect x="2" y="2" width="86" height="56" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <line x1="45" y1="2" x2="45" y2="58" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <circle cx="45" cy="30" r="8" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <circle cx="45" cy="30" r="0.55" fill="rgba(255,255,255,0.65)"/>
-    <rect x="2" y="18" width="14" height="24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <rect x="74" y="18" width="14" height="24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <rect x="0.2" y="24" width="1.8" height="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.65)" stroke-width="0.35"/>
-    <rect x="88" y="24" width="1.8" height="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.65)" stroke-width="0.35"/>
-    <path d="M2 3.5 A1.5 1.5 0 0 1 3.5 2" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <path d="M86.5 2 A1.5 1.5 0 0 1 88 3.5" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <path d="M2 56.5 A1.5 1.5 0 0 0 3.5 58" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>
-    <path d="M88 56.5 A1.5 1.5 0 0 1 86.5 58" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="0.5"/>`}
+  // Großes Spielfeld: 105×68m → Verhältnis 1.544:1
+  // Viewbox: 1050×680 (1px = 10cm), Linien exakt nach FIFA/DFB
+  full:{vb:'0 0 1050 680',bg:'#2d7a3a',
+    // FIELD_METERS: {w:105, h:68} — für Entfernungsberechnung
+    metersW:105, metersH:68,
+    content:`
+    <!-- Rasenstreifen à 10m Breite (680px = 68m) -->
+    <rect x="0"   y="0" width="1050" height="680" fill="#2a7038"/>
+    <rect x="0"   y="0" width="105"  height="680" fill="#2f8040"/>
+    <rect x="105" y="0" width="105"  height="680" fill="#2a7038"/>
+    <rect x="210" y="0" width="105"  height="680" fill="#2f8040"/>
+    <rect x="315" y="0" width="105"  height="680" fill="#2a7038"/>
+    <rect x="420" y="0" width="105"  height="680" fill="#2f8040"/>
+    <rect x="525" y="0" width="105"  height="680" fill="#2a7038"/>
+    <rect x="630" y="0" width="105"  height="680" fill="#2f8040"/>
+    <rect x="735" y="0" width="105"  height="680" fill="#2a7038"/>
+    <rect x="840" y="0" width="105"  height="680" fill="#2f8040"/>
+    <rect x="945" y="0" width="105"  height="680" fill="#2a7038"/>
+    <!-- Außenlinie: 105×68m = 1050×680px -->
+    <rect x="0" y="0" width="1050" height="680" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Mittellinie -->
+    <line x1="525" y1="0" x2="525" y2="680" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Mittelkreis r=9.15m = 91.5px -->
+    <circle cx="525" cy="340" r="91.5" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <circle cx="525" cy="340" r="4" fill="rgba(255,255,255,0.9)"/>
+    <!-- Linker Strafraum: 40.32×16.5m = 403.2×165px, Abstand von Torlinie: (68-40.32)/2=13.84m=138.4px -->
+    <rect x="0" y="138" width="165" height="404" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Linker Torraum: 18.32×5.5m = 183.2×55px, (68-18.32)/2=24.84m=248.4px -->
+    <rect x="0" y="248" width="55"  height="184" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Linker Elfmeterpunkt: 11m = 110px vom Tor -->
+    <circle cx="110" cy="340" r="4" fill="rgba(255,255,255,0.9)"/>
+    <!-- Linker Elfmeterkreisbogen (nur außerhalb Strafraum): r=9.15m=91.5px von EP -->
+    <path d="M165 271 A91.5 91.5 0 0 1 165 409" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Linkes Tor: 7.32×2.44m = 73.2×24.4px, innen gemalt -->
+    <rect x="-24" y="304" width="24" height="73" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+    <!-- Rechter Strafraum -->
+    <rect x="885" y="138" width="165" height="404" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Rechter Torraum -->
+    <rect x="995" y="248" width="55"  height="184" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Rechter Elfmeterpunkt -->
+    <circle cx="940" cy="340" r="4" fill="rgba(255,255,255,0.9)"/>
+    <!-- Rechter Elfmeterkreisbogen -->
+    <path d="M885 271 A91.5 91.5 0 0 0 885 409" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Rechtes Tor -->
+    <rect x="1050" y="304" width="24" height="73" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+    <!-- Eckfahnen-Bögen r=1m=10px -->
+    <path d="M0 10 A10 10 0 0 0 10 0"    fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <path d="M1040 0 A10 10 0 0 0 1050 10"  fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <path d="M0 670 A10 10 0 0 1 10 680"   fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <path d="M1040 680 A10 10 0 0 0 1050 670" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Maßstab-Label -->
+    <text x="520" y="670" font-family="sans-serif" font-size="18" fill="rgba(255,255,255,0.4)" text-anchor="middle">105 × 68 m</text>`},
+
+  // Halbfeld: 52.5×68m (Viewbox 525×680)
+  half:{vb:'0 0 525 680',bg:'#2d7a3a',
+    metersW:52.5, metersH:68,
+    content:`
+    <rect x="0"   y="0" width="525" height="680" fill="#2a7038"/>
+    <rect x="0"   y="0" width="105" height="680" fill="#2f8040"/>
+    <rect x="105" y="0" width="105" height="680" fill="#2a7038"/>
+    <rect x="210" y="0" width="105" height="680" fill="#2f8040"/>
+    <rect x="315" y="0" width="105" height="680" fill="#2a7038"/>
+    <rect x="420" y="0" width="105" height="680" fill="#2f8040"/>
+    <rect x="0"   y="0" width="525" height="680" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Halbkreis Mittelfeld (halber Mittelkreis) -->
+    <path d="M525 249 A91.5 91.5 0 0 0 525 431" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <circle cx="525" cy="340" r="4" fill="rgba(255,255,255,0.9)"/>
+    <!-- Strafraum -->
+    <rect x="0" y="138" width="165" height="404" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Torraum -->
+    <rect x="0" y="248" width="55" height="184" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Elfmeterpunkt -->
+    <circle cx="110" cy="340" r="4" fill="rgba(255,255,255,0.9)"/>
+    <!-- Elfmeterkreisbogen -->
+    <path d="M165 271 A91.5 91.5 0 0 1 165 409" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <!-- Tor -->
+    <rect x="-24" y="304" width="24" height="73" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+    <!-- Eckfahnen-Bögen -->
+    <path d="M0 10 A10 10 0 0 0 10 0"  fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <path d="M0 670 A10 10 0 0 1 10 680" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+    <text x="260" y="665" font-family="sans-serif" font-size="18" fill="rgba(255,255,255,0.4)" text-anchor="middle">52.5 × 68 m</text>`},
+
+  // Kleinfeld: 40×25m (Viewbox 400×250) — typisches Trainingsfeld
+  small:{vb:'0 0 400 250',bg:'#2d7a3a',
+    metersW:40, metersH:25,
+    content:`
+    <rect x="0"   y="0" width="400" height="250" fill="#2a7038"/>
+    <rect x="0"   y="0" width="80"  height="250" fill="#2f8040"/>
+    <rect x="80"  y="0" width="80"  height="250" fill="#2a7038"/>
+    <rect x="160" y="0" width="80"  height="250" fill="#2f8040"/>
+    <rect x="240" y="0" width="80"  height="250" fill="#2a7038"/>
+    <rect x="320" y="0" width="80"  height="250" fill="#2f8040"/>
+    <rect x="0" y="0" width="400" height="250" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+    <line x1="200" y1="0" x2="200" y2="250" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+    <circle cx="200" cy="125" r="50" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+    <circle cx="200" cy="125" r="4" fill="rgba(255,255,255,0.85)"/>
+    <!-- Minitore (3m breit = 30px) -->
+    <rect x="-15" y="110" width="15" height="30" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+    <rect x="400" y="110" width="15" height="30" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+    <!-- Strafräume 6m × 10m = 60×100px -->
+    <rect x="0"   y="75"  width="60" height="100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+    <rect x="340" y="75"  width="60" height="100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+    <text x="198" y="243" font-family="sans-serif" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">40 × 25 m</text>`}
 };
 
 /* ════════════════════════════════════
    ZEICHENBOARD
 ════════════════════════════════════ */
 let canvas,ctx,animCanvas,animCtx;
-let drawing=false,currentTool='pen',currentColor='#fff',currentSize=4;
+let drawing=false,currentTool='arrow',currentColor='#fff',currentSize=4;
 let paths=[],currentPath=null;
 let boardInited=false,startPt=null;
 let entities=[],entityIdCounter=0,gdColor='#e8614e';
@@ -2722,6 +2835,14 @@ let drawingMovement=false,movePt1=null,movePt2=null;
 let fixedStartPt=null;
 let pbPlaying=false,pbTime=0,pbDuration=0,pbRAF=null,pbLastTS=null,pbSpeed=1;
 
+// Zoom & Pan state
+let zoomLevel=1, panX=0, panY=0;
+let isPanning=false, panStart=null;
+let currentFieldMeta={metersW:105,metersH:68}; // updated on field select
+
+// Distance tool
+let distPt1=null, distPt2=null, measuringDist=false;
+
 function initBoard(fieldType){
   boardInited=true;
   canvas=document.getElementById('drawCanvas');
@@ -2729,17 +2850,57 @@ function initBoard(fieldType){
   animCanvas=document.getElementById('animCanvas');
   animCtx=animCanvas.getContext('2d');
   const fd=FIELD_SVGS[fieldType]||FIELD_SVGS.full;
+  currentFieldMeta={metersW:fd.metersW||105, metersH:fd.metersH||68};
   const svg=document.getElementById('fieldSvg');
   svg.setAttribute('viewBox',fd.vb);
   svg.style.background=fd.bg;
   svg.innerHTML=fd.content;
+  zoomLevel=1; panX=0; panY=0;
   resizeBoard();
   window.addEventListener('resize',resizeBoard);
   canvas.addEventListener('pointerdown',bDown);
   canvas.addEventListener('pointermove',bMove);
   canvas.addEventListener('pointerup',bUp);
   canvas.addEventListener('pointerleave',bLeave);
+  // Mouse wheel zoom
+  canvas.addEventListener('wheel', onWheel, {passive:false});
   updateBoardStatus();updatePlaybackUI();
+}
+
+function onWheel(e){
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+  adjustZoom(delta, e.clientX, e.clientY);
+}
+
+function adjustZoom(delta, cx, cy){
+  const area=document.getElementById('boardArea');
+  const prev=zoomLevel;
+  zoomLevel=Math.min(4, Math.max(0.5, zoomLevel+delta));
+  // Zoom toward cursor or center
+  const px = cx!=null ? cx-area.getBoundingClientRect().left : area.offsetWidth/2;
+  const py = cy!=null ? cy-area.getBoundingClientRect().top  : area.offsetHeight/2;
+  panX = px - (px - panX) * (zoomLevel/prev);
+  panY = py - (py - panY) * (zoomLevel/prev);
+  applyZoom();
+  redraw();
+}
+
+function resetZoom(){
+  zoomLevel=1; panX=0; panY=0;
+  applyZoom();
+  redraw();
+}
+
+function applyZoom(){
+  const area=document.getElementById('boardArea');
+  const svg=document.getElementById('fieldSvg');
+  // Transform the SVG overlay and entity layer
+  const t=`translate(${panX}px,${panY}px) scale(${zoomLevel})`;
+  svg.style.transformOrigin='0 0';
+  svg.style.transform=t;
+  document.getElementById('playerLayer').style.transformOrigin='0 0';
+  document.getElementById('playerLayer').style.transform=t;
 }
 
 function resizeBoard(){
@@ -2750,8 +2911,50 @@ function resizeBoard(){
   redraw();
 }
 
+// Convert screen → canvas coordinates (accounting for zoom+pan)
+function screenToCanvas(sx,sy){
+  return {x:(sx-panX)/zoomLevel, y:(sy-panY)/zoomLevel};
+}
+
+function getXY(e){
+  const r=canvas.getBoundingClientRect();
+  return screenToCanvas(e.clientX-r.left, e.clientY-r.top);
+}
+
+// Convert canvas px → meters using field dimensions
+function canvasToMeters(dx,dy){
+  const area=document.getElementById('boardArea');
+  const mx = dx / area.offsetWidth  * currentFieldMeta.metersW;
+  const my = dy / area.offsetHeight * currentFieldMeta.metersH;
+  return Math.sqrt(mx*mx+my*my);
+}
+
 function bDown(e){
+  const raw={x:e.clientX-canvas.getBoundingClientRect().left, y:e.clientY-canvas.getBoundingClientRect().top};
   const pt=getXY(e);
+
+  // Distance tool
+  if(currentTool==='distance'){
+    if(!distPt1){distPt1=pt;measuringDist=true;}
+    else{
+      distPt2=pt;
+      const dist=canvasToMeters(Math.abs(pt.x-distPt1.x),Math.abs(pt.y-distPt1.y));
+      // Actually use Euclidean in meter-space
+      const area=document.getElementById('boardArea');
+      const mx=(pt.x-distPt1.x)/area.offsetWidth*currentFieldMeta.metersW;
+      const my=(pt.y-distPt1.y)/area.offsetHeight*currentFieldMeta.metersH;
+      const m=Math.sqrt(mx*mx+my*my).toFixed(1);
+      toast(`Entfernung: ${m} m`,'📏');
+      // Draw measurement line
+      paths.push({color:'#f0bc2e',size:2,tool:'distance',pts:[distPt1,pt],label:`${m}m`});
+      distPt1=null;measuringDist=false;redraw();
+    }
+    return;
+  }
+
+  // Middle mouse or space+drag = pan
+  if(e.button===1||(e.button===0&&e.altKey)){isPanning=true;panStart={x:e.clientX-panX,y:e.clientY-panY};return;}
+
   if(movementMode&&selectedSource){
     drawingMovement=true;
     movePt1=getEntityCenter(selectedSource);
@@ -2761,27 +2964,42 @@ function bDown(e){
   }
   if(currentTool==='eraser'){drawing=true;erase(e);return;}
   drawing=true;startPt=pt;
-  if(currentTool==='pen'||currentTool==='dashed') currentPath={color:currentColor,size:currentSize,tool:currentTool,pts:[pt]};
+  if(currentTool==='dashed') currentPath={color:currentColor,size:currentSize,tool:currentTool,pts:[pt]};
 }
 
 function bMove(e){
   const pt=getXY(e);
-  if(drawingMovement&&movePt1){movePt2=pt;redraw();drawMovementPreview(movePt1,pt);return;}
+  if(isPanning){panX=e.clientX-panStart.x;panY=e.clientY-panStart.y;applyZoom();redraw();return;}
+  if(measuringDist&&distPt1){redraw();drawDistPreview(distPt1,pt);return;}
+  if(drawingMovement&&movePt1){
+    movePt2=pt;
+    // Free-path: accumulate points
+    if(currentMoveType==='free'){
+      if(!movePt1._freePts) movePt1._freePts=[];
+      movePt1._freePts.push(pt);
+    }
+    redraw();drawMovementPreview(movePt1,pt);return;
+  }
   if(!drawing)return;
   if(currentTool==='eraser'){erase(e);return;}
-  if(currentTool==='pen'||currentTool==='dashed'){currentPath.pts.push(pt);redraw();drawSinglePath(currentPath);}
+  if(currentTool==='dashed'){currentPath.pts.push(pt);redraw();drawSinglePath(currentPath);}
   else if(currentTool==='line'||currentTool==='arrow'){redraw();drawSinglePath({color:currentColor,size:currentSize,tool:currentTool,pts:[startPt,pt]});}
 }
 
 function bUp(e){
+  if(isPanning){isPanning=false;return;}
   const pt=getXY(e);
   if(drawingMovement&&movePt1){
     drawingMovement=false;
-    const dist=Math.hypot((movePt2||pt).x-movePt1.x,(movePt2||pt).y-movePt1.y);
-    if(dist>20){
-      const p2=movePt2||pt;
-      const pts=buildMovePts(movePt1,p2,currentMoveType);
-      // Speed: ballpath uses ball-type multiplier, run uses standard pace
+    const endPt=movePt2||pt;
+    const dist=Math.hypot(endPt.x-movePt1.x,endPt.y-movePt1.y);
+    if(dist>10){
+      let pts;
+      if(currentMoveType==='free'&&movePt1._freePts&&movePt1._freePts.length>2){
+        pts=smoothPath(movePt1._freePts);
+      } else {
+        pts=buildMovePts(movePt1,endPt,currentMoveType);
+      }
       let dur;
       if(movementMode==='ballpath'){
         const speedMult=BALL_SPEED[currentBallType]||3.5;
@@ -2808,6 +3026,7 @@ function bUp(e){
       toast(typeLabel,'✔');
       checkMergePoints();
     }
+    if(movePt1) delete movePt1._freePts;
     fixedStartPt=null;
     movePt1=null;movePt2=null;redraw();updateBoardStatus();return;
   }
@@ -2818,7 +3037,8 @@ function bUp(e){
 }
 
 function bLeave(){
-  if(drawingMovement){drawingMovement=false;movePt1=null;movePt2=null;redraw();}
+  if(isPanning){isPanning=false;}
+  if(drawingMovement){drawingMovement=false;if(movePt1)delete movePt1._freePts;movePt1=null;movePt2=null;redraw();}
   if(drawing){drawing=false;if(currentPath&&currentPath.pts.length>1)paths.push(currentPath);currentPath=null;redraw();updateBoardStatus();}
 }
 
@@ -2828,16 +3048,39 @@ function erase(e){
   redraw();updateBoardStatus();
 }
 
-function getXY(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function getEntityCenter(ent){
   if(fixedStartPt)return fixedStartPt;
-  const a=document.getElementById('boardArea');return{x:ent.x/100*a.offsetWidth,y:ent.y/100*a.offsetHeight};
+  const a=document.getElementById('boardArea');
+  return{x:ent.x/100*a.offsetWidth,y:ent.y/100*a.offsetHeight};
+}
+
+/* ── Smooth Catmull-Rom spline for free paths ── */
+function smoothPath(rawPts){
+  if(rawPts.length<3) return rawPts;
+  // Decimate first: keep every 3rd point
+  const pts=rawPts.filter((_,i)=>i%3===0);
+  if(pts[pts.length-1]!==rawPts[rawPts.length-1]) pts.push(rawPts[rawPts.length-1]);
+  const out=[];
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[Math.max(0,i-1)];
+    const p1=pts[i];
+    const p2=pts[i+1];
+    const p3=pts[Math.min(pts.length-1,i+2)];
+    for(let t=0;t<=1;t+=0.1){
+      const t2=t*t,t3=t2*t;
+      out.push({
+        x:0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+        y:0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+      });
+    }
+  }
+  return out;
 }
 
 /* ── Path building ── */
 function buildMovePts(p1,p2,type){
   const N=50,pts=[];
-  if(type==='straight'){
+  if(type==='straight'||type==='free'){
     for(let i=0;i<=N;i++) pts.push({x:p1.x+(p2.x-p1.x)*(i/N),y:p1.y+(p2.y-p1.y)*(i/N)});
   } else if(type==='arc'){
     const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
@@ -2845,19 +3088,34 @@ function buildMovePts(p1,p2,type){
     const bend=len*0.18;
     const cx=mx-dy/len*bend,cy=my+dx/len*bend;
     for(let i=0;i<=N;i++){const t=i/N;pts.push({x:(1-t)*(1-t)*p1.x+2*(1-t)*t*cx+t*t*p2.x,y:(1-t)*(1-t)*p1.y+2*(1-t)*t*cy+t*t*p2.y});}
-  } else if(type==='slalom'){
-    const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy);
-    const ux=dx/len,uy=dy/len,px=-uy,py=ux;
-    const waves=3.5,amp=Math.min(len*0.13,30);
-    for(let i=0;i<=N;i++){const t=i/N,wave=Math.sin(t*Math.PI*2*waves)*amp;pts.push({x:p1.x+dx*t+px*wave,y:p1.y+dy*t+py*wave});}
   }
   return pts;
+}
+
+function drawDistPreview(p1,p2){
+  ctx.save();
+  ctx.setLineDash([6,4]);
+  ctx.strokeStyle='#f0bc2e';ctx.lineWidth=2;ctx.globalAlpha=0.8;
+  ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+  const area=document.getElementById('boardArea');
+  const mx=(p2.x-p1.x)/area.offsetWidth*currentFieldMeta.metersW;
+  const my=(p2.y-p1.y)/area.offsetHeight*currentFieldMeta.metersH;
+  const m=Math.sqrt(mx*mx+my*my).toFixed(1);
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+  ctx.fillStyle='#f0bc2e';ctx.font='bold 13px sans-serif';
+  ctx.fillText(`${m} m`,(p1.x+p2.x)/2+4,(p1.y+p2.y)/2-4);
+  ctx.restore();
 }
 
 function drawMovementPreview(p1,p2){
   if(!p1||!p2)return;
   const color=movementMode==='run'?'#f0bc2e':'#5dda8c';
-  const pts=buildMovePts(p1,p2,currentMoveType);
+  let pts;
+  if(currentMoveType==='free'&&p1._freePts&&p1._freePts.length>2){
+    pts=smoothPath(p1._freePts);
+  } else {
+    pts=buildMovePts(p1,p2,currentMoveType);
+  }
   ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';
   ctx.setLineDash([8,5]);ctx.globalAlpha=0.75;
   ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(pt=>ctx.lineTo(pt.x,pt.y));
@@ -2899,19 +3157,28 @@ function drawSinglePath(p){
   ctx.setLineDash(p.tool==='dashed'?[p.size*3,p.size*2]:[]);
   ctx.moveTo(p.pts[0].x,p.pts[0].y);
   if(p.tool==='line'||p.tool==='arrow')ctx.lineTo(p.pts[p.pts.length-1].x,p.pts[p.pts.length-1].y);
-  else p.pts.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+  else {
+    // Catmull-Rom for smooth paths
+    p.pts.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+  }
   ctx.stroke();ctx.setLineDash([]);
   if(p.tool==='arrow'&&p.pts.length>=2)drawArrowHead(ctx,p.pts[p.pts.length-2],p.pts[p.pts.length-1],p.color,p.size);
+  if(p.label){
+    ctx.fillStyle=p.color;ctx.font='bold 12px sans-serif';
+    const mid=p.pts[Math.floor(p.pts.length/2)];
+    ctx.fillText(p.label,mid.x+4,mid.y-4);
+  }
 }
 
 /* ── Tool controls ── */
 function setTool(t){
   currentTool=t;setMovementMode(null);
+  distPt1=null;measuringDist=false;
   document.querySelectorAll('[id^="tool-"]').forEach(b=>b.classList.remove('on'));
   document.getElementById('tool-'+t)?.classList.add('on');
-  const n={pen:'✏️ Freihand',arrow:'↗ Pfeil',line:'╱ Linie',dashed:'╌ Gestrichelt',eraser:'◻ Radierer'};
+  const n={arrow:'↗ Pfeil',line:'╱ Linie',dashed:'╌ Gestrichelt',eraser:'◻ Radierer',distance:'📏 Entfernung'};
   document.getElementById('bsTool').textContent=n[t]||t;
-  if(canvas)canvas.style.cursor=t==='eraser'?'cell':'crosshair';
+  if(canvas)canvas.style.cursor=t==='eraser'?'cell':t==='distance'?'crosshair':'crosshair';
 }
 
 const COLOR_NAMES={'#fff':'Weiß','#f0bc2e':'Gold','#e8614e':'Rot','#4fa3e0':'Blau','#c070f0':'Lila','#5dda8c':'Grün'};
@@ -3869,6 +4136,21 @@ function haversineKm(lat1,lng1,lat2,lng2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
+// PLZ → Koordinaten via Nominatim
+let plzTimer=null, plzLat=null, plzLng=null;
+function onPlzInput(val){
+  clearTimeout(plzTimer);
+  if(val.length===5&&/^\d{5}$/.test(val)){
+    plzTimer=setTimeout(async()=>{
+      try{
+        const r=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${val}&country=de&format=json&limit=1`);
+        const d=await r.json();
+        if(d&&d[0]){plzLat=parseFloat(d[0].lat);plzLng=parseFloat(d[0].lon);loadFriendlyRequests();}
+      }catch(e){}
+    },600);
+  } else { plzLat=null; plzLng=null; if(!val) loadFriendlyRequests(); }
+}
+
 async function loadFriendlyRequests(){
   const list = document.getElementById('friendlyList');
   list.innerHTML='<div class="comm-empty">Lade…</div>';
@@ -3901,16 +4183,17 @@ async function loadFriendlyRequests(){
   const radius = parseInt(document.getElementById('radiusFilter').value);
   const ageF   = document.getElementById('ageFilter').value;
   const myClub = currentUser?.user_metadata?.club;
-  const myLat  = myClub?.lat, myLng = myClub?.lng;
+  // PLZ override hat Vorrang vor Profil-Koordinaten
+  const refLat = plzLat ?? (myClub?.lat ? parseFloat(myClub.lat) : null);
+  const refLng = plzLng ?? (myClub?.lng ? parseFloat(myClub.lng) : null);
 
   let items = data;
   if(ageF) items = items.filter(i=>i.age_group===ageF);
-  if(myLat && myLng && radius < 9999){
+  if(refLat && refLng && radius < 9999){
     items = items.filter(i=>{
-      // Eigene Anfragen immer anzeigen
       if(currentUser && i.user_id===currentUser.id) return true;
       if(!i.lat||!i.lng) return true;
-      return haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)) <= radius;
+      return haversineKm(refLat,refLng,parseFloat(i.lat),parseFloat(i.lng)) <= radius;
     });
   }
 
@@ -3920,8 +4203,8 @@ async function loadFriendlyRequests(){
   const fmtDate = d => { if(!d) return ''; try{ return new Date(d).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'long',year:'numeric'}); } catch(e){ return d; } };
   list.innerHTML = items.map(i=>{
     const isOwn = currentUser && i.user_id===currentUser.id;
-    const dist = (!isOwn && myLat && myLng && i.lat && i.lng)
-      ? `<span class="comm-badge green">${Math.round(haversineKm(parseFloat(myLat),parseFloat(myLng),parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
+    const dist = (!isOwn && refLat && refLng && i.lat && i.lng)
+      ? `<span class="comm-badge green">${Math.round(haversineKm(refLat,refLng,parseFloat(i.lat),parseFloat(i.lng)))} km</span>` : '';
     return `<div class="comm-card${isOwn?' comm-card-own':''}">
       <div class="comm-card-header">
         <div style="flex:1;min-width:0">
