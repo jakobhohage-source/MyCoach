@@ -721,18 +721,19 @@ input[type="date"].form-input::-webkit-date-and-time-value{
   z-index:50;
 }
 /* Spieltag view */
-.spieltag-outer{flex:1;overflow:hidden;background:#f9fafb;display:flex;flex-direction:column;min-height:0;}
+.spieltag-outer{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
 .spieltag-header{background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;flex-shrink:0;}
-.spieltag-header h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:#111827;margin:0;}
+.spieltag-header h2{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:#111827;margin:0;}
 .spieltag-header-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.spieltag-body{display:grid;grid-template-columns:1fr 290px;flex:1;overflow:hidden;min-height:0;}
-.spieltag-main{padding:12px;overflow:hidden;display:flex;flex-direction:column;gap:8px;min-height:0;flex:1;}
-.spieltag-side{border-left:1px solid #e5e7eb;background:#fff;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;}
-.spieltag-card{background:#fff;border:1px solid #e5e7eb;border-radius:var(--radius);padding:14px;}
+.spieltag-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+.spieltag-main{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:0;min-height:0;background:#fff;}
+.spieltag-side{width:280px;flex-shrink:0;border-left:1px solid #e5e7eb;background:#fff;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.spieltag-card{background:#fff;border:1px solid #e5e7eb;border-radius:var(--radius);padding:12px;}
 .spieltag-card h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px;}
-/* Field */
-.st-field-wrap{position:relative;background:#fff;user-select:none;overflow:hidden;border-radius:0;flex:1;min-height:0;display:flex;align-items:stretch;}
-.st-field-wrap svg{display:block;height:100%;width:auto;max-width:100%;margin:0 auto;}
+/* Field — fills remaining height, maintains 105:68 aspect ratio */
+.st-field-area{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px;background:#f9fafb;overflow:hidden;}
+.st-field-wrap{position:relative;background:#fff;user-select:none;border:1px solid #e5e7eb;/* aspect ratio maintained by JS */}
+.st-field-wrap svg{display:block;width:100%;height:auto;}
 #stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
 .st-player{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
 .st-player:active{cursor:grabbing;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
@@ -2004,16 +2005,16 @@ html, body {
             </div>
           </div>
 
-          <!-- Field -->
-          <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:#fff;border-top:1px solid #e5e7eb;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-              <h3 style="margin:0" id="stFieldLabel">Heimmannschaft</h3>
-              <span style="font-size:11px;color:#9ca3af" id="stFieldHint">Spieler ziehen zum Verschieben · Nummer in Kader-Liste ändern</span>
-            </div>
+          <!-- Field header bar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f3f4f6;flex-shrink:0">
+            <span style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px" id="stFieldLabel">Heimmannschaft</span>
+            <span style="font-size:11px;color:#9ca3af" id="stFieldHint">Spieler ziehen · Nummer in Kader ändern</span>
+          </div>
+          <!-- Field area — fills all remaining height -->
+          <div class="st-field-area" id="stFieldArea">
             <div class="st-field-wrap" id="stFieldWrap">
-              <!-- Inner container sized by JS to match rendered SVG -->
-              <div id="stFieldInner" style="position:relative;height:100%;margin:0 auto;display:inline-block;line-height:0">
-              <svg id="stFieldSvg" viewBox="0 0 1050 680" xmlns="http://www.w3.org/2000/svg" style="display:block;height:100%;width:auto;max-width:100%">
+              <div id="stFieldInner" style="position:relative;line-height:0">
+              <svg id="stFieldSvg" viewBox="0 0 1050 680" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto">
                 <rect width="1050" height="680" fill="#2a7038"/>
                 <rect x="0"   y="0" width="105" height="680" fill="#2f8040"/><rect x="105" y="0" width="105" height="680" fill="#2a7038"/>
                 <rect x="210" y="0" width="105" height="680" fill="#2f8040"/><rect x="315" y="0" width="105" height="680" fill="#2a7038"/>
@@ -2039,7 +2040,6 @@ html, body {
                 <path d="M0 670 A10 10 0 0 1 10 680" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
                 <path d="M1040 680 A10 10 0 0 0 1050 670" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
               </svg>
-              <!-- Canvas and players are sized by JS to match SVG rendered dimensions -->
               <canvas id="stCanvas" style="position:absolute;inset:0;pointer-events:none"></canvas>
               <div id="stHomePlayers" style="position:absolute;inset:0;pointer-events:none"></div>
               <div id="stAwayPlayers" style="position:absolute;inset:0;pointer-events:none"></div>
@@ -3921,27 +3921,35 @@ function setStTool(tool){
 function initStCanvas(){
   stCanvasEl=document.getElementById('stCanvas');
   if(!stCanvasEl) return;
+  const area=document.getElementById('stFieldArea');
   const wrap=document.getElementById('stFieldWrap');
   const inner=document.getElementById('stFieldInner');
-  const svg=document.getElementById('stFieldSvg');
+  const RATIO=1050/680; // field aspect ratio width:height
 
-  function syncSize(){
-    if(!svg||!inner) return;
-    const r=svg.getBoundingClientRect();
-    if(!r.width||!r.height) return;
-    const W=Math.round(r.width), H=Math.round(r.height);
-    // Set inner wrapper to exact SVG rendered size
+  function sizeField(){
+    if(!area) return;
+    const aW=area.clientWidth - 16;  // minus padding (8px each side)
+    const aH=area.clientHeight - 16;
+    if(!aW||!aH) return;
+
+    // Fit field within area maintaining aspect ratio
+    let W=aW, H=W/RATIO;
+    if(H>aH){H=aH; W=H*RATIO;}
+    W=Math.floor(W); H=Math.floor(H);
+
+    wrap.style.width=W+'px';
+    wrap.style.height=H+'px';
     inner.style.width=W+'px';
     inner.style.height=H+'px';
-    // Resize canvas
+
     stCanvasEl.width=W;
     stCanvasEl.height=H;
     stCtx2=stCanvasEl.getContext('2d');
     redrawStLines();
   }
 
-  setTimeout(syncSize,80);
-  new ResizeObserver(()=>requestAnimationFrame(syncSize)).observe(wrap);
+  setTimeout(sizeField,80);
+  new ResizeObserver(()=>requestAnimationFrame(sizeField)).observe(area);
 
   stCanvasEl.addEventListener('pointerdown',e=>{
     if(stCurrentTool==='none') return;
