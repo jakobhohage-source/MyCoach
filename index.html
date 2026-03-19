@@ -726,13 +726,13 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .spieltag-header h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:#111827;margin:0;}
 .spieltag-header-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .spieltag-body{display:grid;grid-template-columns:1fr 290px;flex:1;overflow:hidden;min-height:0;}
-.spieltag-main{padding:12px;overflow:hidden;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.spieltag-main{padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .spieltag-side{border-left:1px solid #e5e7eb;background:#fff;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .spieltag-card{background:#fff;border:1px solid #e5e7eb;border-radius:var(--radius);padding:14px;}
 .spieltag-card h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px;}
 /* Field */
-.st-field-wrap{position:relative;width:100%;overflow:hidden;background:#2d7a3a;user-select:none;display:flex;flex-direction:column;flex:1;min-height:0;border-radius:0;}
-.st-field-wrap svg{display:block;width:100%;height:100%;object-fit:contain;}
+.st-field-wrap{position:relative;width:100%;background:#2d7a3a;user-select:none;overflow:hidden;border-radius:0;}
+.st-field-wrap svg{display:block;width:100%;height:auto;}
 #stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
 .st-player{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
 .st-player:active{cursor:grabbing;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
@@ -2005,13 +2005,13 @@ html, body {
           </div>
 
           <!-- Field -->
-          <div class="spieltag-card" style="padding:12px;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;border-radius:0;border-left:none;border-right:none;border-bottom:none;">
+          <div class="spieltag-card" style="padding:12px;display:flex;flex-direction:column;border-radius:0;border-left:none;border-right:none;border-bottom:none;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <h3 style="margin:0" id="stFieldLabel">Heimmannschaft</h3>
               <span style="font-size:11px;color:#9ca3af" id="stFieldHint">Spieler ziehen zum Verschieben · Nummer in Kader-Liste ändern</span>
             </div>
-            <div class="st-field-wrap" id="stFieldWrap" style="position:relative;flex:1;min-height:0;">
-              <svg viewBox="0 0 1050 680" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%;">
+            <div class="st-field-wrap" id="stFieldWrap">
+              <svg viewBox="0 0 1050 680" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
                 <rect width="1050" height="680" fill="#2a7038"/>
                 <rect x="0"   y="0" width="105" height="680" fill="#2f8040"/><rect x="105" y="0" width="105" height="680" fill="#2a7038"/>
                 <rect x="210" y="0" width="105" height="680" fill="#2f8040"/><rect x="315" y="0" width="105" height="680" fill="#2a7038"/>
@@ -3811,7 +3811,7 @@ function setStTeam(team){
 function applySpieltagFormation(){
   const f=document.getElementById('spieltagFormation').value;
   const pts=FORMATIONS[f];if(!pts)return;
-  stHomePlayers=[{num:1,x:6,y:50,isGK:true,team:'home'},...pts.filter(p=>p&&p.length===2).map(([x,y],i)=>({num:i+2,x,y,isGK:false,team:'home'}))];
+  stHomePlayers=[{num:1,x:4,y:50,isGK:true,team:'home'},...pts.filter(p=>p&&p.length===2).map(([x,y],i)=>({num:i+2,x,y,isGK:false,team:'home'}))];
   renderStPlayers();
   renderSpieltagKader();
 }
@@ -3819,7 +3819,7 @@ function applySpieltagFormation(){
 function applySpieltagFormationAway(){
   const f=document.getElementById('spieltagFormationAway').value;
   const pts=FORMATIONS[f];if(!pts)return;
-  const homeBase=[{num:1,x:6,y:50,isGK:true,team:'away'},...pts.filter(p=>p&&p.length===2).map(([x,y],i)=>({num:i+2,x,y,isGK:false,team:'away'}))];
+  const homeBase=[{num:1,x:4,y:50,isGK:true,team:'away'},...pts.filter(p=>p&&p.length===2).map(([x,y],i)=>({num:i+2,x,y,isGK:false,team:'away'}))];
   stAwayPlayers=homeBase.map(p=>({...p,x:100-p.x}));
   renderStPlayers();
 }
