@@ -721,14 +721,35 @@ input[type="date"].form-input::-webkit-date-and-time-value{
   z-index:50;
 }
 /* Spieltag view */
-.spieltag-outer{flex:1;overflow-y:auto;background:#fff;padding:32px 40px;}
-.spieltag-outer h2{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#111827;margin-bottom:6px;}
-.spieltag-meta{font-size:14px;color:#9ca3af;margin-bottom:28px;}
-.spieltag-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.spieltag-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:var(--radius);padding:20px;}
-.spieltag-card h3{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;color:#374151;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;}
-.spieltag-formation-preview{background:#2d7a3a;border-radius:8px;height:160px;position:relative;margin-bottom:14px;overflow:hidden;}
-.spieltag-btn{width:100%;padding:10px;border-radius:8px;border:none;background:#111827;color:#fff;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.spieltag-outer{flex:1;overflow-y:auto;background:#f9fafb;display:flex;flex-direction:column;}
+.spieltag-header{background:#fff;border-bottom:1px solid #e5e7eb;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;flex-shrink:0;}
+.spieltag-header h2{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;color:#111827;margin:0;}
+.spieltag-header-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.spieltag-body{display:grid;grid-template-columns:1fr 340px;gap:0;flex:1;min-height:0;}
+.spieltag-main{padding:24px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.spieltag-side{border-left:1px solid #e5e7eb;background:#fff;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.spieltag-card{background:#fff;border:1px solid #e5e7eb;border-radius:var(--radius);padding:18px;}
+.spieltag-card h3{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;color:#374151;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.8px;}
+/* Field canvas for formation */
+.st-field-wrap{position:relative;width:100%;aspect-ratio:105/68;border-radius:8px;overflow:hidden;background:#2d7a3a;cursor:default;user-select:none;}
+.st-field-wrap svg{position:absolute;inset:0;width:100%;height:100%;}
+#stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
+.st-player{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:grab;user-select:none;pointer-events:all;transition:box-shadow 0.15s;}
+.st-player:active{cursor:grabbing;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+.st-player.home{background:#e8614e;color:#fff;}
+.st-player.gk{background:#f0bc2e;color:#111;border-style:dashed;}
+.st-player.away{background:#4fa3e0;color:#fff;}
+.st-player.away.gk{background:#93c5fd;color:#111;}
+/* Formation controls */
+.st-formation-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.st-formation-bar .form-label{margin:0;white-space:nowrap;}
+.st-formation-select{padding:7px 12px;border-radius:7px;border:1px solid #e5e7eb;font-size:13px;font-family:'Source Sans 3',sans-serif;background:#fff;color:#111827;cursor:pointer;outline:none;}
+.st-formation-select:focus{border-color:#111827;}
+.st-tab-btn{padding:7px 14px;border-radius:7px;border:1px solid #e5e7eb;font-size:12px;font-family:'Oswald',sans-serif;font-weight:600;cursor:pointer;background:transparent;color:#6b7280;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px;}
+.st-tab-btn.active{background:#111827;border-color:#111827;color:#fff;}
+.st-tab-btn.home-active{background:#e8614e;border-color:#e8614e;color:#fff;}
+.st-tab-btn.away-active{background:#4fa3e0;border-color:#4fa3e0;color:#fff;}
+.spieltag-btn{width:100%;padding:10px;border-radius:8px;border:none;background:#111827;color:#fff;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;}
 .spieltag-btn:hover{background:#374151;}
 .spieltag-btn.outline{background:transparent;border:1px solid #e5e7eb;color:#374151;}
 .spieltag-btn.outline:hover{background:#f9fafb;}
@@ -1897,80 +1918,143 @@ html, body {
   <!-- ═══ SPIELTAG VIEW ═══ -->
   <div id="view-spieltag" class="view" style="flex-direction:column">
     <div class="spieltag-outer">
-      <h2>Spieltagsvorbereitung</h2>
-      <div class="spieltag-meta">Aufstellung, Taktik und Notizen für das nächste Spiel</div>
-      <div class="spieltag-grid">
 
-        <!-- Aufstellung -->
-        <div class="spieltag-card">
-          <h3>Aufstellung</h3>
-          <div class="spieltag-formation-preview" id="spieltagFormPreview">
-            <svg width="100%" height="100%" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
-              <rect width="300" height="160" fill="#2d7a3a"/>
-              <rect x="0" y="0" width="60" height="160" fill="#2f8040" opacity="0.5"/>
-              <rect x="60" y="0" width="60" height="160" fill="#2a7038" opacity="0.5"/>
-              <rect x="120" y="0" width="60" height="160" fill="#2f8040" opacity="0.5"/>
-              <rect x="180" y="0" width="60" height="160" fill="#2a7038" opacity="0.5"/>
-              <rect x="240" y="0" width="60" height="160" fill="#2f8040" opacity="0.5"/>
-              <rect x="6" y="6" width="288" height="148" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-              <line x1="150" y1="6" x2="150" y2="154" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-              <circle cx="150" cy="80" r="28" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-              <rect x="6" y="46" width="42" height="68" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-              <rect x="252" y="46" width="42" height="68" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-            </svg>
-            <div id="spieltagPlayers" style="position:absolute;inset:0"></div>
+      <!-- Header -->
+      <div class="spieltag-header">
+        <div>
+          <h2>Spieltagsvorbereitung</h2>
+          <div style="font-size:13px;color:#9ca3af;margin-top:2px">Aufstellung, Taktik und Notizen für das nächste Spiel</div>
+        </div>
+        <div class="spieltag-header-meta">
+          <input class="form-input" id="stGegner" placeholder="Gegner" style="padding:8px 12px;width:180px">
+          <input class="form-input" id="stDatum" type="date" style="padding:8px 12px;width:150px">
+          <button class="spieltag-btn" style="width:auto;padding:8px 18px" onclick="saveSpieltagNotes()">Speichern</button>
+          <button class="spieltag-btn outline" style="width:auto;padding:8px 18px" onclick="openSpieltagBoard()">Im Board öffnen →</button>
+        </div>
+      </div>
+
+      <!-- Body: Feld links, Sidebar rechts -->
+      <div class="spieltag-body">
+
+        <!-- MAIN: Aufstellungsfeld -->
+        <div class="spieltag-main">
+
+          <!-- Formation controls -->
+          <div class="spieltag-card" style="padding:14px 18px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <!-- Team toggle -->
+              <div style="display:flex;gap:4px">
+                <button class="st-tab-btn home-active" id="stTeamHome" onclick="setStTeam('home')">Heim</button>
+                <button class="st-tab-btn" id="stTeamAway" onclick="setStTeam('away')">Gast</button>
+              </div>
+              <div class="tb-sep" style="height:24px"></div>
+              <!-- Formation select -->
+              <label class="form-label" style="margin:0;font-size:11px">Formation:</label>
+              <select class="st-formation-select" id="spieltagFormation" onchange="applySpieltagFormation()">
+                <optgroup label="Klassisch">
+                  <option value="4-4-2">4-4-2</option>
+                  <option value="4-3-3">4-3-3</option>
+                  <option value="4-2-4">4-2-4</option>
+                  <option value="3-5-2">3-5-2</option>
+                  <option value="3-4-3">3-4-3</option>
+                </optgroup>
+                <optgroup label="Modernes Pressing">
+                  <option value="4-2-3-1">4-2-3-1</option>
+                  <option value="4-1-4-1">4-1-4-1</option>
+                  <option value="4-3-2-1">4-3-2-1 (Weihnachtsbaum)</option>
+                  <option value="4-4-1-1">4-4-1-1</option>
+                </optgroup>
+                <optgroup label="Defensiv">
+                  <option value="5-3-2">5-3-2</option>
+                  <option value="5-4-1">5-4-1</option>
+                  <option value="5-2-3">5-2-3</option>
+                </optgroup>
+                <optgroup label="Offensiv">
+                  <option value="3-6-1">3-6-1</option>
+                  <option value="4-2-2-2">4-2-2-2 (Raute)</option>
+                  <option value="3-3-4">3-3-4</option>
+                </optgroup>
+              </select>
+              <select class="st-formation-select" id="spieltagFormationAway" onchange="applySpieltagFormationAway()" style="display:none">
+                <optgroup label="Klassisch">
+                  <option value="4-4-2">4-4-2</option>
+                  <option value="4-3-3">4-3-3</option>
+                  <option value="3-5-2">3-5-2</option>
+                  <option value="4-2-3-1">4-2-3-1</option>
+                  <option value="5-3-2">5-3-2</option>
+                  <option value="4-1-4-1">4-1-4-1</option>
+                  <option value="5-4-1">5-4-1</option>
+                  <option value="3-4-3">3-4-3</option>
+                  <option value="4-3-2-1">4-3-2-1</option>
+                </optgroup>
+              </select>
+              <button class="st-tab-btn" onclick="applySpieltagFormation();applySpieltagFormationAway()">Anwenden</button>
+              <button class="st-tab-btn" onclick="clearStTeam()" style="margin-left:auto">Leeren</button>
+            </div>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <select class="form-select" id="spieltagFormation" onchange="applySpieltagFormation()" style="flex:1;padding:8px 10px;font-size:13px">
-              <option value="4-4-2">4-4-2</option>
-              <option value="4-3-3">4-3-3</option>
-              <option value="3-5-2">3-5-2</option>
-              <option value="4-2-3-1">4-2-3-1</option>
-              <option value="5-3-2">5-3-2</option>
-              <option value="4-1-4-1">4-1-4-1</option>
-            </select>
-            <button class="spieltag-btn outline" onclick="applySpieltagFormation()" style="flex:none;padding:8px 14px;font-size:13px">Anwenden</button>
+
+          <!-- Field -->
+          <div class="spieltag-card" style="padding:16px;flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="margin:0" id="stFieldLabel">Heimmannschaft</h3>
+              <span style="font-size:11px;color:#9ca3af">Spieler verschieben: ziehen</span>
+            </div>
+            <!-- The field — aspect ratio 105:68 -->
+            <div class="st-field-wrap" id="stFieldWrap">
+              <!-- Rasenstreifen -->
+              <svg viewBox="0 0 1050 680" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+                <rect width="1050" height="680" fill="#2a7038"/>
+                <rect x="0"   y="0" width="105" height="680" fill="#2f8040"/><rect x="105" y="0" width="105" height="680" fill="#2a7038"/>
+                <rect x="210" y="0" width="105" height="680" fill="#2f8040"/><rect x="315" y="0" width="105" height="680" fill="#2a7038"/>
+                <rect x="420" y="0" width="105" height="680" fill="#2f8040"/><rect x="525" y="0" width="105" height="680" fill="#2a7038"/>
+                <rect x="630" y="0" width="105" height="680" fill="#2f8040"/><rect x="735" y="0" width="105" height="680" fill="#2a7038"/>
+                <rect x="840" y="0" width="105" height="680" fill="#2f8040"/><rect x="945" y="0" width="105" height="680" fill="#2a7038"/>
+                <rect x="0" y="0" width="1050" height="680" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <line x1="525" y1="0" x2="525" y2="680" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <circle cx="525" cy="340" r="91.5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <circle cx="525" cy="340" r="4" fill="rgba(255,255,255,0.85)"/>
+                <rect x="0" y="138" width="165" height="404" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <rect x="0" y="248" width="55" height="184" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <circle cx="110" cy="340" r="4" fill="rgba(255,255,255,0.85)"/>
+                <path d="M165 271 A91.5 91.5 0 0 1 165 409" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <rect x="-24" y="304" width="24" height="73" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+                <rect x="885" y="138" width="165" height="404" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <rect x="995" y="248" width="55" height="184" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <circle cx="940" cy="340" r="4" fill="rgba(255,255,255,0.85)"/>
+                <path d="M885 271 A91.5 91.5 0 0 0 885 409" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <rect x="1050" y="304" width="24" height="73" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+                <path d="M0 10 A10 10 0 0 0 10 0" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <path d="M1040 0 A10 10 0 0 0 1050 10" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <path d="M0 670 A10 10 0 0 1 10 680" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+                <path d="M1040 680 A10 10 0 0 0 1050 670" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
+              </svg>
+              <!-- Player layers -->
+              <div id="stHomePlayers"></div>
+              <div id="stAwayPlayers"></div>
+            </div>
           </div>
-          <button class="spieltag-btn" onclick="openSpieltagBoard()">Im Zeichenboard öffnen →</button>
+
         </div>
 
-        <!-- Notizen -->
-        <div class="spieltag-card">
-          <h3>Spielnotizen</h3>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div>
-              <div class="form-label">Gegner</div>
-              <input class="form-input" id="stGegner" placeholder="z.B. FC Bayern München" style="padding:9px 12px">
-            </div>
-            <div>
-              <div class="form-label">Datum / Uhrzeit</div>
-              <input class="form-input" id="stDatum" type="datetime-local" style="padding:9px 12px">
-            </div>
-            <div>
-              <div class="form-label">Taktische Schlüsselpunkte</div>
-              <textarea class="form-input" id="stNotes" rows="4" placeholder="z.B. Hohes Pressing ab Mittellinie, schnelles Umschalten..." style="padding:9px 12px;resize:vertical;min-height:80px"></textarea>
-            </div>
-            <button class="spieltag-btn" onclick="saveSpieltagNotes()">Speichern</button>
-          </div>
-        </div>
+        <!-- SIDEBAR -->
+        <div class="spieltag-side">
 
-        <!-- Kaderübersicht -->
-        <div class="spieltag-card">
-          <h3>Kader</h3>
-          <div id="spieltagKader" style="display:flex;flex-direction:column;gap:6px">
-            <div style="font-size:13px;color:#9ca3af">Spieler werden aus der Aufstellung übernommen.</div>
+          <!-- Kader -->
+          <div>
+            <div style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Kader</div>
+            <div id="spieltagKader" style="display:flex;flex-direction:column;gap:4px"></div>
           </div>
-          <button class="spieltag-btn outline" style="margin-top:12px" onclick="renderSpieltagKader()">Aktualisieren</button>
-        </div>
 
-        <!-- Board-Vorschau -->
-        <div class="spieltag-card">
-          <h3>Taktik-Board</h3>
-          <div style="font-size:13px;color:#6b7280;margin-bottom:12px">Zeichne taktische Abläufe direkt auf dem Spielfeld.</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="spieltag-btn" onclick="showView('board')">Zeichenboard öffnen</button>
+          <div style="border-top:1px solid #f3f4f6;padding-top:14px">
+            <div style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Notizen</div>
+            <textarea class="form-input" id="stNotes" rows="5" placeholder="Taktische Schlüsselpunkte, Sondersituationen..." style="padding:9px 12px;resize:vertical;width:100%;box-sizing:border-box"></textarea>
+          </div>
+
+          <div style="border-top:1px solid #f3f4f6;padding-top:14px;display:flex;flex-direction:column;gap:8px">
+            <button class="spieltag-btn" onclick="openSpieltagBoard()">Im Zeichenboard öffnen →</button>
             <button class="spieltag-btn outline" onclick="exportSpieltagPdf()">Als PDF exportieren</button>
           </div>
+
         </div>
       </div>
     </div>
@@ -3672,38 +3756,131 @@ function placeEntityAt(type,xPct,yPct){
    SPIELTAG
 ════════════════════════════════════ */
 const FORMATIONS={
-  '4-4-2':[[50,88],[18,72],[34,72],[66,72],[82,72],[18,52],[34,52],[66,52],[82,52],[38,32],[62,32]],
-  '4-3-3':[[50,88],[18,72],[34,72],[66,72],[82,72],[30,52],[50,52],[70,52],[25,28],[50,28],[75,28]],
-  '3-5-2':[[50,88],[30,72],[50,72],[70,72],[18,52],[34,52],[50,52],[66,52],[82,52],[38,28],[62,28]],
-  '4-2-3-1':[[50,88],[18,72],[34,72],[66,72],[82,72],[36,60],[64,60],[25,42],[50,42],[75,42],[50,25]],
-  '5-3-2':[[50,88],[12,70],[28,70],[50,70],[72,70],[88,70],[30,50],[50,50],[70,50],[38,28],[62,28]],
-  '4-1-4-1':[[50,88],[18,72],[34,72],[66,72],[82,72],[50,64],[18,48],[36,48],[64,48],[82,48],[50,28]]
+  '4-4-2':   [[50,88],[20,72],[37,72],[63,72],[80,72],[20,52],[37,52],[63,52],[80,52],[38,32],[62,32]],
+  '4-3-3':   [[50,88],[20,72],[37,72],[63,72],[80,72],[30,52],[50,52],[70,52],[22,28],[50,28],[78,28]],
+  '4-2-4':   [[50,88],[20,72],[37,72],[63,72],[80,72],[38,56],[62,56],[18,32],[39,32],[61,32],[82,32]],
+  '3-5-2':   [[50,88],[30,72],[50,72],[70,72],[18,52],[34,52],[50,52],[66,52],[82,52],[38,28],[62,28]],
+  '3-4-3':   [[50,88],[30,72],[50,72],[70,72],[22,52],[40,52],[60,52],[78,52],[22,28],[50,28],[78,28]],
+  '4-2-3-1': [[50,88],[20,72],[37,72],[63,72],[80,72],[38,58],[62,58],[22,42],[50,42],[78,42],[50,24]],
+  '4-1-4-1': [[50,88],[20,72],[37,72],[63,72],[80,72],[50,62],[20,48],[37,48],[63,48],[80,48],[50,26]],
+  '4-3-2-1': [[50,88],[20,72],[37,72],[63,72],[80,72],[30,55],[50,55],[70,55],[38,38],[62,38],[50,22]],
+  '4-4-1-1': [[50,88],[20,72],[37,72],[63,72],[80,72],[20,52],[37,52],[63,52],[80,52],[50,34],[50,20]],
+  '5-3-2':   [[50,88],[14,70],[30,70],[50,70],[70,70],[86,70],[30,50],[50,50],[70,50],[38,28],[62,28]],
+  '5-4-1':   [[50,88],[12,70],[28,70],[50,70],[72,70],[88,70],[18,50],[38,50],[62,50],[82,50],[50,26]],
+  '5-2-3':   [[50,88],[12,70],[28,70],[50,70],[72,70],[88,70],[38,52],[62,52],[22,28],[50,28],[78,28]],
+  '3-6-1':   [[50,88],[30,72],[50,72],[70,72],[18,54],[33,54],[46,54],[54,54],[67,54],[82,54],[50,26]],
+  '4-2-2-2': [[50,88],[20,72],[37,72],[63,72],[80,72],[38,56],[62,56],[34,40],[66,40],[34,24],[66,24]],
+  '3-3-4':   [[50,88],[30,72],[50,72],[70,72],[30,52],[50,52],[70,52],[20,28],[40,28],[60,28],[80,28]]
 };
 
+// Away formation: mirror horizontally (100 - x) and vertically invert (100 - y from center)
+function mirrorFormation(pts){
+  return pts.map(([x,y])=>[100-x, 100-y]);
+}
+
+let stCurrentTeam='home';
+// Player data: [{num, x, y, team, isGK}]
+let stHomePlayers=[];
+let stAwayPlayers=[];
+
+function setStTeam(team){
+  stCurrentTeam=team;
+  document.getElementById('stTeamHome').className='st-tab-btn'+(team==='home'?' home-active':'');
+  document.getElementById('stTeamAway').className='st-tab-btn'+(team==='away'?' away-active':'');
+  document.getElementById('spieltagFormation').style.display=team==='home'?'':'none';
+  document.getElementById('spieltagFormationAway').style.display=team==='away'?'':'none';
+  document.getElementById('stFieldLabel').textContent=team==='home'?'Heimmannschaft':'Gastmannschaft';
+  renderSpieltagKader();
+}
+
 function applySpieltagFormation(){
-  const f=document.getElementById('spieltagFormation')?.value||'4-4-2';
+  const f=document.getElementById('spieltagFormation').value;
   const pts=FORMATIONS[f];if(!pts)return;
-  const preview=document.getElementById('spieltagPlayers');if(!preview)return;
-  preview.innerHTML='';
-  [[50,94],...pts].forEach((p,i)=>{
-    const div=document.createElement('div');
-    const color=i===0?'#f0bc2e':'#e8614e';
-    div.style.cssText=`position:absolute;left:${p[0]}%;top:${p[1]}%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:${i===0?'#111':'#fff'};border:1.5px solid rgba(255,255,255,0.7);box-shadow:0 1px 4px rgba(0,0,0,0.3)`;
-    div.textContent=i+1;
-    preview.appendChild(div);
+  stHomePlayers=[{num:1,x:50,y:94,isGK:true},...pts.map(([x,y],i)=>({num:i+2,x,y,isGK:false}))];
+  renderStPlayers();
+  renderSpieltagKader();
+}
+
+function applySpieltagFormationAway(){
+  const f=document.getElementById('spieltagFormationAway').value;
+  const pts=FORMATIONS[f];if(!pts)return;
+  const mirrored=mirrorFormation([[50,94],...pts]);
+  stAwayPlayers=mirrored.map(([x,y],i)=>({num:i+1,x,y,isGK:i===0}));
+  renderStPlayers();
+}
+
+function clearStTeam(){
+  if(stCurrentTeam==='home') stHomePlayers=[];
+  else stAwayPlayers=[];
+  renderStPlayers();
+  renderSpieltagKader();
+}
+
+function renderStPlayers(){
+  const homeLayer=document.getElementById('stHomePlayers');
+  const awayLayer=document.getElementById('stAwayPlayers');
+  if(!homeLayer||!awayLayer)return;
+  homeLayer.innerHTML='';awayLayer.innerHTML='';
+  const wrap=document.getElementById('stFieldWrap');
+
+  stHomePlayers.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='st-player home'+(p.isGK?' gk':'');
+    el.style.left=p.x+'%';el.style.top=p.y+'%';
+    el.textContent=p.num;
+    el.title='Spieler '+p.num+(p.name?' — '+p.name:'');
+    makeStPlayerDraggable(el,p,wrap);
+    homeLayer.appendChild(el);
+  });
+
+  stAwayPlayers.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='st-player away'+(p.isGK?' gk':'');
+    el.style.left=p.x+'%';el.style.top=p.y+'%';
+    el.textContent=p.num;
+    el.title='Gast-Spieler '+p.num;
+    makeStPlayerDraggable(el,p,wrap);
+    awayLayer.appendChild(el);
+  });
+}
+
+function makeStPlayerDraggable(el,playerObj,container){
+  el.addEventListener('pointerdown',e=>{
+    e.stopPropagation();
+    el.setPointerCapture(e.pointerId);
+    const cr=container.getBoundingClientRect();
+    const startX=e.clientX, startY=e.clientY;
+    let moved=false;
+    function mv(e){
+      moved=true;
+      playerObj.x=Math.max(1,Math.min(99,(e.clientX-cr.left)/cr.width*100));
+      playerObj.y=Math.max(1,Math.min(99,(e.clientY-cr.top)/cr.height*100));
+      el.style.left=playerObj.x+'%';
+      el.style.top=playerObj.y+'%';
+    }
+    function up(){
+      el.removeEventListener('pointermove',mv);
+      el.removeEventListener('pointerup',up);
+    }
+    el.addEventListener('pointermove',mv);
+    el.addEventListener('pointerup',up);
   });
 }
 
 function renderSpieltagKader(){
-  const f=document.getElementById('spieltagFormation')?.value||'4-4-2';
-  const pts=FORMATIONS[f]||[];
   const k=document.getElementById('spieltagKader');if(!k)return;
-  const names=['Torwart',...Array.from({length:pts.length},(_,i)=>'Spieler '+(i+2))];
-  k.innerHTML=names.map((n,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:#f9fafb;border-radius:6px;border:1px solid #f3f4f6">
-      <span style="width:20px;height:20px;border-radius:50%;background:${i===0?'#f0bc2e':'#e8614e'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:Oswald,sans-serif;color:${i===0?'#111':'#fff'};flex-shrink:0">${i+1}</span>
-      <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none" placeholder="${n}" id="kader${i}">
+  const players=stCurrentTeam==='home'?stHomePlayers:stAwayPlayers;
+  if(!players.length){k.innerHTML='<div style="font-size:13px;color:#9ca3af">Keine Spieler platziert.</div>';return;}
+  k.innerHTML=players.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;background:#f9fafb;border:1px solid #f3f4f6">
+      <span style="width:22px;height:22px;border-radius:50%;background:${stCurrentTeam==='home'?(p.isGK?'#f0bc2e':'#e8614e'):(p.isGK?'#93c5fd':'#4fa3e0')};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:Oswald,sans-serif;color:${p.isGK?'#111':'#fff'};flex-shrink:0">${p.num}</span>
+      <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none;min-width:0" placeholder="${p.isGK?'Torwart':'Spieler '+p.num}" value="${p.name||''}" oninput="stSetName(${i},'${stCurrentTeam}',this.value)">
     </div>`).join('');
+}
+
+function stSetName(idx,team,val){
+  if(team==='home'&&stHomePlayers[idx])stHomePlayers[idx].name=val;
+  if(team==='away'&&stAwayPlayers[idx])stAwayPlayers[idx].name=val;
 }
 
 function saveSpieltagNotes(){toast('Gespeichert','✓');}
@@ -3714,23 +3891,32 @@ function openSpieltagBoard(){
   setTimeout(()=>{
     if(!boardInited){toast('Bitte zuerst Spielfeld wählen','!');return;}
     clearBoard();
-    placeEntityAt('gk',50,92);
-    (FORMATIONS[f]||[]).forEach((p,i)=>{
-      const e=placeEntityAt('attacker',p[0],p[1]);
-      e.label=''+(i+2);
-      e.el.querySelector('.fe-player')&&(e.el.querySelector('.fe-player').textContent=''+(i+2));
+    // Place home players
+    stHomePlayers.forEach(p=>{
+      const e=placeEntityAt(p.isGK?'gk':'attacker',p.x,100-p.y);
+      e.label=''+p.num;
+      const fp=e.el.querySelector('.fe-player');
+      if(fp)fp.textContent=''+p.num;
     });
-    boardLabels=[{id:Date.now(),text:'Formation: '+f,x:50,y:8}];
+    // Place away players
+    stAwayPlayers.forEach(p=>{
+      const e=placeEntityAt(p.isGK?'gk':'defender',p.x,100-p.y);
+      e.label=''+p.num;
+      const fp=e.el.querySelector('.fe-player');
+      if(fp)fp.textContent=''+p.num;
+    });
+    boardLabels=[{id:Date.now(),text:'Formation: '+f,x:50,y:6}];
     renderBoardLabels();
-    toast('Formation '+f+' geladen','✓');
+    toast('Aufstellung geladen','✓');
   },400);
 }
 
 function exportSpieltagPdf(){toast('PDF-Export folgt in Kürze','!');}
 
-// Init Spieltag on first view
 function initSpieltag(){
-  applySpieltagFormation();
+  setStTeam('home');
+  if(!stHomePlayers.length) applySpieltagFormation();
+  else renderStPlayers();
   renderSpieltagKader();
 }
 
