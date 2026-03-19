@@ -737,6 +737,7 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 #stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
 .st-player{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
 .st-player:active{cursor:grabbing;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
+.st-player.st-pass-sel{outline:3px solid #f0bc2e;outline-offset:2px;box-shadow:0 0 0 4px rgba(240,188,46,0.4);}
 .st-player.home{background:#e8614e;color:#fff;}
 .st-player.gk{background:#f0bc2e;color:#111;border-style:dashed;}
 .st-player.away{background:#4fa3e0;color:#fff;}
@@ -747,9 +748,10 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .st-formation-select{padding:6px 10px;border-radius:7px;border:1px solid #e5e7eb;font-size:13px;font-family:'Source Sans 3',sans-serif;background:#fff;color:#111827;cursor:pointer;outline:none;}
 .st-formation-select:focus{border-color:#111827;}
 .st-tab-btn{padding:6px 13px;border-radius:7px;border:1px solid #e5e7eb;font-size:12px;font-family:'Oswald',sans-serif;font-weight:600;cursor:pointer;background:transparent;color:#6b7280;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.4px;}
-.st-tab-btn:hover{background:#f3f4f6;}
-.st-tab-btn.home-active{background:#e8614e;border-color:#e8614e;color:#fff;}
-.st-tab-btn.away-active{background:#4fa3e0;border-color:#4fa3e0;color:#fff;}
+.st-tab-btn:hover{background:#f3f4f6;color:#374151;}
+.st-tab-btn.st-active{background:#111827;border-color:#111827;color:#fff;}
+.st-tab-btn.home-active{background:#111827;border-color:#111827;color:#fff;}
+.st-tab-btn.away-active{background:#374151;border-color:#374151;color:#fff;}
 .spieltag-btn{width:100%;padding:9px;border-radius:8px;border:none;background:#111827;color:#fff;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;}
 .spieltag-btn:hover{background:#374151;}
 .spieltag-btn.outline{background:transparent;border:1px solid #e5e7eb;color:#374151;}
@@ -2000,6 +2002,7 @@ html, body {
               <button class="st-tab-btn home-active" id="stToolNone" onclick="setStTool('none')" style="padding:5px 10px">Verschieben</button>
               <button class="st-tab-btn" id="stToolRun" onclick="setStTool('run')" style="padding:5px 10px">Laufweg</button>
               <button class="st-tab-btn" id="stToolBall" onclick="setStTool('ball')" style="padding:5px 10px">Ballweg</button>
+              <button class="st-tab-btn" id="stToolPass" onclick="setStTool('pass')" style="padding:5px 10px">Pass</button>
               <button class="st-tab-btn" id="stToolErase" onclick="setStTool('erase')" style="padding:5px 10px">Löschen</button>
               <button class="st-tab-btn" onclick="clearStLines()" style="padding:5px 10px;margin-left:auto;color:#9ca3af">Linien leeren</button>
             </div>
@@ -3862,6 +3865,29 @@ function renderStPlayers(){
 }
 
 function makeStPlayerDraggable(el,playerObj,container){
+  // Pass tool: click to select from → click to draw pass line
+  el.addEventListener('click',e=>{
+    if(stCurrentTool!=='pass') return;
+    e.stopPropagation();
+    if(!stPassFrom){
+      // First click: select as source
+      stPassFrom=playerObj;
+      document.querySelectorAll('.st-player').forEach(p=>p.classList.remove('st-pass-sel'));
+      el.classList.add('st-pass-sel');
+      const hint=document.getElementById('stFieldHint');
+      if(hint) hint.textContent='Jetzt Zielspieler wählen (Spieler '+playerObj.num+' ausgewählt)';
+    } else if(stPassFrom!==playerObj){
+      // Second click: draw pass line from source to this player
+      const from=stPassFrom, to=playerObj;
+      stLines.push({type:'pass', pts:[{x:from.x,y:from.y},{x:to.x,y:to.y}], fromNum:from.num, toNum:to.num});
+      redrawStLines();
+      stPassFrom=null;
+      document.querySelectorAll('.st-player').forEach(p=>p.classList.remove('st-pass-sel'));
+      const hint=document.getElementById('stFieldHint');
+      if(hint) hint.textContent='Pass '+from.num+' → '+to.num+' eingezeichnet · nächsten Pass wählen';
+    }
+  });
+
   el.addEventListener('pointerdown',e=>{
     if(stCurrentTool!=='none') return;
     e.stopPropagation();
@@ -3886,35 +3912,46 @@ let stDrawing=false;
 let stCurrentLine=null;
 let stCanvasEl=null, stCtx2=null;
 
+let stPassFrom=null;
+
 function setStTool(tool){
   stCurrentTool=tool;
-  ['stToolNone','stToolRun','stToolBall','stToolErase'].forEach(id=>{
+  stPassFrom=null;
+  document.querySelectorAll('.st-player').forEach(el=>el.classList.remove('st-pass-sel'));
+  ['stToolNone','stToolRun','stToolBall','stToolPass','stToolErase'].forEach(id=>{
     const b=document.getElementById(id);
-    if(b) b.className='st-tab-btn'+(
-      (id==='stToolNone'&&tool==='none'?' home-active':'')+
-      (id==='stToolRun'&&tool==='run'?' home-active':'')+
-      (id==='stToolBall'&&tool==='ball'?' home-active':'')+
-      (id==='stToolErase'&&tool==='erase'?' home-active':'')
+    if(b) b.classList.toggle('home-active',
+      (id==='stToolNone'&&tool==='none')||
+      (id==='stToolRun'&&tool==='run')||
+      (id==='stToolBall'&&tool==='ball')||
+      (id==='stToolPass'&&tool==='pass')||
+      (id==='stToolErase'&&tool==='erase')
     );
   });
   const hint=document.getElementById('stFieldHint');
-  const wrap=document.getElementById('stFieldWrap');
-  if(!wrap||!stCanvasEl) return;
+  const homeL=document.getElementById('stHomePlayers');
+  const awayL=document.getElementById('stAwayPlayers');
+  if(!stCanvasEl) return;
   if(tool==='none'){
     stCanvasEl.style.pointerEvents='none';
-    if(hint) hint.textContent='Ziehen = verschieben · Doppelklick = Nummer ändern';
-    document.getElementById('stHomePlayers').style.pointerEvents='';
-    document.getElementById('stAwayPlayers').style.pointerEvents='';
+    if(hint) hint.textContent='Spieler ziehen · Nummer in Kader ändern';
+    if(homeL) homeL.style.pointerEvents='';
+    if(awayL) awayL.style.pointerEvents='';
+  } else if(tool==='pass'){
+    stCanvasEl.style.pointerEvents='none';
+    if(hint) hint.textContent='Pass: ersten Spieler wählen → zweiten Spieler wählen';
+    if(homeL) homeL.style.pointerEvents='';
+    if(awayL) awayL.style.pointerEvents='';
   } else if(tool==='erase'){
     stCanvasEl.style.pointerEvents='all';
-    if(hint) hint.textContent='Klicken zum Löschen von Linien';
-    document.getElementById('stHomePlayers').style.pointerEvents='none';
-    document.getElementById('stAwayPlayers').style.pointerEvents='none';
+    if(hint) hint.textContent='Linie anklicken zum Löschen';
+    if(homeL) homeL.style.pointerEvents='none';
+    if(awayL) awayL.style.pointerEvents='none';
   } else {
     stCanvasEl.style.pointerEvents='all';
-    if(hint) hint.textContent=(tool==='run'?'Laufweg':'Ballweg')+' zeichnen: klicken und ziehen';
-    document.getElementById('stHomePlayers').style.pointerEvents='none';
-    document.getElementById('stAwayPlayers').style.pointerEvents='none';
+    if(hint) hint.textContent=(tool==='run'?'Laufweg':'Ballweg')+' zeichnen: ziehen';
+    if(homeL) homeL.style.pointerEvents='none';
+    if(awayL) awayL.style.pointerEvents='none';
   }
 }
 
@@ -3988,15 +4025,37 @@ function redrawStLines(previewLine){
   [...stLines, ...(previewLine?[previewLine]:[])].forEach(l=>{
     if(l.pts.length<2) return;
     const isRun=l.type==='run';
+    const isPass=l.type==='pass';
+    const p0={x:l.pts[0].x/100*W, y:l.pts[0].y/100*H};
+    const p1={x:l.pts[l.pts.length-1].x/100*W, y:l.pts[l.pts.length-1].y/100*H};
+
     stCtx2.beginPath();
-    stCtx2.strokeStyle=isRun?'#f0bc2e':'#4fa3e0';
-    stCtx2.lineWidth=2.5;
+    stCtx2.strokeStyle = isPass ? '#fff' : isRun ? '#f0bc2e' : '#4fa3e0';
+    stCtx2.lineWidth = isPass ? 2 : 2.5;
     stCtx2.lineCap='round'; stCtx2.lineJoin='round';
-    if(!isRun) stCtx2.setLineDash([6,4]);
-    stCtx2.moveTo(l.pts[0].x/100*W, l.pts[0].y/100*H);
-    l.pts.forEach(p=>stCtx2.lineTo(p.x/100*W, p.y/100*H));
+    if(!isRun && !isPass) stCtx2.setLineDash([6,4]);
+    if(isPass) stCtx2.setLineDash([5,3]);
+
+    stCtx2.moveTo(p0.x, p0.y);
+    if(isPass){
+      stCtx2.lineTo(p1.x, p1.y);
+    } else {
+      l.pts.forEach(p=>stCtx2.lineTo(p.x/100*W, p.y/100*H));
+    }
     stCtx2.stroke(); stCtx2.setLineDash([]);
-    // No arrowhead — clean lines only
+
+    // Pass: draw label at midpoint
+    if(isPass && l.fromNum!=null && l.toNum!=null){
+      const mx=(p0.x+p1.x)/2, my=(p0.y+p1.y)/2;
+      const label=l.fromNum+'→'+l.toNum;
+      stCtx2.font='bold 11px system-ui,sans-serif';
+      const tw=stCtx2.measureText(label).width;
+      stCtx2.fillStyle='rgba(17,24,39,0.75)';
+      stCtx2.fillRect(mx-tw/2-4, my-9, tw+8, 16);
+      stCtx2.fillStyle='#fff';
+      stCtx2.textAlign='center'; stCtx2.textBaseline='middle';
+      stCtx2.fillText(label, mx, my);
+    }
   });
 }
 
