@@ -735,7 +735,7 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .st-field-wrap{position:relative;background:#fff;user-select:none;border:2px solid #d1d5db;border-radius:0 !important;overflow:hidden;}
 .st-field-wrap svg{display:block;width:100%;height:auto;}
 #stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
-.st-player{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
+.st-player{position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
 .st-player:active{cursor:grabbing;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
 .st-player.st-pass-sel{outline:3px solid #f0bc2e;outline-offset:2px;box-shadow:0 0 0 4px rgba(240,188,46,0.4);}
 .st-player.home{background:#e8614e;color:#fff;}
@@ -1941,13 +1941,13 @@ html, body {
         <!-- MAIN: Aufstellungsfeld -->
         <div class="spieltag-main">
 
-          <!-- Einzige Toolbar-Leiste -->
-          <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid #e5e7eb;flex-shrink:0;flex-wrap:wrap;background:#fff">
-            <!-- Team toggle -->
+          <!-- Toolbar Zeile 1: Team + Formation -->
+          <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid #e5e7eb;flex-shrink:0;background:#fff;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-right:2px">Team</span>
             <button class="st-tab-btn home-active" id="stTeamHome" onclick="setStTeam('home')">Heim</button>
             <button class="st-tab-btn" id="stTeamAway" onclick="setStTeam('away')">Gast</button>
             <div class="tb-sep" style="height:20px"></div>
-            <!-- Formation -->
+            <span style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-right:2px">Formation</span>
             <select class="st-formation-select" id="spieltagFormation" onchange="applySpieltagFormation()">
               <optgroup label="Klassisch">
                 <option value="4-4-2">4-4-2</option>
@@ -1985,17 +1985,20 @@ html, body {
             <button class="st-tab-btn" onclick="applySpieltagFormation();applySpieltagFormationAway()">Anwenden</button>
             <button class="st-tab-btn" onclick="clearStTeam()">Leeren</button>
             <div class="tb-sep" style="height:20px"></div>
-            <!-- Draw tools -->
+            <span style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-right:2px">Ansicht</span>
+            <span style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px" id="stFieldLabel">Heimmannschaft</span>
+            <span style="font-size:11px;color:#9ca3af;margin-left:2px" id="stFieldHint">Spieler ziehen · Nummer in Kader ändern</span>
+          </div>
+
+          <!-- Toolbar Zeile 2: Zeichenwerkzeuge -->
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-bottom:1px solid #e5e7eb;flex-shrink:0;background:#f9fafb;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-right:2px">Werkzeug</span>
             <button class="st-tab-btn home-active" id="stToolNone" onclick="setStTool('none')">Verschieben</button>
             <button class="st-tab-btn" id="stToolRun" onclick="setStTool('run')">Laufweg</button>
             <button class="st-tab-btn" id="stToolBall" onclick="setStTool('ball')">Ballweg</button>
             <button class="st-tab-btn" id="stToolPass" onclick="setStTool('pass')">Pass</button>
             <button class="st-tab-btn" id="stToolErase" onclick="setStTool('erase')">Löschen</button>
-            <button class="st-tab-btn" onclick="clearStLines()">Linien leeren</button>
-            <div class="tb-sep" style="height:20px"></div>
-            <!-- Field label + hint -->
-            <span style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px" id="stFieldLabel">Heimmannschaft</span>
-            <span style="font-size:11px;color:#9ca3af;margin-left:4px" id="stFieldHint">Spieler ziehen · Nummer in Kader ändern</span>
+            <button class="st-tab-btn" onclick="clearStLines()" style="color:#9ca3af">Linien leeren</button>
           </div>
 
           <!-- Field area — fills all remaining height, no rounded corners -->
@@ -4137,7 +4140,115 @@ function openSpieltagBoard(){
   },400);
 }
 
-function exportSpieltagPdf(){toast('PDF-Export folgt in Kürze','!');}
+function exportSpieltagPdf(){
+  // Capture field as image
+  const svg=document.getElementById('stFieldSvg');
+  const canvas2=document.getElementById('stCanvas');
+  const inner=document.getElementById('stFieldInner');
+  if(!svg||!inner){toast('Feld nicht bereit','!');return;}
+
+  // Build SVG data URL for field background
+  const svgData=new XMLSerializer().serializeToString(svg);
+  const svgB64=btoa(unescape(encodeURIComponent(svgData)));
+  const svgUrl='data:image/svg+xml;base64,'+svgB64;
+
+  // Gather kader names
+  const homeNames=stHomePlayers.map(p=>(p.num)+'. '+(p.name||'Spieler '+p.num));
+  const benchNames=stBench.map(p=>(p.num)+'. '+(p.name||'Ersatz'));
+
+  const gegner=document.getElementById('stGegner')?.value||'—';
+  const datum=document.getElementById('stDatum')?.value||'';
+  const notizen=document.getElementById('stNotes')?.value||'';
+  const formation=document.getElementById('spieltagFormation')?.value||'';
+
+  // Build printable HTML, open in new window
+  const pw=window.open('','_blank','width=900,height=700');
+  pw.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Spieltag — ${gegner}</title>
+<style>
+  @page{size:A4 landscape;margin:14mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;color:#111;background:#fff;font-size:12px}
+  h1{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:2px}
+  .meta{color:#666;font-size:11px;margin-bottom:12px}
+  .layout{display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start}
+  .field-wrap{position:relative;width:100%}
+  .field-wrap img.field-bg{display:block;width:100%;height:auto;border:1px solid #aaa}
+  .field-wrap canvas.lines{position:absolute;inset:0;width:100%;height:100%}
+  .player-dot{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;border:2px solid rgba(255,255,255,0.9);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+  .player-dot.home{background:#e8614e;color:#fff}
+  .player-dot.away{background:#4fa3e0;color:#fff}
+  .player-dot.gk{background:#f0bc2e;color:#111;border-style:dashed}
+  aside h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#374151;margin-bottom:8px;margin-top:12px}
+  aside h2:first-child{margin-top:0}
+  .kader-row{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+  .num-badge{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+  .notes{font-size:11px;color:#444;line-height:1.5;white-space:pre-wrap;margin-top:4px}
+  .footer{margin-top:10px;font-size:9px;color:#aaa;text-align:right}
+</style>
+</head><body>
+<h1>Spieltagsvorbereitung — ${gegner}</h1>
+<div class="meta">${datum?'Datum: '+datum+' · ':''}Formation: ${formation}</div>
+<div class="layout">
+  <div class="field-wrap" id="pfieldWrap">
+    <img class="field-bg" src="${svgUrl}" id="pfieldImg">
+    <!-- players injected by script -->
+  </div>
+  <aside>
+    <h2>Startelf</h2>
+    ${homeNames.map((n,i)=>{
+      const p=stHomePlayers[i];
+      const bg=p.isGK?'#f0bc2e':'#e8614e'; const tc=p.isGK?'#111':'#fff';
+      return '<div class="kader-row"><div class="num-badge" style="background:'+bg+';color:'+tc+'">'+p.num+'</div><span>'+( p.name||'—')+'</span></div>';
+    }).join('')}
+    ${stBench.length?`<h2>Bank</h2>${stBench.map(p=>'<div class="kader-row"><div class="num-badge" style="background:#9ca3af;color:#fff">'+p.num+'</div><span>'+(p.name||'—')+'</span></div>').join('')}`:''}
+    ${notizen?`<h2>Notizen</h2><div class="notes">${notizen}</div>`:''}
+  </aside>
+</div>
+<div class="footer">MyCoach — Spieltagsvorbereitung</div>
+<script>
+// Place players on field after image loads
+const img=document.getElementById('pfieldImg');
+const wrap=document.getElementById('pfieldWrap');
+function placePlayers(){
+  const W=img.offsetWidth, H=img.offsetHeight;
+  const players=${JSON.stringify(stHomePlayers.map(p=>({num:p.num,x:p.x,y:p.y,isGK:p.isGK,team:'home'})).concat(stAwayPlayers.map(p=>({num:p.num,x:p.x,y:p.y,isGK:p.isGK,team:'away'}))))};
+  players.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='player-dot '+(p.isGK?'gk':p.team);
+    d.style.left=p.x+'%'; d.style.top=p.y+'%';
+    d.textContent=p.num;
+    wrap.appendChild(d);
+  });
+  // Draw lines from canvas data
+  const linesData=${JSON.stringify(stLines)};
+  if(linesData.length){
+    const cv=document.createElement('canvas');
+    cv.className='lines'; cv.width=W; cv.height=H;
+    cv.style.cssText='position:absolute;inset:0;width:100%;height:100%';
+    wrap.appendChild(cv);
+    const ctx=cv.getContext('2d');
+    linesData.forEach(l=>{
+      if(l.pts.length<2) return;
+      const isRun=l.type==='run'; const isPass=l.type==='pass';
+      ctx.beginPath();
+      ctx.strokeStyle=isPass?'#fff':isRun?'#f0bc2e':'#4fa3e0';
+      ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round';
+      if(!isRun&&!isPass) ctx.setLineDash([5,3]);
+      if(isPass) ctx.setLineDash([4,3]);
+      ctx.moveTo(l.pts[0].x/100*W,l.pts[0].y/100*H);
+      l.pts.forEach(p=>ctx.lineTo(p.x/100*W,p.y/100*H));
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+  }
+  setTimeout(()=>window.print(),400);
+}
+img.complete?placePlayers():img.onload=placePlayers;
+<\/script>
+</body></html>`);
+  pw.document.close();
+}
 
 function initSpieltag(){
   setStTeam('home');
