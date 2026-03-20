@@ -731,8 +731,8 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .spieltag-card{background:#fff;border:1px solid #e5e7eb;border-radius:var(--radius);padding:12px;}
 .spieltag-card h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px;}
 /* Field — fills remaining height, maintains 105:68 aspect ratio */
-.st-field-area{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px;background:#f9fafb;overflow:hidden;}
-.st-field-wrap{position:relative;background:#fff;user-select:none;border:1px solid #e5e7eb;/* aspect ratio maintained by JS */}
+.st-field-area{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px;background:#f3f4f6;overflow:hidden;}
+.st-field-wrap{position:relative;background:#fff;user-select:none;border:2px solid #d1d5db;border-radius:0 !important;overflow:hidden;}
 .st-field-wrap svg{display:block;width:100%;height:auto;}
 #stHomePlayers,#stAwayPlayers{position:absolute;inset:0;pointer-events:none;}
 .st-player{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.35);cursor:grab;pointer-events:all;}
@@ -1941,79 +1941,64 @@ html, body {
         <!-- MAIN: Aufstellungsfeld -->
         <div class="spieltag-main">
 
-          <!-- Formation controls -->
-          <div class="spieltag-card" style="padding:10px 14px;flex-shrink:0">
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-              <!-- Team toggle -->
-              <div style="display:flex;gap:4px">
-                <button class="st-tab-btn home-active" id="stTeamHome" onclick="setStTeam('home')">Heim</button>
-                <button class="st-tab-btn" id="stTeamAway" onclick="setStTeam('away')">Gast</button>
-              </div>
-              <div class="tb-sep" style="height:24px"></div>
-              <!-- Formation select -->
-              <label class="form-label" style="margin:0;font-size:11px">Formation:</label>
-              <select class="st-formation-select" id="spieltagFormation" onchange="applySpieltagFormation()">
-                <optgroup label="Klassisch">
-                  <option value="4-4-2">4-4-2</option>
-                  <option value="4-3-3">4-3-3</option>
-                  <option value="4-2-4">4-2-4</option>
-                  <option value="3-5-2">3-5-2</option>
-                  <option value="3-4-3">3-4-3</option>
-                </optgroup>
-                <optgroup label="Modernes Pressing">
-                  <option value="4-2-3-1">4-2-3-1</option>
-                  <option value="4-1-4-1">4-1-4-1</option>
-                  <option value="4-3-2-1">4-3-2-1 (Weihnachtsbaum)</option>
-                  <option value="4-4-1-1">4-4-1-1</option>
-                </optgroup>
-                <optgroup label="Defensiv">
-                  <option value="5-3-2">5-3-2</option>
-                  <option value="5-4-1">5-4-1</option>
-                  <option value="5-2-3">5-2-3</option>
-                </optgroup>
-                <optgroup label="Offensiv">
-                  <option value="3-6-1">3-6-1</option>
-                  <option value="4-2-2-2">4-2-2-2 (Raute)</option>
-                  <option value="3-3-4">3-3-4</option>
-                </optgroup>
-              </select>
-              <select class="st-formation-select" id="spieltagFormationAway" onchange="applySpieltagFormationAway()" style="display:none">
-                <optgroup label="Klassisch">
-                  <option value="4-4-2">4-4-2</option>
-                  <option value="4-3-3">4-3-3</option>
-                  <option value="3-5-2">3-5-2</option>
-                  <option value="4-2-3-1">4-2-3-1</option>
-                  <option value="5-3-2">5-3-2</option>
-                  <option value="4-1-4-1">4-1-4-1</option>
-                  <option value="5-4-1">5-4-1</option>
-                  <option value="3-4-3">3-4-3</option>
-                  <option value="4-3-2-1">4-3-2-1</option>
-                </optgroup>
-              </select>
-              <button class="st-tab-btn" onclick="applySpieltagFormation();applySpieltagFormationAway()">Anwenden</button>
-              <button class="st-tab-btn" onclick="clearStTeam()" style="margin-left:auto">Leeren</button>
-            </div>
+          <!-- Einzige Toolbar-Leiste -->
+          <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid #e5e7eb;flex-shrink:0;flex-wrap:wrap;background:#fff">
+            <!-- Team toggle -->
+            <button class="st-tab-btn home-active" id="stTeamHome" onclick="setStTeam('home')">Heim</button>
+            <button class="st-tab-btn" id="stTeamAway" onclick="setStTeam('away')">Gast</button>
+            <div class="tb-sep" style="height:20px"></div>
+            <!-- Formation -->
+            <select class="st-formation-select" id="spieltagFormation" onchange="applySpieltagFormation()">
+              <optgroup label="Klassisch">
+                <option value="4-4-2">4-4-2</option>
+                <option value="4-3-3">4-3-3</option>
+                <option value="4-2-4">4-2-4</option>
+                <option value="3-5-2">3-5-2</option>
+                <option value="3-4-3">3-4-3</option>
+              </optgroup>
+              <optgroup label="Pressing">
+                <option value="4-2-3-1">4-2-3-1</option>
+                <option value="4-1-4-1">4-1-4-1</option>
+                <option value="4-3-2-1">4-3-2-1</option>
+                <option value="4-4-1-1">4-4-1-1</option>
+              </optgroup>
+              <optgroup label="Defensiv">
+                <option value="5-3-2">5-3-2</option>
+                <option value="5-4-1">5-4-1</option>
+                <option value="5-2-3">5-2-3</option>
+              </optgroup>
+              <optgroup label="Offensiv">
+                <option value="3-6-1">3-6-1</option>
+                <option value="4-2-2-2">4-2-2-2</option>
+                <option value="3-3-4">3-3-4</option>
+              </optgroup>
+            </select>
+            <select class="st-formation-select" id="spieltagFormationAway" onchange="applySpieltagFormationAway()" style="display:none">
+              <option value="4-4-2">4-4-2</option>
+              <option value="4-3-3">4-3-3</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="5-3-2">5-3-2</option>
+              <option value="4-1-4-1">4-1-4-1</option>
+              <option value="5-4-1">5-4-1</option>
+            </select>
+            <button class="st-tab-btn" onclick="applySpieltagFormation();applySpieltagFormationAway()">Anwenden</button>
+            <button class="st-tab-btn" onclick="clearStTeam()">Leeren</button>
+            <div class="tb-sep" style="height:20px"></div>
+            <!-- Draw tools -->
+            <button class="st-tab-btn home-active" id="stToolNone" onclick="setStTool('none')">Verschieben</button>
+            <button class="st-tab-btn" id="stToolRun" onclick="setStTool('run')">Laufweg</button>
+            <button class="st-tab-btn" id="stToolBall" onclick="setStTool('ball')">Ballweg</button>
+            <button class="st-tab-btn" id="stToolPass" onclick="setStTool('pass')">Pass</button>
+            <button class="st-tab-btn" id="stToolErase" onclick="setStTool('erase')">Löschen</button>
+            <button class="st-tab-btn" onclick="clearStLines()">Linien leeren</button>
+            <div class="tb-sep" style="height:20px"></div>
+            <!-- Field label + hint -->
+            <span style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px" id="stFieldLabel">Heimmannschaft</span>
+            <span style="font-size:11px;color:#9ca3af;margin-left:4px" id="stFieldHint">Spieler ziehen · Nummer in Kader ändern</span>
           </div>
 
-          <!-- Draw toolbar -->
-          <div class="spieltag-card" style="padding:8px 12px;flex-shrink:0">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px">Zeichnen</span>
-              <button class="st-tab-btn home-active" id="stToolNone" onclick="setStTool('none')" style="padding:5px 10px">Verschieben</button>
-              <button class="st-tab-btn" id="stToolRun" onclick="setStTool('run')" style="padding:5px 10px">Laufweg</button>
-              <button class="st-tab-btn" id="stToolBall" onclick="setStTool('ball')" style="padding:5px 10px">Ballweg</button>
-              <button class="st-tab-btn" id="stToolPass" onclick="setStTool('pass')" style="padding:5px 10px">Pass</button>
-              <button class="st-tab-btn" id="stToolErase" onclick="setStTool('erase')" style="padding:5px 10px">Löschen</button>
-              <button class="st-tab-btn" onclick="clearStLines()" style="padding:5px 10px;margin-left:auto;color:#9ca3af">Linien leeren</button>
-            </div>
-          </div>
-
-          <!-- Field header bar -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f3f4f6;flex-shrink:0">
-            <span style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px" id="stFieldLabel">Heimmannschaft</span>
-            <span style="font-size:11px;color:#9ca3af" id="stFieldHint">Spieler ziehen · Nummer in Kader ändern</span>
-          </div>
-          <!-- Field area — fills all remaining height -->
+          <!-- Field area — fills all remaining height, no rounded corners -->
           <div class="st-field-area" id="stFieldArea">
             <div class="st-field-wrap" id="stFieldWrap">
               <div id="stFieldInner" style="position:relative;line-height:0">
