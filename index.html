@@ -493,6 +493,7 @@ input[type="date"].form-input::-webkit-date-and-time-value{
   background:linear-gradient(160deg,#0d2e18,var(--pitch));
   position:relative;overflow:hidden;
 }
+.dc-pitch canvas{width:100%;height:100%;display:block;}
 .dc-pitch svg{width:100%;height:100%;}
 .dc-lvl{
   position:absolute;top:10px;right:10px;
@@ -519,6 +520,50 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .dc-btn:hover{border-color:#111827;color:#111827;}
 .dc-btn.primary{background:#f3f4f6;border-color:#e5e7eb;color:#374151;font-weight:600;}
 .dc-btn.primary:hover{background:#111827;border-color:#111827;color:#fff;}
+
+/* ═══════════════════════════════════════════
+   DRILL ANIMATION PLAYER
+═══════════════════════════════════════════ */
+.dd-anim-wrap{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#0d2e18,#1e5c2e);border-radius:14px 14px 0 0;overflow:hidden;}
+.dd-anim-canvas{width:100%;height:100%;display:block;}
+.dd-anim-controls{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;gap:8px;padding:8px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.55));}
+.dd-anim-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
+.dd-anim-btn:hover{background:rgba(255,255,255,0.3);}
+.dd-anim-bar{flex:1;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;cursor:pointer;position:relative;}
+.dd-anim-bar-fill{height:100%;background:#fff;border-radius:2px;width:0%;pointer-events:none;transition:none;}
+.dd-anim-time{color:rgba(255,255,255,0.7);font-size:11px;font-family:'Source Sans 3',sans-serif;white-space:nowrap;min-width:52px;text-align:right;}
+.dd-anim-speed{background:rgba(255,255,255,0.15);border:none;color:rgba(255,255,255,0.8);font-size:11px;font-family:'Source Sans 3',sans-serif;padding:2px 6px;border-radius:4px;cursor:pointer;}
+.dd-anim-speed:hover{background:rgba(255,255,255,0.3);color:#fff;}
+.dd-no-anim{display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,0.4);font-size:13px;font-family:'Source Sans 3',sans-serif;}
+
+/* ═══════════════════════════════════════════
+   DRILL EDITOR
+═══════════════════════════════════════════ */
+.de-wrap{background:#fff;width:min(1400px,97vw);margin:24px auto;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.de-header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid #e5e7eb;}
+.de-section{padding:16px 28px;}
+.de-row{display:flex;gap:12px;margin-bottom:10px;}
+.de-field{flex:1;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;}
+.de-label{font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;}
+.de-input{padding:9px 12px;border:1px solid #e5e7eb;border-radius:8px;font-family:'Source Sans 3',sans-serif;font-size:14px;color:#111827;background:#fff;outline:none;transition:border-color .15s;}
+.de-input:focus{border-color:#111827;}
+textarea.de-input{resize:vertical;min-height:48px;}
+.de-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.de-tool-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-family:'Source Sans 3',sans-serif;font-size:12px;color:#374151;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.de-tool-btn:hover{border-color:#111827;color:#111827;}
+.de-tool-del{color:#991b1b;border-color:#fecaca;background:#fef2f2;}
+.de-tool-del:hover{background:#fee2e2;border-color:#f87171;}
+.de-tool-sep{width:1px;height:24px;background:#e5e7eb;margin:0 4px;}
+.de-canvas-wrap{position:relative;width:100%;aspect-ratio:105/68;background:linear-gradient(160deg,#0d2e18,#1e5c2e);border-radius:10px;overflow:hidden;cursor:default;}
+.de-canvas{width:100%;height:100%;display:block;}
+.de-phase-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding:10px 0;}
+.de-phase-tabs{display:flex;gap:3px;}
+.de-phase-tab{padding:6px 14px;border:1px solid #e5e7eb;border-radius:6px;font-family:'Source Sans 3',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:#6b7280;transition:all .15s;}
+.de-phase-tab.active{background:#111827;color:#fff;border-color:#111827;}
+.de-phase-add{padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;font-family:'Source Sans 3',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:#f9fafb;color:#374151;}
+.de-phase-add:hover{border-color:#9ca3af;}
+.de-hint{font-size:12px;color:#9ca3af;margin-top:4px;}
+.de-actions{display:flex;gap:10px;padding:16px 28px 24px;border-top:1px solid #f3f4f6;}
 
 /* ═══════════════════════════════════════════
    PLANER
@@ -823,7 +868,8 @@ input[type="date"].form-input::-webkit-date-and-time-value{
 .mode-place{background:#f3e8ff;border-color:#e9d5ff;color:#6b21a8;}
 
 /* Canvas area */
-.board-canvas-area{flex:1;position:relative;overflow:hidden;background:var(--pitch);}
+.board-canvas-area{flex:1;position:relative;overflow:hidden;background:#1a3a22;display:flex;align-items:center;justify-content:center;}
+.board-field-container{position:relative;background:var(--pitch);}
 .field-bg{position:absolute;inset:0;width:100%;height:100%;}
 #drawCanvas{position:absolute;inset:0;touch-action:none;}
 #playerLayer{position:absolute;inset:0;pointer-events:none;}
@@ -1397,12 +1443,12 @@ html, body {
             </div>
           </div>
           <div class="hero-side-stats">
-            <div class="hss"><strong>150</strong>Übungen</div>
+            <div class="hss"><strong id="homeExCount">0</strong>Übungen</div>
             <div class="hss"><strong>8</strong>Kategorien</div>
           </div>
         </div>
         <div class="home-stats">
-          <div class="hstat"><div class="hstat-n">150</div><div class="hstat-l">Übungen</div></div>
+          <div class="hstat"><div class="hstat-n" id="homeExCount2">0</div><div class="hstat-l">Übungen</div></div>
           <div class="hstat"><div class="hstat-n">8</div><div class="hstat-l">Kategorien</div></div>
           <div class="hstat"><div class="hstat-n" id="statPlans">0</div><div class="hstat-l">Meine Pläne</div></div>
           <div class="hstat"><div class="hstat-n">12k</div><div class="hstat-l">Community</div></div>
@@ -1497,8 +1543,11 @@ html, body {
         </div>
         <div class="lib-main">
           <div class="lib-header">
-            <h2>Übungsbibliothek</h2>
-            <span class="results-count" id="drillCount">9 Übungen</span>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <h2>Übungsbibliothek</h2>
+              <span class="results-count" id="drillCount">0 Übungen</span>
+            </div>
+            <button class="comm-new-btn" onclick="openDrillEditor()">+ Neue Übung</button>
           </div>
           <div class="drills-grid" id="drillsGrid"></div>
         </div>
@@ -1755,26 +1804,17 @@ html, body {
             <div class="tb-sep"></div>
             <button class="entity-btn" onclick="setMovementMode(null)" id="btn-select-mode">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="margin-right:5px;vertical-align:middle"><path d="M3 2L13 8L8 9.5L6 14L3 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg>Auswählen</button>
-            <div class="tb-sep"></div>
-            <span class="tb-label">Zoom</span>
-            <button class="entity-btn" onclick="adjustZoom(0.25)" title="Einzoomen">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="7" y1="4.5" x2="7" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
-            <button class="entity-btn" onclick="adjustZoom(-0.25)" title="Auszoomen">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
-            <button class="entity-btn" onclick="resetZoom()" title="Zoom zurücksetzen">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="vertical-align:middle"><path d="M3 8 A5 5 0 1 1 5 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><polyline points="3,5 3,8 6,8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
           </div>
         </div>
 
         <!-- CANVAS -->
         <div class="board-canvas-area" id="boardArea">
-          <svg class="field-bg" id="fieldSvg" viewBox="0 0 100 65" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Full field by default - replaced dynamically -->
-            <rect width="100" height="65" fill="none"/>
-          </svg>
-          <canvas id="drawCanvas"></canvas>
-          <canvas id="animCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
-          <div id="playerLayer"></div>
+          <div class="board-field-container" id="boardFieldContainer">
+            <canvas id="fieldCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+            <canvas id="drawCanvas"></canvas>
+            <canvas id="animCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+            <div id="playerLayer"></div>
+          </div>
         </div>
 
         <!-- PLAYBACK BAR -->
@@ -2271,23 +2311,24 @@ html, body {
 
 <!-- Übungs-Detail Modal -->
 <div id="drillDetailOverlay" onclick="if(event.target===this)closeDrillDetail()" style="display:none;position:fixed;inset:0;background:rgba(17,24,39,0.5);z-index:8700;align-items:center;justify-content:center">
-  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;width:min(560px,95vw);max-height:88vh;overflow-y:auto;position:relative">
-    <!-- Pitch header -->
-    <div id="ddPitch" style="height:180px;background:linear-gradient(160deg,#0d2e18,#1e5c2e);position:relative;border-radius:14px 14px 0 0;overflow:hidden">
-      <svg viewBox="0 0 560 180" style="width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
-        <rect width="560" height="180" fill="none"/>
-        <rect x="28" y="12" width="504" height="156" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <line x1="280" y1="12" x2="280" y2="168" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <circle cx="280" cy="90" r="40" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <circle cx="280" cy="90" r="3" fill="rgba(255,255,255,0.5)"/>
-        <rect x="28" y="50" width="70" height="80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-        <rect x="462" y="50" width="70" height="80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-      </svg>
-      <span id="ddLvlBadge" style="position:absolute;top:12px;right:14px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,0.3);color:#fff;letter-spacing:0.3px"></span>
-      <button onclick="closeDrillDetail()" style="position:absolute;top:12px;left:14px;background:rgba(0,0,0,0.3);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;width:min(860px,95vw);max-height:92vh;display:flex;flex-direction:column;position:relative">
+    <!-- Animation Player -->
+    <div class="dd-anim-wrap" id="ddAnimWrap" style="flex-shrink:0">
+      <canvas class="dd-anim-canvas" id="ddAnimCanvas"></canvas>
+      <span id="ddLvlBadge" style="position:absolute;top:12px;right:14px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,0.3);color:#fff;letter-spacing:0.3px;z-index:1"></span>
+      <button onclick="closeDrillDetail()" style="position:absolute;top:12px;left:14px;background:rgba(0,0,0,0.3);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;z-index:1">✕</button>
+      <div class="dd-anim-controls" id="ddAnimControls" style="display:none">
+        <button class="dd-anim-btn" id="ddAnimPlay" onclick="ddAnimToggle()">▶</button>
+        <div class="dd-anim-bar" id="ddAnimBar" onclick="ddAnimSeek(event)">
+          <div class="dd-anim-bar-fill" id="ddAnimFill"></div>
+        </div>
+        <span class="dd-anim-time" id="ddAnimTime">0.0s / 0.0s</span>
+        <button class="dd-anim-speed" id="ddAnimSpeedBtn" onclick="ddAnimCycleSpeed()">1x</button>
+      </div>
+      <div class="dd-no-anim" id="ddNoAnim">Keine Animation hinterlegt</div>
     </div>
     <!-- Body -->
-    <div style="padding:24px 28px 28px">
+    <div style="padding:24px 28px 28px;overflow-y:auto;flex:1;min-height:0">
       <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px" id="ddCat"></div>
       <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:#111827;margin-bottom:16px" id="ddTitle"></div>
       <!-- Meta row -->
@@ -2305,6 +2346,93 @@ html, body {
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     DRILL EDITOR OVERLAY
+═══════════════════════════════════════════ -->
+<div id="drillEditorOverlay" style="display:none;position:fixed;inset:0;background:rgba(17,24,39,0.6);z-index:9000;overflow-y:auto">
+  <div class="de-wrap">
+    <div class="de-header">
+      <div style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:#111827">Übung erstellen</div>
+      <button onclick="closeDrillEditor()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1">✕</button>
+    </div>
+
+    <!-- Metadata -->
+    <div class="de-section">
+      <div class="de-row">
+        <div class="de-field" style="flex:2"><label class="de-label">Name</label><input type="text" id="deName" class="de-input" placeholder="z.B. Pasdreieck 1-2"></div>
+        <div class="de-field"><label class="de-label">Kategorie</label>
+          <select id="deCat" class="de-input">
+            <option>Passspiel</option><option>Dribbling</option><option>Torschuss</option><option>Taktik</option>
+            <option>Aufwärmen</option><option>Ausdauer</option><option>Ballkontrolle</option><option>Koordination</option>
+          </select>
+        </div>
+      </div>
+      <div class="de-row">
+        <div class="de-field"><label class="de-label">Niveau</label>
+          <select id="deLvl" class="de-input"><option>Anfänger</option><option>Fortgeschritten</option><option>Profi</option></select>
+        </div>
+        <div class="de-field"><label class="de-label">Spieler</label><input type="text" id="dePlayers" class="de-input" placeholder="z.B. 3 oder 6+"></div>
+        <div class="de-field"><label class="de-label">Dauer (Min)</label><input type="number" id="deDur" class="de-input" value="10" min="1"></div>
+      </div>
+      <div class="de-field"><label class="de-label">Beschreibung</label><textarea id="deDesc" class="de-input" rows="2" placeholder="Kurze Beschreibung der Übung…"></textarea></div>
+      <div class="de-field"><label class="de-label">Tags (kommagetrennt)</label><input type="text" id="deTags" class="de-input" placeholder="z.B. Kurzpass, Bewegung, Timing"></div>
+    </div>
+
+    <!-- Animation Editor -->
+    <div class="de-section">
+      <div class="de-label" style="margin-bottom:10px">Animation</div>
+
+      <!-- Entity toolbar -->
+      <div class="de-toolbar">
+        <button class="de-tool-btn" onclick="deAddEntity('player','#e8614e')" title="Angreifer hinzufügen">
+          <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e8614e" stroke="#fff" stroke-width="1.5"/><text x="10" y="10" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="9" font-weight="bold" font-family="Oswald">A</text></svg>
+          Angreifer
+        </button>
+        <button class="de-tool-btn" onclick="deAddEntity('player','#4fa3e0')" title="Verteidiger hinzufügen">
+          <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#4fa3e0" stroke="#fff" stroke-width="1.5"/><text x="10" y="10" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="9" font-weight="bold" font-family="Oswald">V</text></svg>
+          Verteidiger
+        </button>
+        <button class="de-tool-btn" onclick="deAddEntity('gk','#f0bc2e')" title="Torwart hinzufügen">
+          <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f0bc2e" stroke="#fff" stroke-width="1.5"/><text x="10" y="10" text-anchor="middle" dominant-baseline="central" fill="#333" font-size="8" font-weight="bold" font-family="Oswald">TW</text></svg>
+          Torwart
+        </button>
+        <button class="de-tool-btn" onclick="deAddEntity('ball','')" title="Ball hinzufügen">⚽ Ball</button>
+        <span class="de-tool-sep"></span>
+        <button class="de-tool-btn" onclick="deAddEquip('cone')" title="Hütchen">🔶 Hütchen</button>
+        <button class="de-tool-btn" onclick="deAddEquip('pole')" title="Stange">| Stange</button>
+        <button class="de-tool-btn" onclick="deAddEquip('mannequin')" title="Dummy">🧍 Dummy</button>
+        <span class="de-tool-sep"></span>
+        <button class="de-tool-btn de-tool-del" onclick="deDeleteSelected()" title="Ausgewähltes löschen">✕ Löschen</button>
+      </div>
+
+      <!-- Canvas -->
+      <div class="de-canvas-wrap" id="deCanvasWrap">
+        <canvas id="deCanvas" class="de-canvas"></canvas>
+      </div>
+
+      <!-- Phase timeline -->
+      <div class="de-phase-bar">
+        <div class="de-phase-tabs" id="dePhaseTabs"></div>
+        <button class="de-phase-add" onclick="deAddPhase()" title="Phase hinzufügen">+ Phase</button>
+        <button class="de-phase-add" onclick="deRemovePhase()" title="Letzte Phase entfernen" style="background:#fee2e2;color:#991b1b;border-color:#fecaca">– Phase</button>
+        <span class="de-tool-sep"></span>
+        <label class="de-label" style="margin:0;font-size:12px">Phasendauer (Sek):</label>
+        <input type="number" id="dePhaseDur" class="de-input" style="width:60px;padding:4px 8px;font-size:13px" value="2" min="0.5" step="0.5" onchange="deUpdatePhaseDur()">
+        <span class="de-tool-sep"></span>
+        <button class="de-tool-btn" onclick="dePreview()" style="background:#1e5c2e;color:#fff;border-color:#1e5c2e">▶ Vorschau</button>
+      </div>
+
+      <div class="de-hint">Platziere Elemente auf dem Feld. Wechsle zwischen Phasen und verschiebe die Elemente, um die Bewegung zu definieren.</div>
+    </div>
+
+    <!-- Save -->
+    <div class="de-actions">
+      <button class="btn-login" style="max-width:220px;padding:12px 24px;font-size:15px" onclick="deSaveDrill()">Übung speichern</button>
+      <button onclick="closeDrillEditor()" style="padding:12px 24px;border-radius:8px;border:1px solid #e5e7eb;background:transparent;color:#6b7280;font-family:'Source Sans 3',sans-serif;font-size:14px;cursor:pointer">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toastEl"><span class="toast-icon" id="toastIcon">✔</span><span id="toastMsg"></span></div>
 
 <script>
@@ -2312,171 +2440,7 @@ html, body {
    DATA
 ════════════════════════════════════ */
 const DRILLS = [
-  /* ── PASSSPIEL (25) ── */
-  {id:1,  name:'Pasdreieck 1-2',            cat:'Passspiel',     lvl:'Anfänger',      players:'3',   dur:10, icon:'⚡', desc:'Drei Spieler üben schnelle 1-2 Kombinationen im Dreieck. Nach jedem Pass folgt ein Positionswechsel. Fokus auf genaue Ballabgabe und Laufweg.',                                               tags:['Kurzpass','Bewegung','Timing']},
-  {id:2,  name:'Rondo 5 gegen 2',           cat:'Passspiel',     lvl:'Fortgeschritten',players:'7',  dur:15, icon:'🔄', desc:'Klassisches Rondo mit zwei Pressern in der Mitte. Die äußeren Spieler halten den Ball mit maximal zwei Kontakten. Pressen nach Ballverlust.',                                              tags:['Ballbesitz','Pressing','Rondo']},
-  {id:3,  name:'Rondo 6 gegen 2',           cat:'Passspiel',     lvl:'Anfänger',      players:'8',   dur:12, icon:'🔄', desc:'Sechs Spieler im Außenring halten den Ball gegen zwei Preller. Betonung auf Wandpässe, Körperstellung und Antizipation der Mitspieler.',                                                tags:['Rondo','Ballbesitz','Körperstellung']},
-  {id:4,  name:'Passgasse mit Doppelpass',   cat:'Passspiel',     lvl:'Anfänger',      players:'4',   dur:10, icon:'⚡', desc:'Zwei Kolonnen gegenüber, Spieler spielt in die Gasse, erhält Doppelpass und spielt weiter. Wechsel der Kolonne nach Ausführung.',                                                        tags:['Doppelpass','Gasse','Technik']},
-  {id:5,  name:'Kombinationsspiel 3+1',      cat:'Passspiel',     lvl:'Profi',         players:'8',   dur:20, icon:'⚡', desc:'Kleinfeldspiel mit neutralem Joker, der immer mit der ballbesitzenden Mannschaft spielt. Fördert schnelles Umschalten und Positionsrotation.',                                         tags:['Joker','Kleinfeld','Umschalten']},
-  {id:6,  name:'Viereck-Passspiel',          cat:'Passspiel',     lvl:'Anfänger',      players:'4',   dur:10, icon:'⚡', desc:'Vier Spieler an den Ecken eines 10x10m Vierecks passen reihum. Variante: Diagonalpässe einbauen, Tempo erhöhen, Ein-Kontakt-Pässe.',                                                   tags:['Kurzpass','Technik','Aufwärmen']},
-  {id:7,  name:'Passstaffel mit Lauf',       cat:'Passspiel',     lvl:'Anfänger',      players:'6',   dur:12, icon:'⚡', desc:'Spieler passt, läuft zur nächsten Station, erhält Rückpass. Kette aus 4 Stationen auf 30m. Fokus auf Timing des Anlaufens und Ballannahme.',                                           tags:['Staffel','Lauf','Annahme']},
-  {id:8,  name:'Wandpass-Stafette',          cat:'Passspiel',     lvl:'Anfänger',      players:'5',   dur:10, icon:'⚡', desc:'Spieler A passt zu B, B spielt Wand zu C, C passt zurück zu A. Rotation nach jeder Runde. Geeignet als Aufwärmform.',                                                                  tags:['Wandpass','Aufwärmen','Rotation']},
-  {id:9,  name:'Raute Passspiel',            cat:'Passspiel',     lvl:'Fortgeschritten',players:'5',  dur:15, icon:'⚡', desc:'Fünf Spieler in Rautenformation. Passen mit fester Laufregel: Pass diagonal = Lauf gerade. Fördert Raumwahrnehmung und Kommunikation.',                                               tags:['Raute','Laufwege','Timing']},
-  {id:10, name:'Kombinationskreis',          cat:'Passspiel',     lvl:'Fortgeschritten',players:'8',  dur:15, icon:'🔄', desc:'Acht Spieler im Kreis, zwei Bälle gleichzeitig im Umlauf. Abwechselnd kurze und lange Pässe. Erhöht kognitive Belastung und Reaktionsschnelligkeit.',                               tags:['Kreis','Zwei Bälle','Reaktion']},
-  {id:11, name:'Pressing-Rondo 4+2 vs 4',   cat:'Passspiel',     lvl:'Fortgeschritten',players:'10', dur:20, icon:'🔄', desc:'Vier Außenspieler und zwei Joker im Innenraum gegen vier Preller. Joker entscheiden ob sie pressen oder anbieten. Hohe taktische Anforderung.',                                       tags:['Rondo','Pressing','Taktik']},
-  {id:12, name:'Langer Ball & Folgeaktion',  cat:'Passspiel',     lvl:'Fortgeschritten',players:'6',  dur:15, icon:'⚡', desc:'Innenverteidiger spielt langen Diagonalball auf wechselnde Positionen. Empfänger nimmt mit und kombiniert sofort mit anlaufendem Mitspieler.',                                         tags:['Langer Ball','Diagonale','Folgeaktion']},
-  {id:13, name:'1-2 Kombination auf Tor',    cat:'Passspiel',     lvl:'Fortgeschritten',players:'5',  dur:15, icon:'🥅', desc:'Kombination über drei Stationen mit abschließendem Torschuss. Station 1: Doppelpass. Station 2: Hereingabe. Station 3: Abschluss.',                                                  tags:['Kombination','Abschluss','Spielzug']},
-  {id:14, name:'Passdreieck in Bewegung',    cat:'Passspiel',     lvl:'Anfänger',      players:'3',   dur:10, icon:'⚡', desc:'Drei Spieler bewegen sich ständig und passen in Bewegung. Keine festen Positionen. Fördert Orientierung ohne Ball und Spielübersicht.',                                               tags:['Bewegung','Orientierung','Kommunikation']},
-  {id:15, name:'Dreieckspassspiel mit Zug',  cat:'Passspiel',     lvl:'Profi',         players:'6',   dur:20, icon:'⚡', desc:'Zwei Dreiecke, die ineinandergreifen. Pässe folgen festgelegtem Muster mit wechselnden Zugläufen hinter den Passempfänger. Hohe Intensität.',                                         tags:['Laufwege','Muster','Intensität']},
-  {id:16, name:'Steilpass & Tiefenlauf',     cat:'Passspiel',     lvl:'Fortgeschritten',players:'4',  dur:12, icon:'⚡', desc:'Außenspieler bietet sich an, erhält Steilpass in die Tiefe, nimmt mit und flankt oder schließt ab. Wechsel nach drei Aktionen.',                                                     tags:['Steilpass','Tiefe','Flanke']},
-  {id:17, name:'Sechser-Passzirkel',         cat:'Passspiel',     lvl:'Anfänger',      players:'6',   dur:10, icon:'🔄', desc:'Sechs Spieler passen in vorgegebenem Muster: Immer zum übernächsten Spieler. Erfordert Antizipation und genaue Technik.',                                                            tags:['Zirkel','Antizipation','Technik']},
-  {id:18, name:'Druck-Rondo 3 vs 1',        cat:'Passspiel',     lvl:'Anfänger',      players:'4',   dur:10, icon:'🔄', desc:'Drei gegen einen auf kleinem Feld (5x5m). Preller versucht den Ball zu gewinnen. Außenspieler mit maximal zwei Kontakten.',                                                          tags:['Rondo','Pressing','Kleinfeld']},
-  {id:19, name:'Zuspiel auf Zeit',           cat:'Passspiel',     lvl:'Anfänger',      players:'4',   dur:10, icon:'⚡', desc:'Zwei Paare passen gegeneinander auf Zeit: Wer schafft mehr Pässe in 60 Sekunden ohne Fehler? Klare Distanz von 10m, direkter Kontakt.',                                             tags:['Wettbewerb','Technik','Direktpass']},
-  {id:20, name:'Spielaufbau 3-2-1',         cat:'Passspiel',     lvl:'Profi',         players:'9',   dur:25, icon:'🧠', desc:'Strukturierter Spielaufbau von hinten: Drei Innenverteidiger spielen auf zwei Mittelfeldstürmer, die auf einen Stürmer spielen. Angreifer pressen simuliert.',                       tags:['Spielaufbau','Struktur','Pressing']},
-  {id:21, name:'Gegenpressing nach Verlust', cat:'Passspiel',     lvl:'Profi',         players:'8',   dur:20, icon:'🔄', desc:'5 vs 3 auf kleinem Feld. Nach Ballverlust sofortiges Gegenpressing der ballbesitzenden Mannschaft. Fokus auf Umschaltmoment.',                                                       tags:['Gegenpressing','Umschalten','Intensität']},
-  {id:22, name:'Passviereck diagonal',       cat:'Passspiel',     lvl:'Fortgeschritten',players:'5',  dur:12, icon:'⚡', desc:'Viereck mit einem Joker in der Mitte. Pässe dürfen nur diagonal gespielt werden. Joker bewegt sich frei. Fördert Winkelläufe und Timing.',                                          tags:['Diagonal','Joker','Winkel']},
-  {id:23, name:'Positionsspiel 4+1 vs 4',   cat:'Passspiel',     lvl:'Profi',         players:'9',   dur:25, icon:'🔄', desc:'Vier Spieler mit einem Joker gegen vier Gegner auf 20x20m. Ziel: Zehn Pässe am Stück ohne Ballverlust. Pressen nach Verlust.',                                                      tags:['Positionsspiel','Ballbesitz','Pressen']},
-  {id:24, name:'Langpass-Technik',           cat:'Passspiel',     lvl:'Fortgeschritten',players:'3',  dur:15, icon:'⚡', desc:'Zwei Spieler auf 30-40m Abstand spielen Langpässe flach und in der Luft. Dritter Spieler als bewegliches Ziel in der Mitte. Fokus auf Passhärte und Richtung.',                   tags:['Langpass','Technik','Präzision']},
-  {id:25, name:'Tor-zu-Tor Passspiel',       cat:'Passspiel',     lvl:'Fortgeschritten',players:'6',  dur:15, icon:'⚡', desc:'Zwei Teams versuchen den Ball von Tor zu Tor zu spielen (keine Tore, nur Linien). Gegner darf pressen. Direktpass-Regel für Fortgeschrittene.',                                     tags:['Spielform','Direktpass','Pressung']},
-
-  /* ── DRIBBLING (20) ── */
-  {id:26, name:'Slalom mit Tempowechsel',    cat:'Dribbling',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🏃', desc:'Hütchenparcours mit 6 Stangen im Abstand von 1,5m. Slalom im Tempo, nach letzter Stange Sprint auf 10m. Beide Füße nutzen.',                                                          tags:['Slalom','Tempo','Technik']},
-  {id:27, name:'1 gegen 1 im Korridor',      cat:'Dribbling',     lvl:'Fortgeschritten',players:'4+', dur:12, icon:'🛡️', desc:'Zwei Spieler im 5m breiten Korridor. Angreifer versucht den Verteidiger zu überspielen und die Linie zu überqueren. Fokus auf Körpertäuschung.',                                  tags:['Zweikampf','Täuschung','Technik']},
-  {id:28, name:'Ballmitnahme & Antritt',     cat:'Dribbling',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🎯', desc:'Ball wird hoch geworfen oder zugespielt, Spieler nimmt mit in verschiedene Richtungen, direkt danach Antritt über 10m. Alle vier Richtungen trainieren.',                           tags:['Ballmitnahme','Antritt','Schnelligkeit']},
-  {id:29, name:'Dribbelparcours mit Abschluss',cat:'Dribbling',   lvl:'Anfänger',      players:'2+',  dur:12, icon:'🏃', desc:'Parcours aus Hütchen, Stangen und Slalomtoren, abgeschlossen mit Torschuss. Wettbewerbscharakter durch Zeitnahme möglich.',                                                          tags:['Parcours','Abschluss','Wettbewerb']},
-  {id:30, name:'Stangendribbling Tempo',     cat:'Dribbling',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🏃', desc:'Sechs Stangen auf 2m Abstand. Spieler dribbling im Wechsel innen-außen durch alle Stangen. Variante: Auf Signal Richtungswechsel.',                                                tags:['Stangen','Technik','Koordination']},
-  {id:31, name:'Fintenübung: Übersteiger',   cat:'Dribbling',     lvl:'Anfänger',      players:'1+',  dur:10, icon:'🎯', desc:'Übersteiger mit rechts und links auf der Stelle, dann im Lauf. Partner gibt Richtungssignal. Anwendung in 1v1-Situation am Ende.',                                                  tags:['Finten','Übersteiger','1v1']},
-  {id:32, name:'Dribbling unter Druck',      cat:'Dribbling',     lvl:'Fortgeschritten',players:'6+', dur:15, icon:'🏃', desc:'Vier Spieler mit Ball auf engem Feld (10x10m). Zwei Spieler ohne Ball versuchen Bälle rauszuschieben. Ständige Körpertäuschungen nötig.',                                          tags:['Druck','Körpertäuschung','Kleinfeld']},
-  {id:33, name:'Hütchenraub',                cat:'Dribbling',     lvl:'Anfänger',      players:'8+',  dur:10, icon:'🎯', desc:'Jeder Spieler hat Ball und eigenes Hütchen. Aufgabe: Fremde Hütchen klauen, eigenes schützen. Fördert Ballsicherheit und Übersicht gleichzeitig.',                                 tags:['Spielform','Übersicht','Ballsicherheit']},
-  {id:34, name:'Tempo-Dribbling gerades Feld',cat:'Dribbling',    lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🏃', desc:'Sprint mit Ball über 20m, Ball vor dem Fuß treiben. Variante: Ball nur mit Außenrist, nur mit Innenrist, alternierend. Fokus auf flachen Ball.',                                   tags:['Tempo','Technik','Sprint']},
-  {id:35, name:'1 gegen 1 auf zwei Tore',    cat:'Dribbling',     lvl:'Fortgeschritten',players:'4+', dur:12, icon:'🛡️', desc:'Zwei Ministore gegenüber auf 15m Abstand. 1v1 mit Torabschluss. Verlierter wird zum Torwart. Drei Tore Wechsel.',                                                                 tags:['1v1','Abschluss','Wettbewerb']},
-  {id:36, name:'Lückendribbling',            cat:'Dribbling',     lvl:'Anfänger',      players:'6+',  dur:10, icon:'🏃', desc:'Spieler mit Bällen navigieren durch stehende Mitspieler als Hindernisse. Auf Signal: Hindernisse aktivieren sich und pressen.',                                                     tags:['Hindernisse','Reaktion','Signal']},
-  {id:37, name:'Schlangenline mit Pass',     cat:'Dribbling',     lvl:'Anfänger',      players:'4',   dur:10, icon:'🏃', desc:'Spieler dribbliert durch Linie von Mitspielern im Zickzack, passt am Ende auf nächsten Spieler. Rotation nach jedem Durchgang.',                                                   tags:['Slalom','Pass','Rotation']},
-  {id:38, name:'Raumaufteilung 1v1',         cat:'Dribbling',     lvl:'Fortgeschritten',players:'8+', dur:15, icon:'🛡️', desc:'Vier 1v1-Duelle gleichzeitig auf dem Feld. Schiedsrichter pfiff = alle Zweikämpfe starten gleichzeitig. Intensiv, kurze Einheiten.',                                              tags:['1v1','Zweikampf','Simultán']},
-  {id:39, name:'Dribbeln mit Orientierung',  cat:'Dribbling',     lvl:'Anfänger',      players:'4+',  dur:10, icon:'🎯', desc:'Spieler dribbliert frei im Feld, schaut auf Trainer-Signal (Farb-Hütchen, Finger). Ball immer am Fuß. Fördert Kopf oben halten.',                                                 tags:['Orientierung','Kopf hoch','Signal']},
-  {id:40, name:'Dribbling-Turnier',          cat:'Dribbling',     lvl:'Fortgeschritten',players:'8+', dur:20, icon:'🏆', desc:'Knockout-Turnier im 1v1 auf Mini-Tore. Jeder Spieler tritt gegen alle anderen an. Punkte für Durchsetzen, Tore, faire Zweikämpfe.',                                               tags:['Turnier','1v1','Wettbewerb']},
-  {id:41, name:'Fintenschule',               cat:'Dribbling',     lvl:'Anfänger',      players:'1+',  dur:10, icon:'🎯', desc:'Systematisches Einüben von Finten: Außen-Innen-Schritt, Elastico, Rivelino, Stop-and-Go. Jede Finte 5 Minuten mit Links und Rechts.',                                             tags:['Finten','Technik','Schulung']},
-  {id:42, name:'Pressingfestes Dribbling',   cat:'Dribbling',     lvl:'Profi',         players:'6+',  dur:15, icon:'🏃', desc:'Kleiner Raum, 3 vs 1. Der Eine behält den Ball gegen drei Presser so lange wie möglich. Zeitnahme. Fokus auf Körperschutz und Wendigkeit.',                                        tags:['Pressing','Körperschutz','Intensität']},
-  {id:43, name:'Dribbling mit Ablagen',      cat:'Dribbling',     lvl:'Fortgeschritten',players:'5',  dur:12, icon:'🏃', desc:'Spieler dribbliert auf Ablagestationen zu, hinterlegt Ball und nimmt neuen Ball mit. Vier Stationen auf 20m x 20m. Sprint zwischen Stationen.',                                   tags:['Ablage','Sprint','Koordination']},
-  {id:44, name:'Fahrtspiel mit Ball',        cat:'Dribbling',     lvl:'Anfänger',      players:'6+',  dur:12, icon:'🏃', desc:'Freies Dribbeln auf dem Feld: Auf Trainerkommando Richtung wechseln, stehenbleiben, Ball wechseln mit Mitspieler. Macht Spaß, fördert Ballgefühl.',                               tags:['Fahrtspiel','Reaktion','Ballgefühl']},
-  {id:45, name:'Dribbeln durch Raumzonen',   cat:'Dribbling',     lvl:'Fortgeschritten',players:'6+', dur:15, icon:'🏃', desc:'Feld in drei Zonen: In Zone 1 nur links, Zone 2 beliebig, Zone 3 nur rechts. Spieler navigieren mit Ball durch alle Zonen unter Gegnerdruck.',                                    tags:['Zonen','Schwacher Fuß','Druck']},
-
-  /* ── TORSCHUSS (20) ── */
-  {id:46, name:'Torschuss aus der Drehung',  cat:'Torschuss',     lvl:'Fortgeschritten',players:'4',  dur:15, icon:'🥅', desc:'Zuspiel von hinten, Spieler dreht sich, nimmt mit und schießt. Variante: Flanke von der Seite, Drehung unter Gegnerdruck.',                                                        tags:['Drehung','Abschluss','Technik']},
-  {id:47, name:'Volley & Dropkick',          cat:'Torschuss',     lvl:'Profi',         players:'3+',  dur:15, icon:'🥅', desc:'Torhüter wirft hoch, Spieler verarbeitet auf Volley oder Dropkick. Variante: Flanke von der Seite, Abschluss auf Zeit. Enger Torraum.',                                          tags:['Volley','Dropkick','Abschluss']},
-  {id:48, name:'Direktabnahme nach Flanke',  cat:'Torschuss',     lvl:'Fortgeschritten',players:'5',  dur:15, icon:'🥅', desc:'Flanke von links und rechts, zwei Stürmer kommen aus verschiedenen Winkeln. Fokus auf richtigen Zeitpunkt und Schussgenauigkeit bei Direktabnahme.',                              tags:['Flanke','Direktabnahme','Timing']},
-  {id:49, name:'Torschuss nach Hinterlaufen',cat:'Torschuss',     lvl:'Fortgeschritten',players:'4',  dur:12, icon:'🥅', desc:'Spieler A passt auf B, hinterläuft, B spielt Rückpass in den Lauf. Abschluss direkt oder mit einer Ballmitnahme.',                                                               tags:['Hinterlaufen','Abschluss','Laufweg']},
-  {id:50, name:'Schuss nach 1-2',            cat:'Torschuss',     lvl:'Anfänger',      players:'4',   dur:10, icon:'🥅', desc:'Doppelpass mit Mitspieler am Strafraum, Abschluss direkt oder nach Annahme. Variante: Anspiel von der Seite, Doppelpass, Schuss.',                                               tags:['Doppelpass','Abschluss','Einfach']},
-  {id:51, name:'Aufsetzer & Flachschuss',    cat:'Torschuss',     lvl:'Anfänger',      players:'2+',  dur:10, icon:'🥅', desc:'Spieler schießen aus verschiedenen Positionen auf 16m. Torhüter aktiv. Auswertung nach Tortreffern. Fokus auf Schuss-Genauigkeit statt Kraft.',                                  tags:['Genauigkeit','Technik','Torhüter']},
-  {id:52, name:'Torschuss nach Dribbling',   cat:'Torschuss',     lvl:'Anfänger',      players:'2+',  dur:12, icon:'🥅', desc:'Spieler dribbliert auf Außenring zu, überläuft Hütchen, schießt aus spitzem Winkel. Wechsel der Seiten. Tor mit Innenrist und Außenrist.',                                      tags:['Dribbling','Winkel','Technik']},
-  {id:53, name:'Schusswand Kombiniert',      cat:'Torschuss',     lvl:'Profi',         players:'6+',  dur:20, icon:'🥅', desc:'Drei Spieler kombinieren im Mittelfeld, vierter startet tief, erhält Steilpass und schließt ab. Gegenspieler macht leichten Druck. Volle Spielgeschwindigkeit.',                 tags:['Kombination','Steilpass','Spielgeschwindigkeit']},
-  {id:54, name:'Penaltytraining',            cat:'Torschuss',     lvl:'Anfänger',      players:'3+',  dur:10, icon:'🥅', desc:'Standardmäßiges Elfmeterschießen mit Fokus auf Anlaufrhythmus, Blickkontakt zum Tor und Schuss-Entscheidung. Torhüter analysiert Stärken.',                                     tags:['Elfmeter','Technik','Psyche']},
-  {id:55, name:'Sturmzentrum Abschluss',     cat:'Torschuss',     lvl:'Fortgeschritten',players:'6',  dur:15, icon:'🥅', desc:'Stürmer im Sturmzentrum, Zuspiel von zwei Seiten, Stürmer entscheidet: Abschluss oder Ablage auf nachrückenden Spieler.',                                                       tags:['Sturmzentrum','Entscheidung','Ablage']},
-  {id:56, name:'Stangentor-Torschuss',       cat:'Torschuss',     lvl:'Anfänger',      players:'2+',  dur:10, icon:'🥅', desc:'Kleines Stangentor (2m breit) auf 12m Distanz. Spieler schießen auf Genauigkeit, kein Torhüter. Variante: Hütchentore in den Ecken als Zusatzziel.',                            tags:['Genauigkeit','Miniatur','Technik']},
-  {id:57, name:'Torschuss nach Konter',      cat:'Torschuss',     lvl:'Profi',         players:'6+',  dur:20, icon:'🥅', desc:'3 vs 2 Kontersituation nach Ballgewinn. Drei Spieler starten aus eigener Hälfte, zwei Verteidiger kommen zurück. Abschluss unter Zeitdruck.',                                   tags:['Konter','3v2','Zeitdruck']},
-  {id:58, name:'Weitschuss-Training',        cat:'Torschuss',     lvl:'Fortgeschritten',players:'3+', dur:12, icon:'🥅', desc:'Spieler schießen aus 25-30m auf Tor. Torhüter aktiv. Fokus auf Balance, Standbein und Treffpunkt am Ball. Nur bei technisch sicherem Niveau.',                                  tags:['Weitschuss','Technik','Torhüter']},
-  {id:59, name:'Kopfball-Abschluss',         cat:'Torschuss',     lvl:'Fortgeschritten',players:'4+', dur:12, icon:'🥅', desc:'Flanken von rechts und links, Stürmer und nachrückende Mittelfeldspieler köpfen aufs Tor. Variante: Abwehrspieler stört aktiv.',                                               tags:['Kopfball','Flanke','Lufthoheit']},
-  {id:60, name:'Schuss nach Ballkontrolle',  cat:'Torschuss',     lvl:'Anfänger',      players:'2+',  dur:10, icon:'🥅', desc:'Zuspiel aus der Luft, Spieler nimmt mit Brust, Innenrist oder Oberschenkel an und schießt im Anschluss. Zwei Kontakte maximal.',                                               tags:['Ballkontrolle','Annahme','Technik']},
-  {id:61, name:'Torschuss im Lauf',          cat:'Torschuss',     lvl:'Fortgeschritten',players:'3+', dur:12, icon:'🥅', desc:'Spieler startet aus dem Mittelfeld, erhält Steilpass im Lauf und schließt direkt ab ohne abzubremsen. Fokus auf Standbein und Körperhaltung.',                                 tags:['Lauf','Steilpass','Direktschuss']},
-  {id:62, name:'Drehschuss aus Ablage',      cat:'Torschuss',     lvl:'Profi',         players:'4',   dur:15, icon:'🥅', desc:'Stürmer legt kurz ab auf nachrückenden Mittelfeldspieler, dreht sich gleichzeitig in die Tiefe, erhält Steilpass zurück und schließt ab.',                                     tags:['Ablage','Steilpass','Dreher']},
-  {id:63, name:'Schuss an die Latte',        cat:'Torschuss',     lvl:'Fortgeschritten',players:'2+', dur:10, icon:'🥅', desc:'Gezieltes Schießen auf Querlatte und Pfosten als Technikübung. Kein Torhüter. Variante: Zuspiel, Annahme, gezielter Abpraller-Abschluss.',                                    tags:['Genauigkeit','Pfosten','Latte']},
-  {id:64, name:'Torschuss aus zweiter Reihe',cat:'Torschuss',     lvl:'Profi',         players:'5+',  dur:15, icon:'🥅', desc:'Flügelstürmer flankt, Stürmer verlängert auf nachrückenden Mittelfeldspieler der aus zweiter Reihe abschließt. Komplexe Laufwege.',                                             tags:['Zweite Reihe','Flanke','Verlängerung']},
-  {id:65, name:'Konter 2 vs 1',              cat:'Torschuss',     lvl:'Fortgeschritten',players:'5+', dur:15, icon:'🥅', desc:'2 vs 1 Situation nach Ballgewinn. Zwei Angreifer gegen einen Verteidiger auf volles Tor. Schnelle Entscheidung: Abschluss oder Querpass.',                                     tags:['Konter','2v1','Entscheidung']},
-
-  /* ── TAKTIK (20) ── */
-  {id:66, name:'4-4-2 Kompaktes Verschieben',cat:'Taktik',        lvl:'Profi',         players:'11+', dur:35, icon:'🧠', desc:'Taktische Einheit: Kompaktes Verschieben im 4-4-2 gegen variierenden Spielaufbau. Abstand zwischen Linien, Signalgebung des Innenverteidigers.',                                tags:['System','Verschieben','Kompaktheit']},
-  {id:67, name:'Pressing-Trap Außen',        cat:'Taktik',        lvl:'Profi',         players:'8+',  dur:20, icon:'🧠', desc:'Team lockt Gegner auf Außenbahn und schließt Falle mit Doppeln. Signalgeber ist Außenmittelfeldspieler. Koordiniertes Anlaufen im Block.',                                    tags:['Pressing','Falle','Koordination']},
-  {id:68, name:'Umschalten Offensive',       cat:'Taktik',        lvl:'Fortgeschritten',players:'8+', dur:20, icon:'🧠', desc:'Nach Ballgewinn sofort vertikal spielen. Übungsformat: 6 vs 4, Ballgewinn = Counter in 5 Sekunden abschließen. Entwickelt Umschalt-Automatismus.',                           tags:['Umschalten','Konter','Automatismus']},
-  {id:69, name:'Raumdeckung vs. Manndeckung',cat:'Taktik',        lvl:'Fortgeschritten',players:'10+',dur:25, icon:'🧠', desc:'Vergleich beider Systeme in Spielform 5v5+TW. Trainer gibt Kommando für Systemwechsel. Spieler sollen Vor- und Nachteile erspüren.',                                          tags:['System','Abwehr','Vergleich']},
-  {id:70, name:'Hoch verteidigen',           cat:'Taktik',        lvl:'Profi',         players:'11+', dur:30, icon:'🧠', desc:'Mannschaft verteidigt hoch im gegnerischen Drittel. Torwart als Libero, enge Abstimmung Sturm-Mittelfeld. Abkippbewegung bei Ballverlust.',                                  tags:['Hohe Linie','Pressung','Torhüter']},
-  {id:71, name:'Standardsituation Ecke',     cat:'Taktik',        lvl:'Fortgeschritten',players:'9+', dur:15, icon:'🧠', desc:'Zwei Eck-Varianten: Kurzeck mit Doppelpass und Flanke; Langer Eck auf ersten Pfosten mit Ablenkungs-Läufer. Wiederholung unter Spielbedingungen.',                          tags:['Eckball','Standard','Spielzug']},
-  {id:72, name:'Freistoß-Varianten',         cat:'Taktik',        lvl:'Fortgeschritten',players:'9+', dur:15, icon:'🧠', desc:'Drei Freistoß-Varianten aus Halbfeld: Direktschuss, Doppelpass-Abschluss, kurz gespielt und Flanke. Absprache im Team, Signal per Handzeichen.',                            tags:['Freistoß','Standard','Varianten']},
-  {id:73, name:'Einrücken der Außenverteidiger',cat:'Taktik',     lvl:'Profi',         players:'9+',  dur:25, icon:'🧠', desc:'Außenverteidiger rücken ins Zentrum wenn Mitspieler auf Außenbahn. Übungsformat: Spielaufbau 5 vs 3, Fokus auf Positionswechsel AV.',                                       tags:['Außenverteidiger','Einrücken','Struktur']},
-  {id:74, name:'4-3-3 Angriffspressing',     cat:'Taktik',        lvl:'Profi',         players:'11+', dur:30, icon:'🧠', desc:'4-3-3 Pressing-Trigger definieren: Querfehler, schlechter erster Kontakt, Rückpass auf TW. Drei Sturm-Linie presst koordiniert mit festem Abstand.',                       tags:['4-3-3','Pressing','Trigger']},
-  {id:75, name:'Gegenpressing nach Flanke',  cat:'Taktik',        lvl:'Profi',         players:'8+',  dur:20, icon:'🧠', desc:'Nach abgewehrter Flanke sofort Gegenpressing in der Zone. Spezifisch für Außenbahn-Situationen. Fokus auf zweiten Ball und Kompaktheit.',                                   tags:['Gegenpressing','Flanke','Zweiter Ball']},
-  {id:76, name:'Spieleröffnung TW',          cat:'Taktik',        lvl:'Fortgeschritten',players:'8+', dur:20, icon:'🧠', desc:'Torhüter als Spielmacher: kurze Abwürfe auf Innenverteidiger, weite Abwürfe auf Flügel. Mitspieler bieten sich an, Gegner simuliert Druck.',                              tags:['Torhüter','Spielaufbau','Eröffnung']},
-  {id:77, name:'Tiefe Staffelung',           cat:'Taktik',        lvl:'Fortgeschritten',players:'10+',dur:25, icon:'🧠', desc:'Mannschaft stellt tief, zwei Linien von je vier enges Abwehrblock. Spielform: 6 vs 6 auf kleines Feld, Fokus auf Disziplin und Passwege schließen.',                     tags:['Staffelung','Defensivblock','Disziplin']},
-  {id:78, name:'Ballbesitz-Spiel 7vs7',      cat:'Taktik',        lvl:'Fortgeschritten',players:'14+',dur:30, icon:'🧠', desc:'Großes Ballbesitzspiel mit Spielziel: 10 Pässe in Folge = 1 Punkt, Torabschluss = 3 Punkte. Fördert taktisches Denken und Geduld.',                                       tags:['Ballbesitz','Spielform','Punkte']},
-  {id:79, name:'Überzahlspiel 5vs3',         cat:'Taktik',        lvl:'Fortgeschritten',players:'8+', dur:15, icon:'🧠', desc:'5 vs 3 auf großem Feld. Team mit Überzahl muss Raum nutzen und Überladen vermeiden. Team in Unterzahl presst koordiniert.',                                                tags:['Überzahl','Raum','Pressing']},
-  {id:80, name:'Abwehrkette Timing',         cat:'Taktik',        lvl:'Fortgeschritten',players:'6+', dur:15, icon:'🧠', desc:'Vier Abwehrspieler üben Vor- und Zurückrücken auf Trainerkommando. Ball wird flankiert oder steil gespielt, Kette reagiert gemeinsam.',                                    tags:['Abwehrkette','Timing','Linienpiel']},
-  {id:81, name:'Konter aus der Defensive',   cat:'Taktik',        lvl:'Profi',         players:'10+', dur:25, icon:'🧠', desc:'Team wartet tief, gewinnt Ball und startet schnellen Konter. Spezifische Laufwege für Stürmer und Außenspieler. Maximal 4 Pässe bis Abschluss.',                          tags:['Konter','Tiefstand','Schnelligkeit']},
-  {id:82, name:'Pressing-Koordination',      cat:'Taktik',        lvl:'Profi',         players:'11+', dur:30, icon:'🧠', desc:'Vollständiges Team übt koordiniertes Pressing: Trigger, Trap, Abfangen. Phasenweise mit Gegnerdummies, dann gegen lebendigen Gegner.',                                     tags:['Pressing','Koordination','System']},
-  {id:83, name:'Zweikampfsituationen Abwehr', cat:'Taktik',       lvl:'Fortgeschritten',players:'6+', dur:15, icon:'🧠', desc:'Innenverteidiger übt Zweikampf gegen Stürmer im Rücken: Hinsetzen, Körperkontakt, Ball klären. Fokus auf Timing und Foulvermeidung.',                                    tags:['Zweikampf','IV','Stürmer']},
-  {id:84, name:'Doppeln & Abfangen',         cat:'Taktik',        lvl:'Fortgeschritten',players:'6+', dur:15, icon:'🧠', desc:'Zwei Verteidiger doppeln einen Angreifer auf der Außenbahn. Dritter Verteidiger sichert Abfangposition. Koordiniertes Signal durch ersten Verteidiger.',                  tags:['Doppeln','Außenbahn','Koordination']},
-  {id:85, name:'5-3-2 Kompaktheit',          cat:'Taktik',        lvl:'Profi',         players:'11+', dur:30, icon:'🧠', desc:'Defensives 5-3-2 System üben: Verschieben, Abwehrkette mit Vordermann, Mittelfeld schließt Pässe. Offensiv-Szenarien simulieren.',                                        tags:['5-3-2','Kompaktheit','Defensive']},
-
-  /* ── AUFWÄRMEN (20) ── */
-  {id:86, name:'Koordinationslauf ABC',      cat:'Aufwärmen',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🌟', desc:'A-Lauf, Knie hoch, Fersenlauf, Skippings und Seitwärtsgalopp auf 20m Strecke. Zweimal hin und zurück als Aufwärmform vor technischem Training.',                               tags:['Koordination','Laufschule','ABC']},
-  {id:87, name:'Fangen mit Ball',            cat:'Aufwärmen',     lvl:'Anfänger',      players:'6+',  dur:8,  icon:'🌟', desc:'Alle Spieler mit Ball in begrenztem Raum. Zwei Fänger ohne Ball. Wer berührt wird, gibt Ball ab und wird Fänger. Fördert Ballgefühl und Übersicht.',                        tags:['Fangen','Aufwärmen','Ballgefühl']},
-  {id:88, name:'Positionsspiel mit Anfassen',cat:'Aufwärmen',     lvl:'Anfänger',      players:'8+',  dur:8,  icon:'🌟', desc:'Freies Laufen, Trainer ruft Zahl: Spieler bilden Gruppen dieser Größe. Wer zu langsam ist, macht Aufgabe. Aktiviert Reaktion und Teamgefühl.',                              tags:['Reaktion','Team','Aktivierung']},
-  {id:89, name:'Aufwärm-Rondo 4v1',          cat:'Aufwärmen',     lvl:'Anfänger',      players:'5',   dur:8,  icon:'🌟', desc:'Leichtes Aufwärm-Rondo im kleinen Raum. Kein Pressing, nur lockeres Passspiel. Gut zur Aktivierung des Ballgefühls und Kommunikation.',                                    tags:['Rondo','Aktivierung','Ballgefühl']},
-  {id:90, name:'Beweglichkeits-Zirkel',      cat:'Aufwärmen',     lvl:'Anfänger',      players:'1+',  dur:10, icon:'🌟', desc:'Fünf Stationen: Hüfte kreisen, Beinpendel, Ausfallschritte, Kniehebelauf, Fußgelenk-Rotationen. Je 45 Sekunden. Dynamisches Dehnen.',                                     tags:['Dehnen','Beweglichkeit','Zirkel']},
-  {id:91, name:'Farbenspiel',                cat:'Aufwärmen',     lvl:'Anfänger',      players:'8+',  dur:8,  icon:'🌟', desc:'Spieler laufen frei, Trainer ruft Farbe: Alle laufen zum nächsten Hütchen dieser Farbe. Variante: Mit Ball. Aktiviert Aufmerksamkeit und Reaktion.',                      tags:['Reaktion','Signal','Aktivierung']},
-  {id:92, name:'Schwanzfangen',              cat:'Aufwärmen',     lvl:'Anfänger',      players:'8+',  dur:8,  icon:'🌟', desc:'Jeder Spieler hat Leibchen als Schwanz im Hosenbund. Aufgabe: Schwänze anderer klauen, eigenen schützen. Wer Schwanz verliert hilft anderen.',                             tags:['Spielform','Reaktion','Spaß']},
-  {id:93, name:'Ball-Jonglieren Wettkampf',  cat:'Aufwärmen',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🌟', desc:'Spieler jonglieren Ball, Ziel: Persönliche Bestmarke verbessern. Partner-Variante: Abwechselnd jonglieren ohne Bodenkontakt. Fördert Ballgefühl.',                        tags:['Jonglieren','Ballgefühl','Wettbewerb']},
-  {id:94, name:'Strecken-Tempowechsel',      cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Spieler laufen in Kolonne: Langsam, mittel, schnell auf Kommando. Abwechslung durch: Rückwärtslaufen, Seitwärtsgalopp, Hochknieen.',                                      tags:['Laufschule','Tempowechsel','Kolonne']},
-  {id:95, name:'Passaufwärmen 2er-Pärchen',  cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Zwei Spieler passen locker auf 15m. Nach jedem Pass einen Schritt zurück. Auf 30m Distanz wird gewechselt auf Innen- und Außenrist.',                                     tags:['Pärchen','Pass','Aufwärmen']},
-  {id:96, name:'Linienlauf mit Aufgaben',    cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Spieler laufen zwischen Linien: Grundlinie, 16er, Mittellinie. Auf Signal Richtung wechseln. Variante: Auf Signal bestimmte Linie als Aufgabe.',                          tags:['Laufschule','Signal','Ausdauer']},
-  {id:97, name:'Torwart-Aufwärmen',          cat:'Aufwärmen',     lvl:'Anfänger',      players:'2',   dur:10, icon:'🌟', desc:'Torhüter-spezifisches Aufwärmen: Fallen links/rechts, Reaktionsball, kurze Schüsse flach. Partner wirft auf verschiedene Körperstellen. 10 Min.',                         tags:['Torhüter','Reaktion','Fallen']},
-  {id:98, name:'Aufwärmen mit Leibchen-Klauen',cat:'Aufwärmen',   lvl:'Anfänger',      players:'8+',  dur:8,  icon:'🌟', desc:'Wie Schwanzfangen, aber mit Ball. Spieler dribbeln und verteidigen gleichzeitig Leibchen. Kombination aus Ballsicherung und Reaktion.',                                   tags:['Dribbling','Reaktion','Spaß']},
-  {id:99, name:'Dynamisches Dehnen',         cat:'Aufwärmen',     lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🌟', desc:'Ausfallschritte vorwärts, Seitwärts-Schrittfolge, Beinpendel, Armkreisen. Alles in Bewegung, kein statisches Dehnen. Gelenke systematisch mobilisieren.',                tags:['Dehnen','Mobilisation','Vorbeugung']},
-  {id:100,name:'Rücken-an-Rücken Start',     cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Zwei Spieler rücken an rücken, auf Signal drehen und sprinten zum Ball. Variante: Auf Kommando verschiedene Ausgangslagen (sitzen, liegen). Schnell und spaßig.',          tags:['Reaktion','Sprint','Aktivierung']},
-  {id:101,name:'Tier-Laufschule',            cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Spieler imitieren Tierbewegungen: Bären-Crawl, Krebs-Laufen, Frosch-Hüpfen. Aktiviert ungewöhnliche Muskelgruppen und sorgt für Spaß.',                                   tags:['Koordination','Spaß','Muskelgruppen']},
-  {id:102,name:'Reifenparcours',             cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Koordinations-Leiterlübungen mit Reifen auf dem Boden: Einbein, Beidbein, seitlich, überkreuz. Tempo steigern, Variante mit Ball in der Hand.',                           tags:['Reifen','Koordination','Leiter']},
-  {id:103,name:'Kopfball-Aufwärmen',         cat:'Aufwärmen',     lvl:'Anfänger',      players:'4+',  dur:8,  icon:'🌟', desc:'Pärchen werfen sich Ball zu, Abwechselnd köpfen. Höhe variieren. Dritter Spieler zwischen zwei Spielern: Ablenkungs-Kopfball-Kette.',                                     tags:['Kopfball','Aufwärmen','Pärchen']},
-  {id:104,name:'Bierbankspiel ohne Hände',   cat:'Aufwärmen',     lvl:'Anfänger',      players:'8+',  dur:8,  icon:'🌟', desc:'Alle Spieler am Feld: Auf Trainerkommando eine Körperteil-Zahl auf den Boden. Zu langsam = Aufgabe. Fördert Reaktion und Teamgeist.',                                    tags:['Reaktion','Teamgeist','Spaß']},
-  {id:105,name:'Aufwärm-Spiel Käfig',        cat:'Aufwärmen',     lvl:'Anfänger',      players:'6+',  dur:10, icon:'🌟', desc:'Freies Spiel auf kleinem Feld ohne Tore. Kein Körperkontakt, Ball muss immer am Boden bleiben. Lockert die Gruppe auf und fördert Ballgefühl.',                           tags:['Freispiel','Käfig','Aufwärmen']},
-
-  /* ── FITNESS & AUSDAUER (15) ── */
-  {id:106,name:'Intervallläufe 30/30',       cat:'Ausdauer',      lvl:'Anfänger',      players:'1+',  dur:25, icon:'🏃', desc:'30 Sek Sprint, 30 Sek lockeres Traben. 10 Wiederholungen pro Satz, 3 Sätze mit 3 Min Pause. Geeignet für allgemeine Konditionsverbesserung.',                             tags:['Intervall','Sprint','Kondition']},
-  {id:107,name:'Fahrtspiel Fußball',         cat:'Ausdauer',      lvl:'Fortgeschritten',players:'6+', dur:20, icon:'🏃', desc:'Spielform 4 vs 4 auf großem Feld: Auf Trainerkommando alle Spieler laufen einmal ums Feld, dann weiter spielen. Wechsel alle 4 Minuten.',                                  tags:['Fahrtspiel','Spielform','Kondition']},
-  {id:108,name:'Ballausdauer 3v3',           cat:'Ausdauer',      lvl:'Fortgeschritten',players:'9+', dur:20, icon:'🏃', desc:'Drei Gruppen à 3, immer zwei Teams spielen 3 vs 3 auf Ministore, drittes Team pausiert 1 Min, dann Wechsel. Hohe Gesamtlaufleistung.',                                    tags:['3v3','Wechsel','Intensität']},
-  {id:109,name:'Cooper-Test 12min',          cat:'Ausdauer',      lvl:'Anfänger',      players:'1+',  dur:15, icon:'🏃', desc:'Laufen auf dem Feld für 12 Minuten so viel Runden wie möglich. Leistungstest zur Konditionserfassung. Zweimal pro Saison durchführen.',                                   tags:['Cooper','Test','Ausdauer']},
-  {id:110,name:'Sprint-Leiter',              cat:'Ausdauer',      lvl:'Anfänger',      players:'2+',  dur:15, icon:'🏃', desc:'Sprint 5m, Pause 10s, Sprint 10m, Pause 15s, Sprint 15m, Pause 20s, Sprint 20m. Dreimal wiederholen. Steigert anaerobe Kapazität.',                                     tags:['Sprint','Leiter','Anaerob']},
-  {id:111,name:'Zirkeltraining ohne Ball',   cat:'Ausdauer',      lvl:'Anfänger',      players:'4+',  dur:20, icon:'🏃', desc:'Sechs Stationen: Liegestütze, Kniebeugen, Burpees, Seitstütz, Sprungkniebeugen, Klettersprint. Je 45s, 15s Pause, 3 Runden.',                                            tags:['Zirkel','Kraft','Ausdauer']},
-  {id:112,name:'HIT Fußball-Sprints',        cat:'Ausdauer',      lvl:'Profi',         players:'2+',  dur:20, icon:'🏃', desc:'High-Intensity-Training: 6x Sprint über 30m mit Ball, Rücklauf als aktive Pause. Danach 5 Minuten lockeres Spielen zur Regeneration.',                                   tags:['HIT','Sprint','Regeneration']},
-  {id:113,name:'Dauerläufe 2000m',           cat:'Ausdauer',      lvl:'Anfänger',      players:'1+',  dur:15, icon:'🏃', desc:'Lockerer Dauerlauf über 2000m als Aufbau-Ausdauer. Tempo: Unterhaltungsgeschwindigkeit. Gut als Abwärmen oder am Ende der Einheit.',                                     tags:['Dauerlauf','Ausdauer','Grundlage']},
-  {id:114,name:'Passlauf-Kondition',         cat:'Ausdauer',      lvl:'Fortgeschritten',players:'4+', dur:20, icon:'🏃', desc:'Spieler passen und laufen gleichzeitig: 4er-Gruppe passt in Bewegung über 40m Strecke ohne anzuhalten. Drei Runden dann Satzpause.',                                    tags:['Passlauf','Ausdauer','Kombination']},
-  {id:115,name:'Reaktions-Sprints',          cat:'Ausdauer',      lvl:'Anfänger',      players:'4+',  dur:12, icon:'🏃', desc:'Spieler starten auf akustisches oder visuelles Signal: Pfeife, Farbe, Zahlen. Sprint über 15m. Entwickelt Startschnelligkeit und Reaktion.',                             tags:['Reaktion','Sprint','Signal']},
-  {id:116,name:'Kraft-Ausdauer Zirkel',      cat:'Ausdauer',      lvl:'Fortgeschritten',players:'4+', dur:20, icon:'🏃', desc:'Acht Stationen mit Kombinationen: Liegestütz + Sprint, Kniebeuge + Kopfball, Planke + Seitenfall. Fußball-spezifische Belastung.',                                       tags:['Kraftausdauer','Zirkel','Spezifisch']},
-  {id:117,name:'Spielform mit Sprint-Trigger',cat:'Ausdauer',     lvl:'Fortgeschritten',players:'8+', dur:20, icon:'🏃', desc:'Normales Kleinfeld-Spiel, aber nach jedem Tor sprinten alle Spieler einmal ums Feld und sofortiger Neustart. Kondition mit Spielfreude.',                                tags:['Spielform','Sprint','Trigger']},
-  {id:118,name:'3 gegen 3 non-stop',         cat:'Ausdauer',      lvl:'Fortgeschritten',players:'9+', dur:20, icon:'🏃', desc:'3 vs 3 ohne Unterbrechung auf kleinem Feld, Ball immer sofort neu eingeworfen. Maximale Laufleistung durch kurze Pausen. 3 Minuten, 2 Min Pause.',                      tags:['3v3','Intensität','Non-Stop']},
-  {id:119,name:'Hügelläufe',                 cat:'Ausdauer',      lvl:'Fortgeschritten',players:'1+', dur:15, icon:'🏃', desc:'Sprint bergauf, lockeres Zurücklaufen. Steigert maximale Kraftausdauer der Beine. Alternative auf ebenem Feld: Widerstands-Sprint mit Partner.',                         tags:['Hügel','Sprint','Kraft']},
-  {id:120,name:'Boxenstop-Spiel',            cat:'Ausdauer',      lvl:'Fortgeschritten',players:'8+', dur:15, icon:'🏃', desc:'Spielform 4 vs 4: Nach jedem Ballverlust muss das verlierende Team zur eigenen Linie laufen und zurück, bevor sie wieder mitspielen dürfen.',                            tags:['Spielform','Ausdauer','Strafe']},
-
-  /* ── BALLKONTROLLE & TECHNIK (15) ── */
-  {id:121,name:'Jonglage-Variationen',       cat:'Ballkontrolle', lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🎯', desc:'Systematisches Jonglieren: beide Füße, Oberschenkel, Kopf, Schulter. Kombination aller Flächen. Persönliche Bestleistung aufschreiben und verbessern.',                 tags:['Jonglage','Ballgefühl','Technik']},
-  {id:122,name:'Ballmitnahme alle Richtungen',cat:'Ballkontrolle',lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🎯', desc:'Ball wird zugespielt oder hochgeworfen: Mitnahme nach vorne, hinten, links, rechts mit Innen-/Außenrist und Spann. Direkt danach Antritt.',                             tags:['Ballmitnahme','Richtungen','Technik']},
-  {id:123,name:'Volley-Kontrolle',           cat:'Ballkontrolle', lvl:'Fortgeschritten',players:'2+', dur:10, icon:'🎯', desc:'Zwei Spieler: Einer wirft hoch, anderer nimmt auf Volley mit Innenrist, Außenrist oder Oberschenkel an. Sofort zurückspielen ohne Bodenkontakt.',                      tags:['Volley','Annahme','Technik']},
-  {id:124,name:'Trapping-Übung',             cat:'Ballkontrolle', lvl:'Anfänger',      players:'2+',  dur:8,  icon:'🎯', desc:'Spieler A schießt halbhoch auf B. B trappt mit der Fußsohle oder dem Innenrist und spielt zurück. Variante: Aus der Luft stoppen.',                                    tags:['Trapping','Annahme','Fußsohle']},
-  {id:125,name:'Brustkontrolle',             cat:'Ballkontrolle', lvl:'Anfänger',      players:'2+',  dur:8,  icon:'🎯', desc:'Partner wirft hohen Ball, Spieler nimmt mit Brust an und leitet weiter. Fokus auf Aufpralldämpfung und sofortige Weiterleitung in Bewegungsrichtung.',               tags:['Brust','Annahme','Technik']},
-  {id:126,name:'Oberschenkel-Kontrolle',     cat:'Ballkontrolle', lvl:'Anfänger',      players:'2+',  dur:8,  icon:'🎯', desc:'Zuspiel auf Höhe des Oberschenkels: Spieler dämpft mit dem Oberschenkel und leitet in gewünschte Richtung weiter. Beide Beine üben.',                                  tags:['Oberschenkel','Annahme','Technik']},
-  {id:127,name:'Ballannahme unter Druck',    cat:'Ballkontrolle', lvl:'Profi',         players:'4+',  dur:15, icon:'🎯', desc:'Spieler erhält Ball mit Gegenspieler im Rücken. Aufgabe: Annehmen und behalten. Körperschutz und Wendigkeit gegen aktiven Druck.',                                     tags:['Druck','Körperschutz','Annahme']},
-  {id:128,name:'Wandpasswand',               cat:'Ballkontrolle', lvl:'Anfänger',      players:'1+',  dur:8,  icon:'🎯', desc:'Spieler spielt gegen eine Wand (oder Rebounder) mit verschiedenen Techniken: Innenrist, Außenrist, Spann, Volley. Abstand variieren.',                                  tags:['Wand','Technik','Variationen']},
-  {id:129,name:'Erste Ballkontrolle Staffel',cat:'Ballkontrolle', lvl:'Anfänger',      players:'4+',  dur:10, icon:'🎯', desc:'Spieler stehen in Reihe, vorderster nimmt Ball an, dreht und passt an die Seite. Nächster Spieler kommt vor. Rhythmus und Timing im Fokus.',                            tags:['Staffel','Erstkontakt','Rotation']},
-  {id:130,name:'Ballannahme aus der Luft',   cat:'Ballkontrolle', lvl:'Fortgeschritten',players:'2+', dur:10, icon:'🎯', desc:'Hochbälle aus verschiedenen Höhen: Spieler entscheidet selbst ob mit Fuß, Brust oder Oberschenkel. Direktes Weiterspielen nach Annahme.',                             tags:['Hochball','Entscheidung','Annahme']},
-  {id:131,name:'Technik unter Erschöpfung',  cat:'Ballkontrolle', lvl:'Profi',         players:'2+',  dur:15, icon:'🎯', desc:'Technische Übungen direkt nach intensivem Sprint. Simuliert Spielsituation: Koordination und Technik unter Erschöpfung aufrechterhalten.',                              tags:['Technik','Erschöpfung','Spielnah']},
-  {id:132,name:'Kopfball-Technik Pärchen',   cat:'Ballkontrolle', lvl:'Anfänger',      players:'2+',  dur:8,  icon:'🎯', desc:'Partner wirft auf Kopfhöhe: Spieler köpft zurück mit verschiedenen Techniken: aufwärts, seitwärts, nach unten. Fokus auf sicheren Kopfball.',                          tags:['Kopfball','Technik','Pärchen']},
-  {id:133,name:'Balltransport Zirkel',       cat:'Ballkontrolle', lvl:'Anfänger',      players:'4+',  dur:10, icon:'🎯', desc:'Spieler transportieren Ball durch Hürden, Reifen und Stangen in festgelegter Reihenfolge. Verschiedene Körperteile für Transport nutzen.',                             tags:['Transport','Koordination','Vielseitigkeit']},
-  {id:134,name:'Ballgefühl-Duo',             cat:'Ballkontrolle', lvl:'Anfänger',      players:'2+',  dur:8,  icon:'🎯', desc:'Zwei Spieler mit einem Ball: Ball zwischen ihnen halten ohne Bodenkontakt mithilfe beider. Fördert nonverbale Kommunikation und Ballgefühl.',                          tags:['Duo','Ballgefühl','Kommunikation']},
-  {id:135,name:'Kontrollstaffel Wettkampf',  cat:'Ballkontrolle', lvl:'Anfänger',      players:'6+',  dur:12, icon:'🎯', desc:'Teams treten gegeneinander an: Ball durch Parcours transportieren mit vorgegebenen Körperteilen. Wettbewerb fördert Motivation und Intensität.',                         tags:['Staffel','Wettbewerb','Technik']},
-
-  /* ── KOORDINATION (15) ── */
-  {id:136,name:'Koordinationsleiter komplex', cat:'Koordination', lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'Koordinationsleiter mit 10 verschiedenen Übungsformen: Ein-Bein, Beidbein, seitwärts, Kreuzschritt. Tempo steigern über mehrere Durchgänge.',                           tags:['Leiter','Koordination','Füße']},
-  {id:137,name:'Reifenfeld',                 cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'12 Reifen in verschiedenen Formationen. Spieler springen nach Muster: Einbein, beidbein, alternierend. Ball in der Hand für erschwerte Variante.',                    tags:['Reifen','Muster','Sprung']},
-  {id:138,name:'Gleichgewichts-Übungen',     cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'Einbein-Stand mit Ball: jonglieren, passen, fangen. Gleichgewicht auf Wackelbrett oder beim Balancieren auf Zehenspitzen.',                                           tags:['Gleichgewicht','Einbein','Balance']},
-  {id:139,name:'Reaktions-Koordination',     cat:'Koordination',  lvl:'Anfänger',      players:'4+',  dur:10, icon:'✨', desc:'Spieler stehen am Startpunkt. Trainer zeigt Farbe/Zahl/Richtung: Spieler springen zu entsprechendem Hütchen. Kombiniert Reaktion und Koordination.',                tags:['Reaktion','Signal','Hütchen']},
-  {id:140,name:'Koordination mit Ball',      cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:10, icon:'✨', desc:'Koordinationsleiter mit Ball am Fuß durch die Sprossen navigieren. Verschiedene Muster: Seitwärts, vorwärts, rückwärts, diagonal.',                                 tags:['Leiter','Ball','Vielseitig']},
-  {id:141,name:'Stab-Reaktion',              cat:'Koordination',  lvl:'Anfänger',      players:'2+',  dur:8,  icon:'✨', desc:'Spieler hält Stab senkrecht auf Boden und lässt los. Partner muss Stab fangen bevor er fällt. Schult Reaktion und koordinierten Griff.',                             tags:['Stab','Reaktion','Fangen']},
-  {id:142,name:'Partnerkoordination',        cat:'Koordination',  lvl:'Anfänger',      players:'2+',  dur:8,  icon:'✨', desc:'Zwei Spieler: Einer macht Bewegung vor, anderer imitiert synchron. Wechsel nach 30s. Steigert Körpergefühl und Aufmerksamkeit.',                                    tags:['Partner','Imitation','Synchro']},
-  {id:143,name:'Multi-Ball Koordination',    cat:'Koordination',  lvl:'Fortgeschritten',players:'3+', dur:10, icon:'✨', desc:'Spieler jongliert mit einem Ball während er einen zweiten Ball wirft und fängt. Fördert split-attention und motorische Kapazität.',                                  tags:['Multi-Ball','Split-Attention','Motorik']},
-  {id:144,name:'Hopserlauf mit Aufgaben',    cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'Hopserlauf auf 20m: Auf Pfiff klatschen, auf Doppelpfiff drehen, auf Rufen hüpfen. Kombiniert Bewegungsausführung mit geteilter Aufmerksamkeit.',                   tags:['Hopserlauf','Aufmerksamkeit','Reaktion']},
-  {id:145,name:'Seilspringen Fußball',       cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'Seilspringen mit verschiedenen Techniken: beidbeinig, einbeinig, Doppelschlag, Kreuzsprung. 3 Minuten kontinuierlich.',                                              tags:['Seilspringen','Koordination','Ausdauer']},
-  {id:146,name:'Balljonglage mit Hindernissen',cat:'Koordination',lvl:'Fortgeschritten',players:'1+', dur:10, icon:'✨', desc:'Spieler jongliert und läuft gleichzeitig durch einen Hütchenparcours. Fällt der Ball ab, Neustart an der Stelle. Fördert Konzentration.',                           tags:['Jonglage','Parcours','Konzentration']},
-  {id:147,name:'Koordiation Phasentraining', cat:'Koordination',  lvl:'Anfänger',      players:'4+',  dur:12, icon:'✨', desc:'Drei Phasen: Koordinationsleiter, Sprungkraft-Übungen, dann Passspiel. Fließender Übergang fördert Körperkontrolle unter wechselnden Anforderungen.',               tags:['Phasen','Leiter','Sprung']},
-  {id:148,name:'Wahrnehmungs-Übung',         cat:'Koordination',  lvl:'Anfänger',      players:'4+',  dur:10, icon:'✨', desc:'Spieler passen, gleichzeitig Fragen des Trainers beantworten: Anzahl von Mitspielern in Zone, Farbe eines Hütchens. Schult Spielübersicht.',                        tags:['Wahrnehmung','Übersicht','Kognition']},
-  {id:149,name:'Augen-zu Ballgefühl',        cat:'Koordination',  lvl:'Anfänger',      players:'1+',  dur:8,  icon:'✨', desc:'Spieler jongliert oder rollt Ball mit geschlossenen Augen am Boden. Fördert taktiles Ballgefühl und kinästhetische Wahrnehmung.',                                  tags:['Augen zu','Ballgefühl','Taktil']},
-  {id:150,name:'Koordinations-Wettkampf',    cat:'Koordination',  lvl:'Anfänger',      players:'4+',  dur:12, icon:'✨', desc:'Teams treten in Koordinationsstationen gegeneinander an: Leiter, Reifen, Sprung, Balance. Punkte für Geschwindigkeit und Sauberkeit der Ausführung.',               tags:['Wettkampf','Stationen','Team']},
+  /* Übungen werden über den Editor erstellt */
 ];
 
 const PHASES = [
@@ -2832,12 +2796,12 @@ const SVG_PATTERNS = [
 function renderDrills(list){
   const g = document.getElementById('drillsGrid');
   document.getElementById('drillCount').textContent = list.length + ' Übungen';
+  const hc=document.getElementById('homeExCount');if(hc)hc.textContent=DRILLS.length;
+  const hc2=document.getElementById('homeExCount2');if(hc2)hc2.textContent=DRILLS.length;
   g.innerHTML = list.map((d,i)=>`
-    <div class="drill-card" draggable="true" ondragstart="startDrillDrag(event,${d.id})">
+    <div class="drill-card" draggable="true" ondragstart="startDrillDrag(event,${d.id})" onclick="openDrillDetail(${d.id})" style="cursor:pointer">
       <div class="dc-pitch">
-        <svg viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg">
-          ${SVG_PATTERNS[i%SVG_PATTERNS.length]}
-        </svg>
+        <canvas id="dcCvs${d.id}" width="280" height="140"></canvas>
         <span class="dc-lvl lvl-${d.lvl[0]}">${d.lvl}</span>
       </div>
       <div class="dc-body">
@@ -2847,13 +2811,298 @@ function renderDrills(list){
         <div class="dc-tags">${d.tags.map(t=>`<span class="dc-tag">${t}</span>`).join('')}</div>
       </div>
       <div class="dc-actions">
-        <button class="dc-btn" onclick="openDrillDetail(${d.id})">Details</button>
-        <button class="dc-btn primary" onclick="addDrillToPlaner(${d.id});toast('Zu Hauptteil 1 hinzugefügt','✔')">+ Planer</button>
+        <button class="dc-btn" onclick="event.stopPropagation();openDrillDetail(${d.id})">Details</button>
+        <button class="dc-btn primary" onclick="event.stopPropagation();addDrillToPlaner(${d.id});toast('Zu Hauptteil 1 hinzugefügt','✔')">+ Planer</button>
       </div>
     </div>`).join('');
+  // Render canvas previews
+  requestAnimationFrame(()=>{
+    list.forEach(d=>{
+      const cvs=document.getElementById('dcCvs'+d.id);
+      if(!cvs)return;
+      const ctx=cvs.getContext('2d');
+      const W=280,H=140;
+      renderDrillPreview(ctx,W,H,d.animation||null);
+    });
+  });
+}
+
+function renderDrillPreview(ctx,W,H,anim){
+  // Draw the pitch field
+  ddAnimDrawField(ctx,W,H);
+  if(!anim)return;
+  const pad=W*0.05,fW=W-pad*2,fH=H-pad*2;
+  function toX(pct){return pad+pct/100*fW;}
+  function toY(pct){return pad+pct/100*fH;}
+  // Draw equipment
+  if(anim.equipment){
+    anim.equipment.forEach(eq=>{
+      const ex=toX(eq.x),ey=toY(eq.y);
+      ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      if(eq.type==='cone')ctx.fillText('🔶',ex,ey);
+      else if(eq.type==='pole'){ctx.fillStyle='#f0bc2e';ctx.fillRect(ex-2,ey-8,4,16);}
+      else if(eq.type==='mannequin')ctx.fillText('🧍',ex,ey);
+    });
+  }
+  // Draw entities at t=0 (first keyframe) + movement paths
+  if(anim.entities){
+    anim.entities.forEach(ent=>{
+      if(!ent.keyframes||!ent.keyframes.length)return;
+      // Draw full path as dotted line
+      if(ent.keyframes.length>1){
+        ctx.beginPath();
+        ctx.strokeStyle=ent.type==='ball'?'rgba(93,218,140,0.4)':'rgba(255,255,255,0.2)';
+        ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.lineCap='round';
+        ctx.moveTo(toX(ent.keyframes[0].x),toY(ent.keyframes[0].y));
+        ent.keyframes.forEach(kf=>ctx.lineTo(toX(kf.x),toY(kf.y)));
+        ctx.stroke();ctx.setLineDash([]);
+      }
+      // Draw entity at start position
+      const kf=ent.keyframes[0];
+      const px=toX(kf.x),py=toY(kf.y);
+      if(ent.type==='ball'){
+        ctx.font='14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('⚽',px,py);
+      } else {
+        const r=10;
+        ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
+        ctx.fillStyle=ent.color||'#4fa3e0';ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=1.5;
+        if(ent.type==='gk')ctx.setLineDash([3,2]);
+        ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='#fff';
+        ctx.font='bold 8px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(ent.label||'',px,py);
+      }
+    });
+  }
 }
 
 let _ddDrillId=null;
+
+/* ════════════════════════════════════
+   DRILL ANIMATION ENGINE
+════════════════════════════════════ */
+let ddAnim={playing:false,time:0,duration:0,speed:1,raf:null,lastTS:null,data:null};
+const DD_SPEEDS=[0.5,1,1.5,2];
+let ddSpeedIdx=1;
+
+function ddAnimLerp(kf,t){
+  if(!kf||!kf.length)return null;
+  if(t<=kf[0].t)return{x:kf[0].x,y:kf[0].y};
+  if(t>=kf[kf.length-1].t)return{x:kf[kf.length-1].x,y:kf[kf.length-1].y};
+  for(let i=0;i<kf.length-1;i++){
+    if(t>=kf[i].t&&t<=kf[i+1].t){
+      const p=(t-kf[i].t)/(kf[i+1].t-kf[i].t);
+      return{x:kf[i].x+(kf[i+1].x-kf[i].x)*p, y:kf[i].y+(kf[i+1].y-kf[i].y)*p};
+    }
+  }
+  return{x:kf[kf.length-1].x,y:kf[kf.length-1].y};
+}
+
+function ddAnimTrail(kf,t){
+  if(!kf||kf.length<2)return[];
+  const pts=[];
+  for(let i=0;i<kf.length;i++){
+    if(kf[i].t>t)break;
+    pts.push({x:kf[i].x,y:kf[i].y});
+  }
+  const cur=ddAnimLerp(kf,t);
+  if(cur&&(pts.length===0||pts[pts.length-1].x!==cur.x||pts[pts.length-1].y!==cur.y))pts.push(cur);
+  return pts;
+}
+
+function ddAnimDrawField(ctx,W,H){
+  // Pitch background
+  ctx.fillStyle='#1a6b30';
+  ctx.fillRect(0,0,W,H);
+  // Grass stripes
+  const stripeW=W/10;
+  for(let i=0;i<10;i+=2){
+    ctx.fillStyle='rgba(255,255,255,0.03)';
+    ctx.fillRect(i*stripeW,0,stripeW,H);
+  }
+  const pad=W*0.05;
+  const fW=W-pad*2,fH=H-pad*2;
+  ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;
+  // Outline
+  ctx.strokeRect(pad,pad,fW,fH);
+  // Center line
+  ctx.beginPath();ctx.moveTo(W/2,pad);ctx.lineTo(W/2,pad+fH);ctx.stroke();
+  // Center circle
+  ctx.beginPath();ctx.arc(W/2,H/2,fH*0.2,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(W/2,H/2,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.4)';ctx.fill();
+  // Penalty areas
+  const paW=fW*0.14,paH=fH*0.5;
+  ctx.strokeRect(pad,H/2-paH/2,paW,paH);
+  ctx.strokeRect(pad+fW-paW,H/2-paH/2,paW,paH);
+  // Goals
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2.5;
+  const gH=fH*0.22;
+  ctx.strokeRect(pad-8,H/2-gH/2,8,gH);
+  ctx.strokeRect(pad+fW,H/2-gH/2,8,gH);
+  ctx.lineWidth=1.5;
+}
+
+function ddAnimRender(){
+  const cvs=document.getElementById('ddAnimCanvas');
+  if(!cvs)return;
+  const ctx=cvs.getContext('2d');
+  const W=cvs.clientWidth,H=cvs.clientHeight;
+  const d=ddAnim.data;
+  ctx.clearRect(0,0,W,H);
+  ddAnimDrawField(ctx,W,H);
+  if(!d)return;
+  const t=ddAnim.time;
+  const pad=W*0.05;
+  const fW=W-pad*2,fH=H-pad*2;
+  function toX(pct){return pad+pct/100*fW;}
+  function toY(pct){return pad+pct/100*fH;}
+
+  // Draw equipment (static)
+  if(d.equipment){
+    d.equipment.forEach(eq=>{
+      const ex=toX(eq.x),ey=toY(eq.y);
+      ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      if(eq.type==='cone')ctx.fillText('🔶',ex,ey);
+      else if(eq.type==='pole'){ctx.fillStyle='#f0bc2e';ctx.fillRect(ex-3,ey-14,6,28);}
+      else if(eq.type==='flag')ctx.fillText('🚩',ex,ey);
+      else if(eq.type==='goal'){ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=2;ctx.strokeRect(ex-4,ey-15,8,30);}
+      else if(eq.type==='mannequin')ctx.fillText('🧍',ex,ey);
+    });
+  }
+
+  // Draw zones
+  if(d.zones){
+    d.zones.forEach(z=>{
+      ctx.fillStyle=z.color||'rgba(255,255,255,0.07)';
+      if(z.type==='rect')ctx.fillRect(toX(z.x),toY(z.y),z.w/100*fW,z.h/100*fH);
+      else if(z.type==='circle'){ctx.beginPath();ctx.arc(toX(z.x),toY(z.y),z.r/100*fW,0,Math.PI*2);ctx.fill();}
+    });
+  }
+
+  // Draw movement trails + entities
+  if(d.entities){
+    d.entities.forEach(ent=>{
+      const pos=ddAnimLerp(ent.keyframes,t);
+      if(!pos)return;
+      const px=toX(pos.x),py=toY(pos.y);
+
+      // Trail
+      if(ent.keyframes.length>1){
+        const trail=ddAnimTrail(ent.keyframes,t);
+        if(trail.length>1){
+          ctx.beginPath();
+          ctx.strokeStyle=ent.type==='ball'?'rgba(93,218,140,0.45)':'rgba(255,255,255,0.25)';
+          ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+          ctx.setLineDash(ent.type==='ball'?[4,3]:[6,4]);
+          ctx.moveTo(toX(trail[0].x),toY(trail[0].y));
+          trail.forEach(p=>ctx.lineTo(toX(p.x),toY(p.y)));
+          ctx.stroke();ctx.setLineDash([]);
+        }
+      }
+
+      // Entity
+      if(ent.type==='ball'){
+        ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('⚽',px,py);
+      } else {
+        // Player circle
+        const r=14;
+        ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
+        ctx.fillStyle=ent.color||'#4fa3e0';ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=2;
+        if(ent.type==='gk')ctx.setLineDash([4,3]);
+        ctx.stroke();ctx.setLineDash([]);
+        // Label
+        ctx.fillStyle='#fff';
+        ctx.font='bold 11px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(ent.label||'',px,py);
+      }
+    });
+  }
+}
+
+function ddAnimTick(ts){
+  if(!ddAnim.playing)return;
+  if(!ddAnim.lastTS)ddAnim.lastTS=ts;
+  ddAnim.time+=((ts-ddAnim.lastTS)/1000)*ddAnim.speed;
+  ddAnim.lastTS=ts;
+  if(ddAnim.time>=ddAnim.duration){
+    ddAnim.time=0; // loop
+  }
+  ddAnimRender();
+  const pct=ddAnim.duration>0?(ddAnim.time/ddAnim.duration*100):0;
+  document.getElementById('ddAnimFill').style.width=pct+'%';
+  document.getElementById('ddAnimTime').textContent=ddAnim.time.toFixed(1)+'s / '+ddAnim.duration.toFixed(1)+'s';
+  ddAnim.raf=requestAnimationFrame(ddAnimTick);
+}
+
+function ddAnimToggle(){
+  if(ddAnim.playing)ddAnimPause();else ddAnimPlay();
+}
+function ddAnimPlay(){
+  if(!ddAnim.data)return;
+  ddAnim.playing=true;ddAnim.lastTS=null;
+  document.getElementById('ddAnimPlay').textContent='⏸';
+  ddAnim.raf=requestAnimationFrame(ddAnimTick);
+}
+function ddAnimPause(){
+  ddAnim.playing=false;
+  if(ddAnim.raf)cancelAnimationFrame(ddAnim.raf);
+  document.getElementById('ddAnimPlay').textContent='▶';
+}
+function ddAnimStop(){
+  ddAnimPause();ddAnim.time=0;
+  document.getElementById('ddAnimFill').style.width='0%';
+  document.getElementById('ddAnimTime').textContent='0.0s / '+ddAnim.duration.toFixed(1)+'s';
+  ddAnimRender();
+}
+function ddAnimSeek(e){
+  const bar=document.getElementById('ddAnimBar');
+  const pct=e.offsetX/bar.offsetWidth;
+  ddAnim.time=pct*ddAnim.duration;
+  document.getElementById('ddAnimFill').style.width=(pct*100)+'%';
+  document.getElementById('ddAnimTime').textContent=ddAnim.time.toFixed(1)+'s / '+ddAnim.duration.toFixed(1)+'s';
+  ddAnimRender();
+}
+function ddAnimCycleSpeed(){
+  ddSpeedIdx=(ddSpeedIdx+1)%DD_SPEEDS.length;
+  ddAnim.speed=DD_SPEEDS[ddSpeedIdx];
+  document.getElementById('ddAnimSpeedBtn').textContent=ddAnim.speed+'x';
+}
+
+function ddAnimInit(anim){
+  ddAnimPause();
+  ddAnim.data=anim||null;
+  ddAnim.time=0;
+  ddAnim.duration=anim?anim.duration:0;
+  const cvs=document.getElementById('ddAnimCanvas');
+  const wrap=document.getElementById('ddAnimWrap');
+  const ctrls=document.getElementById('ddAnimControls');
+  const noAnim=document.getElementById('ddNoAnim');
+  // Size canvas
+  const W=wrap.clientWidth;
+  const H=wrap.clientHeight;
+  cvs.width=W*window.devicePixelRatio;
+  cvs.height=H*window.devicePixelRatio;
+  cvs.style.width=W+'px';
+  cvs.style.height=H+'px';
+  cvs.getContext('2d').scale(window.devicePixelRatio,window.devicePixelRatio);
+  if(anim){
+    ctrls.style.display='flex';
+    noAnim.style.display='none';
+    document.getElementById('ddAnimTime').textContent='0.0s / '+anim.duration.toFixed(1)+'s';
+    document.getElementById('ddAnimFill').style.width='0%';
+    document.getElementById('ddAnimPlay').textContent='▶';
+  } else {
+    ctrls.style.display='none';
+    noAnim.style.display='flex';
+  }
+  ddAnimRender();
+}
+
+/* ── Drill Detail Modal ── */
 function openDrillDetail(id){
   const d=DRILLS.find(x=>x.id===id);
   if(!d)return;
@@ -2869,8 +3118,11 @@ function openDrillDetail(id){
      <span style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:${lvlColor}">${d.lvl}</span>`;
   document.getElementById('ddTags').innerHTML=d.tags.map(t=>`<span class="dc-tag" style="font-size:12px;padding:3px 10px">${t}</span>`).join('');
   document.getElementById('drillDetailOverlay').style.display='flex';
+  // Init animation after overlay is visible
+  setTimeout(()=>ddAnimInit(d.animation||null),30);
 }
 function closeDrillDetail(){
+  ddAnimPause();
   document.getElementById('drillDetailOverlay').style.display='none';
   _ddDrillId=null;
 }
@@ -2893,6 +3145,343 @@ function toggleChip(el,type,val){
   el.classList.add('on');
   filterState[type]=val;
   filterDrills(document.getElementById('libSearch')?.value||'');
+}
+
+/* ════════════════════════════════════
+   DRILL EDITOR
+════════════════════════════════════ */
+let deEntities=[];  // [{id,type,color,label,positions:{0:{x,y},1:{x,y},...}}]
+let deEquipment=[]; // [{id,type,x,y}]
+let dePhases=[{dur:2}]; // phase durations
+let deCurrentPhase=0;
+let deNextId=1;
+let deSelectedId=null;
+let deDragging=null;
+let deIsEquipDrag=false;
+
+function openDrillEditor(editId){
+  deEntities=[];deEquipment=[];dePhases=[{dur:2}];deCurrentPhase=0;deNextId=1;deSelectedId=null;
+  document.getElementById('deName').value='';
+  document.getElementById('deCat').value='Passspiel';
+  document.getElementById('deLvl').value='Anfänger';
+  document.getElementById('dePlayers').value='';
+  document.getElementById('deDur').value='10';
+  document.getElementById('deDesc').value='';
+  document.getElementById('deTags').value='';
+  document.getElementById('dePhaseDur').value='2';
+  document.getElementById('drillEditorOverlay').style.display='block';
+  setTimeout(()=>{
+    deInitCanvas();
+    deRenderPhases();
+    deRedraw();
+  },50);
+}
+function closeDrillEditor(){
+  document.getElementById('drillEditorOverlay').style.display='none';
+}
+
+function deInitCanvas(){
+  const wrap=document.getElementById('deCanvasWrap');
+  const cvs=document.getElementById('deCanvas');
+  const W=wrap.clientWidth,H=wrap.clientHeight;
+  cvs.width=W*window.devicePixelRatio;
+  cvs.height=H*window.devicePixelRatio;
+  cvs.style.width=W+'px';
+  cvs.style.height=H+'px';
+  const ctx=cvs.getContext('2d');
+  ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+
+  // Mouse/touch events
+  cvs.onpointerdown=e=>{
+    const r=cvs.getBoundingClientRect();
+    const mx=(e.clientX-r.left),my=(e.clientY-r.top);
+    const W2=r.width,H2=r.height;
+    const pad=W2*0.05,fW=W2-pad*2,fH=H2-pad*2;
+    const px=(mx-pad)/fW*100,py=(my-pad)/fH*100;
+
+    // Check entities first
+    let hit=null;
+    for(let i=deEntities.length-1;i>=0;i--){
+      const pos=deEntities[i].positions[deCurrentPhase];
+      if(!pos)continue;
+      const dx=px-pos.x,dy=py-pos.y;
+      if(Math.sqrt(dx*dx+dy*dy)<6){hit=deEntities[i];break;}
+    }
+    if(!hit){
+      // Check equipment
+      for(let i=deEquipment.length-1;i>=0;i--){
+        const eq=deEquipment[i];
+        const dx=px-eq.x,dy=py-eq.y;
+        if(Math.sqrt(dx*dx+dy*dy)<6){hit=eq;deIsEquipDrag=true;break;}
+      }
+    }
+    if(hit){
+      deSelectedId=hit.id;
+      deDragging=hit;
+      if(!deIsEquipDrag&&!hit.positions[deCurrentPhase]){
+        // Copy position from nearest previous phase
+        for(let p=deCurrentPhase-1;p>=0;p--){
+          if(hit.positions[p]){hit.positions[deCurrentPhase]={...hit.positions[p]};break;}
+        }
+      }
+    } else {
+      deSelectedId=null;
+      deIsEquipDrag=false;
+    }
+    deRedraw();
+  };
+  cvs.onpointermove=e=>{
+    if(!deDragging)return;
+    const r=cvs.getBoundingClientRect();
+    const mx=(e.clientX-r.left),my=(e.clientY-r.top);
+    const W2=r.width,H2=r.height;
+    const pad=W2*0.05,fW=W2-pad*2,fH=H2-pad*2;
+    const px=Math.max(0,Math.min(100,(mx-pad)/fW*100));
+    const py=Math.max(0,Math.min(100,(my-pad)/fH*100));
+    if(deIsEquipDrag){
+      deDragging.x=px;deDragging.y=py;
+    } else {
+      deDragging.positions[deCurrentPhase]={x:px,y:py};
+    }
+    deRedraw();
+  };
+  cvs.onpointerup=cvs.onpointerleave=()=>{deDragging=null;deIsEquipDrag=false;};
+}
+
+function deRedraw(){
+  const cvs=document.getElementById('deCanvas');
+  if(!cvs)return;
+  const ctx=cvs.getContext('2d');
+  const wrap=document.getElementById('deCanvasWrap');
+  const W=wrap.clientWidth,H=wrap.clientHeight;
+
+  ctx.clearRect(0,0,W,H);
+  ddAnimDrawField(ctx,W,H);
+
+  const pad=W*0.05,fW=W-pad*2,fH=H-pad*2;
+  function toX(pct){return pad+pct/100*fW;}
+  function toY(pct){return pad+pct/100*fH;}
+
+  // Draw equipment
+  deEquipment.forEach(eq=>{
+    const ex=toX(eq.x),ey=toY(eq.y);
+    ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    if(eq.type==='cone')ctx.fillText('🔶',ex,ey);
+    else if(eq.type==='pole'){ctx.fillStyle='#f0bc2e';ctx.fillRect(ex-3,ey-14,6,28);}
+    else if(eq.type==='mannequin')ctx.fillText('🧍',ex,ey);
+    // Selection ring
+    if(deSelectedId===eq.id){
+      ctx.beginPath();ctx.arc(ex,ey,16,0,Math.PI*2);
+      ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+  });
+
+  // Draw trail from previous phases
+  deEntities.forEach(ent=>{
+    if(deCurrentPhase>0){
+      const pts=[];
+      for(let p=0;p<=deCurrentPhase;p++){
+        const pos=ent.positions[p];
+        if(pos)pts.push(pos);
+      }
+      if(pts.length>1){
+        ctx.beginPath();
+        ctx.strokeStyle=ent.type==='ball'?'rgba(93,218,140,0.35)':'rgba(255,255,255,0.2)';
+        ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.lineCap='round';
+        ctx.moveTo(toX(pts[0].x),toY(pts[0].y));
+        pts.forEach(p=>ctx.lineTo(toX(p.x),toY(p.y)));
+        ctx.stroke();ctx.setLineDash([]);
+      }
+    }
+
+    // Current phase position
+    const pos=ent.positions[deCurrentPhase];
+    if(!pos)return;
+    const px=toX(pos.x),py=toY(pos.y);
+
+    if(ent.type==='ball'){
+      ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('⚽',px,py);
+    } else {
+      const r=14;
+      ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle=ent.color;ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=2;
+      if(ent.type==='gk')ctx.setLineDash([4,3]);
+      ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=ent.type==='gk'?(function(){const c=ent.color;return '#333'})():'#fff';
+      ctx.font='bold 11px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(ent.label,px,py);
+    }
+
+    // Selection ring
+    if(deSelectedId===ent.id){
+      ctx.beginPath();ctx.arc(px,py,18,0,Math.PI*2);
+      ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+
+    // Ghost from previous phase (dimmed)
+    if(deCurrentPhase>0){
+      let prevPos=null;
+      for(let p=deCurrentPhase-1;p>=0;p--){if(ent.positions[p]){prevPos=ent.positions[p];break;}}
+      if(prevPos&&(Math.abs(prevPos.x-pos.x)>1||Math.abs(prevPos.y-pos.y)>1)){
+        const gx=toX(prevPos.x),gy=toY(prevPos.y);
+        ctx.globalAlpha=0.25;
+        if(ent.type==='ball'){
+          ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText('⚽',gx,gy);
+        } else {
+          ctx.beginPath();ctx.arc(gx,gy,12,0,Math.PI*2);
+          ctx.fillStyle=ent.color;ctx.fill();
+          ctx.fillStyle='#fff';ctx.font='bold 9px Oswald,sans-serif';
+          ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(ent.label,gx,gy);
+        }
+        ctx.globalAlpha=1;
+      }
+    }
+  });
+}
+
+let dePlayerCountA=0,dePlayerCountV=0,deGkCount=0;
+function deAddEntity(type,color){
+  let label='';
+  if(type==='gk'){label='TW';deGkCount++;}
+  else if(color==='#e8614e'){dePlayerCountA++;label=''+dePlayerCountA;}
+  else{dePlayerCountV++;label=''+dePlayerCountV;}
+  const ent={id:deNextId++,type,color,label,positions:{0:{x:30+Math.random()*40,y:30+Math.random()*40}}};
+  // Copy position to all existing phases
+  for(let p=1;p<dePhases.length;p++){ent.positions[p]={...ent.positions[0]};}
+  deEntities.push(ent);
+  deSelectedId=ent.id;
+  deRedraw();
+}
+function deAddEquip(type){
+  const eq={id:deNextId++,type,x:40+Math.random()*20,y:40+Math.random()*20};
+  deEquipment.push(eq);
+  deSelectedId=eq.id;
+  deRedraw();
+}
+function deDeleteSelected(){
+  if(deSelectedId==null)return;
+  const ei=deEntities.findIndex(e=>e.id===deSelectedId);
+  if(ei>=0){deEntities.splice(ei,1);deSelectedId=null;deRedraw();return;}
+  const qi=deEquipment.findIndex(e=>e.id===deSelectedId);
+  if(qi>=0){deEquipment.splice(qi,1);deSelectedId=null;deRedraw();return;}
+}
+
+function deRenderPhases(){
+  const c=document.getElementById('dePhaseTabs');
+  c.innerHTML=dePhases.map((_,i)=>
+    `<div class="de-phase-tab ${i===deCurrentPhase?'active':''}" onclick="deSwitchPhase(${i})">Phase ${i+1}</div>`
+  ).join('');
+  document.getElementById('dePhaseDur').value=dePhases[deCurrentPhase].dur;
+}
+function deSwitchPhase(idx){
+  deCurrentPhase=idx;
+  deRenderPhases();
+  // For entities without a position in this phase, copy from previous
+  deEntities.forEach(ent=>{
+    if(!ent.positions[idx]){
+      for(let p=idx-1;p>=0;p--){
+        if(ent.positions[p]){ent.positions[idx]={...ent.positions[p]};break;}
+      }
+    }
+  });
+  deRedraw();
+}
+function deAddPhase(){
+  const prevDur=dePhases[dePhases.length-1].dur;
+  dePhases.push({dur:prevDur});
+  const newIdx=dePhases.length-1;
+  // Copy entity positions from previous phase
+  deEntities.forEach(ent=>{
+    const prev=ent.positions[newIdx-1];
+    if(prev)ent.positions[newIdx]={...prev};
+  });
+  deCurrentPhase=newIdx;
+  deRenderPhases();
+  deRedraw();
+}
+function deRemovePhase(){
+  if(dePhases.length<=1){toast('Mindestens 1 Phase','!');return;}
+  const rmIdx=dePhases.length-1;
+  dePhases.pop();
+  deEntities.forEach(ent=>{delete ent.positions[rmIdx];});
+  if(deCurrentPhase>=dePhases.length)deCurrentPhase=dePhases.length-1;
+  deRenderPhases();
+  deRedraw();
+}
+function deUpdatePhaseDur(){
+  dePhases[deCurrentPhase].dur=parseFloat(document.getElementById('dePhaseDur').value)||2;
+}
+
+function dePreview(){
+  // Build animation data from editor state and show it in the detail modal
+  const anim=deBuildAnimation();
+  if(!anim){toast('Platziere mindestens einen Spieler','!');return;}
+  // Use the drill detail overlay for preview
+  document.getElementById('ddCat').textContent='Vorschau';
+  document.getElementById('ddTitle').textContent=document.getElementById('deName').value||'Neue Übung';
+  document.getElementById('ddDesc').textContent=document.getElementById('deDesc').value||'';
+  document.getElementById('ddLvlBadge').textContent='';
+  document.getElementById('ddMeta').innerHTML='';
+  document.getElementById('ddTags').innerHTML='';
+  document.getElementById('drillDetailOverlay').style.display='flex';
+  _ddDrillId=null;
+  setTimeout(()=>{ddAnimInit(anim);ddAnimPlay();},50);
+}
+
+function deBuildAnimation(){
+  if(deEntities.length===0)return null;
+  // Calculate cumulative time for each phase
+  const times=[0];
+  for(let i=0;i<dePhases.length;i++){
+    times.push(times[i]+dePhases[i].dur);
+  }
+  const duration=times[times.length-1];
+
+  const entities=deEntities.map(ent=>{
+    const keyframes=[];
+    for(let p=0;p<dePhases.length;p++){
+      const pos=ent.positions[p];
+      if(pos)keyframes.push({t:times[p],x:pos.x,y:pos.y});
+    }
+    return{type:ent.type,color:ent.color,label:ent.label,keyframes};
+  });
+
+  const equipment=deEquipment.map(eq=>({type:eq.type,x:eq.x,y:eq.y}));
+
+  return{duration,entities,equipment:equipment.length?equipment:undefined};
+}
+
+function deSaveDrill(){
+  const name=document.getElementById('deName').value.trim();
+  if(!name){toast('Bitte einen Namen eingeben','!');return;}
+  if(deEntities.length===0){toast('Platziere mindestens einen Spieler','!');return;}
+
+  const anim=deBuildAnimation();
+  const id=DRILLS.length?Math.max(...DRILLS.map(d=>d.id))+1:1;
+  const tagsRaw=document.getElementById('deTags').value;
+  const tags=tagsRaw?tagsRaw.split(',').map(t=>t.trim()).filter(Boolean):[];
+
+  const drill={
+    id,
+    name,
+    cat:document.getElementById('deCat').value,
+    lvl:document.getElementById('deLvl').value,
+    players:document.getElementById('dePlayers').value||'1+',
+    dur:parseInt(document.getElementById('deDur').value)||10,
+    icon:'⚡',
+    desc:document.getElementById('deDesc').value||'',
+    tags,
+    animation:anim
+  };
+
+  DRILLS.push(drill);
+  renderDrills(DRILLS);
+  closeDrillEditor();
+  toast('Übung gespeichert','✔');
 }
 
 /* ════════════════════════════════════
@@ -3133,10 +3722,6 @@ function initBoard(fieldType){
   animCtx=animCanvas.getContext('2d');
   const fd=FIELD_SVGS[fieldType]||FIELD_SVGS.full;
   currentFieldMeta={metersW:fd.metersW||105, metersH:fd.metersH||68};
-  const svg=document.getElementById('fieldSvg');
-  svg.setAttribute('viewBox',fd.vb);
-  svg.style.background=fd.bg;
-  svg.innerHTML=fd.content;
   zoomLevel=1; panX=0; panY=0;
   resizeBoard();
   window.addEventListener('resize',resizeBoard);
@@ -3144,58 +3729,139 @@ function initBoard(fieldType){
   canvas.addEventListener('pointermove',bMove);
   canvas.addEventListener('pointerup',bUp);
   canvas.addEventListener('pointerleave',bLeave);
-  // Mouse wheel zoom
-  canvas.addEventListener('wheel', onWheel, {passive:false});
   updateBoardStatus();updatePlaybackUI();
 }
 
-function onWheel(e){
-  e.preventDefault();
-  const delta = e.deltaY > 0 ? -0.1 : 0.1;
-  adjustZoom(delta, e.clientX, e.clientY);
-}
-
-function adjustZoom(delta, cx, cy){
-  const area=document.getElementById('boardArea');
-  const prev=zoomLevel;
-  zoomLevel=Math.min(4, Math.max(0.5, zoomLevel+delta));
-  // Zoom toward cursor or center
-  const px = cx!=null ? cx-area.getBoundingClientRect().left : area.offsetWidth/2;
-  const py = cy!=null ? cy-area.getBoundingClientRect().top  : area.offsetHeight/2;
-  panX = px - (px - panX) * (zoomLevel/prev);
-  panY = py - (py - panY) * (zoomLevel/prev);
-  applyZoom();
-  redraw();
-}
-
-function resetZoom(){
-  zoomLevel=1; panX=0; panY=0;
-  applyZoom();
-  redraw();
-}
-
-function applyZoom(){
-  const area=document.getElementById('boardArea');
-  const svg=document.getElementById('fieldSvg');
-  // Transform the SVG overlay and entity layer
-  const t=`translate(${panX}px,${panY}px) scale(${zoomLevel})`;
-  svg.style.transformOrigin='0 0';
-  svg.style.transform=t;
-  document.getElementById('playerLayer').style.transformOrigin='0 0';
-  document.getElementById('playerLayer').style.transform=t;
-}
+function adjustZoom(){}
+function resetZoom(){}
+function applyZoom(){}
 
 function resizeBoard(){
   if(!canvas)return;
   const area=document.getElementById('boardArea');
-  canvas.width=area.offsetWidth;canvas.height=area.offsetHeight;
-  animCanvas.width=area.offsetWidth;animCanvas.height=area.offsetHeight;
+  const container=document.getElementById('boardFieldContainer');
+  const aW=area.clientWidth,aH=area.clientHeight;
+  const ratio=currentFieldMeta.metersW/currentFieldMeta.metersH;
+  let W=aW,H=W/ratio;
+  if(H>aH){H=aH;W=H*ratio;}
+  W=Math.floor(W);H=Math.floor(H);
+  container.style.width=W+'px';
+  container.style.height=H+'px';
+  canvas.width=W;canvas.height=H;
+  animCanvas.width=W;animCanvas.height=H;
+  const fc=document.getElementById('fieldCanvas');
+  fc.width=W;fc.height=H;
+  drawBoardField(fc.getContext('2d'),W,H,selectedFieldType);
   redraw();
 }
 
-// Convert screen → canvas coordinates (accounting for zoom+pan)
+function drawBoardField(ctx,W,H,type){
+  // Background gradient
+  const grad=ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,'#0d2e18');grad.addColorStop(1,'#1e5c2e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  // Grass stripes
+  const stripeCount=type==='small'?8:10;
+  const sw=W/stripeCount;
+  for(let i=0;i<stripeCount;i+=2){
+    ctx.fillStyle='rgba(255,255,255,0.03)';
+    ctx.fillRect(i*sw,0,sw,H);
+  }
+  const lc='rgba(255,255,255,0.45)';
+  const lw=2;
+  ctx.strokeStyle=lc;ctx.lineWidth=lw;ctx.lineCap='round';
+
+  if(type==='full'){
+    // Outline
+    ctx.strokeRect(0,0,W,H);
+    // Center line
+    ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
+    // Center circle r=9.15/105*W
+    const cr=9.15/105*W;
+    ctx.beginPath();ctx.arc(W/2,H/2,cr,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(W/2,H/2,4,0,Math.PI*2);ctx.fillStyle=lc;ctx.fill();
+    // Penalty areas: 16.5m deep, 40.32m wide
+    const paD=16.5/105*W, paW2=40.32/68*H, paY=(H-paW2)/2;
+    ctx.strokeRect(0,paY,paD,paW2);
+    ctx.strokeRect(W-paD,paY,paD,paW2);
+    // Goal areas: 5.5m deep, 18.32m wide
+    const gaD=5.5/105*W, gaW2=18.32/68*H, gaY=(H-gaW2)/2;
+    ctx.strokeRect(0,gaY,gaD,gaW2);
+    ctx.strokeRect(W-gaD,gaY,gaD,gaW2);
+    // Penalty spots: 11m
+    const ps=11/105*W;
+    ctx.beginPath();ctx.arc(ps,H/2,4,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(W-ps,H/2,4,0,Math.PI*2);ctx.fill();
+    // Penalty arcs
+    const parc=9.15/105*W;
+    ctx.beginPath();ctx.arc(ps,H/2,parc,-0.73,0.73);ctx.stroke();
+    ctx.beginPath();ctx.arc(W-ps,H/2,parc,Math.PI-0.73,Math.PI+0.73);ctx.stroke();
+    // Goals: 7.32m wide
+    const gw=7.32/68*H, gd=2.44/105*W;
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.6)';
+    ctx.strokeRect(-gd,(H-gw)/2,gd,gw);
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(-gd,(H-gw)/2,gd,gw);
+    ctx.strokeRect(W,(H-gw)/2,gd,gw);
+    ctx.fillRect(W,(H-gw)/2,gd,gw);
+    ctx.lineWidth=lw;ctx.strokeStyle=lc;
+    // Corner arcs
+    const ca=1/105*W*10;
+    ctx.beginPath();ctx.arc(0,0,ca,0,Math.PI/2);ctx.stroke();
+    ctx.beginPath();ctx.arc(W,0,ca,Math.PI/2,Math.PI);ctx.stroke();
+    ctx.beginPath();ctx.arc(0,H,ca,-Math.PI/2,0);ctx.stroke();
+    ctx.beginPath();ctx.arc(W,H,ca,Math.PI,-Math.PI/2);ctx.stroke();
+  } else if(type==='half'){
+    ctx.strokeRect(0,0,W,H);
+    // Half center arc
+    const cr=9.15/52.5*W;
+    ctx.beginPath();ctx.arc(W,H/2,cr,Math.PI/2,3*Math.PI/2);ctx.stroke();
+    ctx.beginPath();ctx.arc(W,H/2,4,0,Math.PI*2);ctx.fillStyle=lc;ctx.fill();
+    // Penalty area
+    const paD=16.5/52.5*W, paW2=40.32/68*H, paY=(H-paW2)/2;
+    ctx.strokeRect(0,paY,paD,paW2);
+    // Goal area
+    const gaD=5.5/52.5*W, gaW2=18.32/68*H, gaY=(H-gaW2)/2;
+    ctx.strokeRect(0,gaY,gaD,gaW2);
+    // Penalty spot
+    const ps=11/52.5*W;
+    ctx.beginPath();ctx.arc(ps,H/2,4,0,Math.PI*2);ctx.fill();
+    // Penalty arc
+    const parc=9.15/52.5*W;
+    ctx.beginPath();ctx.arc(ps,H/2,parc,-0.73,0.73);ctx.stroke();
+    // Goal
+    const gw=7.32/68*H, gd=2.44/52.5*W;
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.6)';
+    ctx.strokeRect(-gd,(H-gw)/2,gd,gw);
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(-gd,(H-gw)/2,gd,gw);
+    ctx.lineWidth=lw;ctx.strokeStyle=lc;
+    // Corner arcs
+    const ca=1/52.5*W*10;
+    ctx.beginPath();ctx.arc(0,0,ca,0,Math.PI/2);ctx.stroke();
+    ctx.beginPath();ctx.arc(0,H,ca,-Math.PI/2,0);ctx.stroke();
+  } else if(type==='small'){
+    ctx.strokeRect(0,0,W,H);
+    // Center line
+    ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
+    // Center circle
+    const cr=5/40*W;
+    ctx.beginPath();ctx.arc(W/2,H/2,cr,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(W/2,H/2,3,0,Math.PI*2);ctx.fillStyle=lc;ctx.fill();
+    // Penalty areas: 6m deep, 10m wide
+    const paD=6/40*W, paW2=10/25*H, paY=(H-paW2)/2;
+    ctx.strokeRect(0,paY,paD,paW2);
+    ctx.strokeRect(W-paD,paY,paD,paW2);
+    // Mini goals: 3m wide
+    const gw=3/25*H, gd=1.5/40*W;
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.6)';
+    ctx.strokeRect(-gd,(H-gw)/2,gd,gw);
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(-gd,(H-gw)/2,gd,gw);
+    ctx.strokeRect(W,(H-gw)/2,gd,gw);
+    ctx.fillRect(W,(H-gw)/2,gd,gw);
+  }
+}
+
 function screenToCanvas(sx,sy){
-  return {x:(sx-panX)/zoomLevel, y:(sy-panY)/zoomLevel};
+  return {x:sx, y:sy};
 }
 
 function getXY(e){
@@ -3240,9 +3906,6 @@ function bDown(e){
     return;
   }
 
-  // Middle mouse or space+drag = pan
-  if(e.button===1||(e.button===0&&e.altKey)){isPanning=true;panStart={x:e.clientX-panX,y:e.clientY-panY};return;}
-
   if(movementMode&&selectedSource){
     drawingMovement=true;
     movePt1=getEntityCenter(selectedSource);
@@ -3257,7 +3920,6 @@ function bDown(e){
 
 function bMove(e){
   const pt=getXY(e);
-  if(isPanning){panX=e.clientX-panStart.x;panY=e.clientY-panStart.y;applyZoom();redraw();return;}
   if(measuringDist&&distPt1){redraw();drawDistPreview(distPt1,pt);return;}
   if(drawingMovement&&movePt1){
     movePt2=pt;
@@ -3275,7 +3937,6 @@ function bMove(e){
 }
 
 function bUp(e){
-  if(isPanning){isPanning=false;return;}
   const pt=getXY(e);
   if(drawingMovement&&movePt1){
     drawingMovement=false;
@@ -3325,7 +3986,6 @@ function bUp(e){
 }
 
 function bLeave(){
-  if(isPanning){isPanning=false;}
   if(drawingMovement){drawingMovement=false;if(movePt1)delete movePt1._freePts;movePt1=null;movePt2=null;redraw();}
   if(drawing){drawing=false;if(currentPath&&currentPath.pts.length>1)paths.push(currentPath);currentPath=null;redraw();updateBoardStatus();}
 }
@@ -3471,17 +4131,8 @@ async function exportBoardPng(){
   out.width=W; out.height=H;
   const octx=out.getContext('2d');
 
-  // 1. Draw SVG field
-  const svg=document.getElementById('fieldSvg');
-  const svgData=new XMLSerializer().serializeToString(svg);
-  const blob=new Blob([svgData],{type:'image/svg+xml'});
-  const url=URL.createObjectURL(blob);
-  await new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{octx.drawImage(img,0,0,W,H);res();};
-    img.onerror=res;
-    img.src=url;
-  });
+  // 1. Draw canvas field
+  drawBoardField(octx,W,H,selectedFieldType);
   URL.revokeObjectURL(url);
 
   // 2. Draw paths & movements canvas
@@ -4854,12 +5505,11 @@ function openSavedEx(id){
   if(!boardInited){
     initBoard(ft);
   } else {
-    // Reinit field SVG for potentially different field type
+    // Reinit field for potentially different field type
     const fd=FIELD_SVGS[ft]||FIELD_SVGS.full;
-    const svg=document.getElementById('fieldSvg');
-    svg.setAttribute('viewBox',fd.vb);
-    svg.style.background=fd.bg;
-    svg.innerHTML=fd.content;
+    currentFieldMeta={metersW:fd.metersW||105, metersH:fd.metersH||68};
+    selectedFieldType=ft;
+    resizeBoard();
   }
 
   // 4. Clear existing board state
@@ -4937,7 +5587,7 @@ function exportVideo(){
 
   // Draw field background onto offCanvas first frame
   function drawFieldBg(){
-    offCtx.fillStyle='#1e5c2e';offCtx.fillRect(0,0,W,H);
+    drawBoardField(offCtx,W,H,selectedFieldType);
   }
 
   const stream=offCanvas.captureStream(30);
