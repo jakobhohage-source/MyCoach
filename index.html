@@ -1798,7 +1798,8 @@ html, body {
         <!-- PLAYBACK BAR -->
         <div class="playback-bar">
           <button class="pb-btn" id="pbRewind" onclick="pbRewind()" title="Zurücksetzen">⏮</button>
-          <button class="pb-btn" id="pbPlay" onclick="pbToggle()" title="Abspielen">▶</button>
+          <button class="pb-btn" id="pbPlay" onclick="pbToggle()" title="Aktuelle Phase abspielen">▶</button>
+          <button class="pb-btn" id="pbSeqBtn" onclick="playFullSequence()" title="Gesamte Sequenz abspielen (alle Phasen)">⏭</button>
           <div class="pb-timeline" onclick="pbSeek(event)">
             <div class="pb-progress" id="pbProgress"></div>
           </div>
@@ -3902,6 +3903,9 @@ function canvasToMeters(dx,dy){
 }
 
 function bDown(e){
+  // Pointer-Capture: der Zug bleibt am Canvas, auch wenn man über einen Spieler fährt
+  // (sonst bricht ein Pfeil/Weg ab, sobald der Cursor eine Figur berührt)
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
   const raw={x:e.clientX-canvas.getBoundingClientRect().left, y:e.clientY-canvas.getBoundingClientRect().top};
   const pt=getXY(e);
 
@@ -5242,15 +5246,12 @@ function makeDraggableEntity(el,ent,container){
    This ensures: everything that arrives at a merge point must finish
    before anything leaving that point begins.                          */
 const MERGE_THRESH=38;
-function computeSequencing(){
-  // Reset
-  movements.forEach(m=>{ m.startTime=0; });
-
-  // Iterative relaxation (handles chains of arbitrary depth)
-  for(let pass=0;pass<movements.length;pass++){
-    movements.forEach(m=>{
+function computeSequencingFor(movs){
+  movs.forEach(m=>{ m.startTime=0; });
+  for(let pass=0;pass<movs.length;pass++){
+    movs.forEach(m=>{
       const mStart=m.startPtSnap||m.pts[0];
-      movements.forEach(pred=>{
+      movs.forEach(pred=>{
         if(pred===m)return;
         const predEnd=pred.pts[pred.pts.length-1];
         if(Math.hypot(mStart.x-predEnd.x, mStart.y-predEnd.y)<MERGE_THRESH){
@@ -5260,6 +5261,100 @@ function computeSequencing(){
       });
     });
   }
+}
+function computeSequencing(){ computeSequencingFor(movements); }
+
+/* ── Gemeinsamer Sequenz-Renderer (Live-Vorschau + Video) ── */
+// Punkt entlang einer Polyline bei Fraktion t (0..1)
+function pointAlong(pts,t){
+  if(!pts||!pts.length)return{x:0,y:0};
+  if(pts.length===1)return pts[0];
+  t=Math.max(0,Math.min(1,t));
+  const fi=t*(pts.length-1),i=Math.floor(fi),fr=fi-i;
+  const a=pts[i],b=pts[Math.min(pts.length-1,i+1)];
+  return{x:a.x+(b.x-a.x)*fr,y:a.y+(b.y-a.y)*fr};
+}
+// Dauer einer Phase (nach computeSequencingFor)
+function phaseDurationOf(movs){
+  let d=0;(movs||[]).forEach(m=>{d=Math.max(d,(m.startTime||0)+(m.duration||0));});
+  return d;
+}
+// Eine Spielfigur/Utensil an Canvas-Position (ex,ey) zeichnen
+function drawBoardEntity(c,ent,ex,ey){
+  if(ent.type==='attacker'||ent.type==='defender'||ent.type==='gk'){
+    const col=ent.color||'#e8614e';
+    c.beginPath();c.arc(ex,ey,14,0,Math.PI*2);c.fillStyle=col;c.fill();
+    c.strokeStyle='rgba(255,255,255,0.85)';c.lineWidth=2;
+    if(ent.type==='gk')c.setLineDash([4,3]);
+    c.stroke();c.setLineDash([]);
+    c.fillStyle=isLight(col)?'#111':'#fff';
+    c.font='bold 12px Oswald,sans-serif';c.textAlign='center';c.textBaseline='middle';
+    c.fillText(ent.label||'',ex,ey);
+  } else if(ent.type==='ball'){
+    drawTelstarBall(c,ex,ey,13);
+  } else if(ent.type==='cone'){
+    c.beginPath();c.moveTo(ex,ey-13);c.lineTo(ex+9,ey+10);c.lineTo(ex-9,ey+10);c.closePath();
+    c.fillStyle='#f09a30';c.fill();
+  } else if(ent.type==='pylon'){
+    c.beginPath();c.moveTo(ex,ey-16);c.lineTo(ex+12,ey+12);c.lineTo(ex-12,ey+12);c.closePath();
+    c.fillStyle='#e04010';c.fill();
+  } else if(ent.type==='pole'){
+    c.fillStyle='#f0bc2e';c.fillRect(ex-4,ey-20,8,40);
+  }
+}
+// Statischen Pfad/Strich zeichnen
+function drawStaticPathOn(c,p){
+  if(!p.pts||p.pts.length<2)return;
+  c.beginPath();c.strokeStyle=p.color;c.lineWidth=p.size;c.lineCap='round';c.lineJoin='round';
+  c.setLineDash(p.tool==='dashed'?[p.size*3,p.size*2]:[]);
+  c.moveTo(p.pts[0].x,p.pts[0].y);
+  if(p.tool==='line'||p.tool==='arrow')c.lineTo(p.pts[p.pts.length-1].x,p.pts[p.pts.length-1].y);
+  else p.pts.forEach(pt=>c.lineTo(pt.x,pt.y));
+  c.stroke();c.setLineDash([]);
+}
+// Kompletten Frame einer Phase auf c zeichnen (Feld muss vorher gezeichnet sein).
+// entities: [{id,type,x%,y%,...}], movs: Bewegungen der Phase, tLocal: Sekunden in der Phase.
+function drawSequenceFrame(c,pr,ents,movs,tLocal){
+  const movByEnt={};
+  (movs||[]).forEach(m=>{ if(m.entityId!=null&&m.entityId>=0) movByEnt[m.entityId]=m; });
+  // Bewegungs-Spuren bis tLocal
+  (movs||[]).forEach(m=>{
+    if(!m.pts||m.pts.length<2)return;
+    const lt=tLocal-(m.startTime||0);if(lt<=0)return;
+    const t=Math.min(1,lt/(m.duration||1));
+    const n=Math.max(2,Math.floor(t*m.pts.length));
+    const pts=m.pts.slice(0,n);
+    c.beginPath();c.strokeStyle=m.color;c.lineWidth=3;c.lineCap='round';c.lineJoin='round';
+    c.setLineDash(m.type==='run'?[8,5]:[5,4]);
+    c.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>c.lineTo(p.x,p.y));
+    c.stroke();c.setLineDash([]);
+  });
+  // Entities (mit Bewegung an animierter Position, sonst statisch)
+  (ents||[]).forEach(ent=>{
+    let ex,ey;const m=movByEnt[ent.id];
+    if(m&&m.pts&&m.pts.length>=2){
+      const lt=tLocal-(m.startTime||0);
+      const t=lt<=0?0:Math.min(1,lt/(m.duration||1));
+      const p=pointAlong(m.pts,t);ex=p.x;ey=p.y;
+    } else { ex=pr.x+ent.x/100*pr.w; ey=pr.y+ent.y/100*pr.h; }
+    drawBoardEntity(c,ent,ex,ey);
+  });
+}
+// Alle Phasen als eine Sequenz vorbereiten (mit Sequencing + Dauer je Phase)
+function buildSequencePhases(){
+  saveBoardPhaseState();
+  const HOLD=0.7; // Sekunden Halt am Ende jeder Phase
+  return boardPhases.map(p=>{
+    const movs=(p.movements||[]).map(m=>({...m,pts:[...(m.pts||[])]}));
+    computeSequencingFor(movs);
+    const dur=phaseDurationOf(movs);
+    return {
+      entities:(p.entities||[]).map(e=>({...e})),
+      movements:movs,
+      paths:(p.paths||[]).map(pt=>({...pt,pts:[...(pt.pts||[])]})),
+      dur, seg:Math.max(0.4,dur)+HOLD
+    };
+  });
 }
 
 /* ── Playback ── */
@@ -5276,6 +5371,7 @@ function updatePlaybackUI(){
 }
 function pbToggle(){if(pbPlaying)pbStop();else pbPlay();}
 function pbPlay(){
+  if(seqPlaying)stopFullSequence();
   if(!movements.length){toast('Keine Bewegungen','!');return;}
   pbPlaying=true;if(pbTime>=pbDuration)pbTime=0;
   // Hide DOM entities that have movements during playback
@@ -5352,6 +5448,54 @@ function pbSeek(e){
   document.getElementById('pbProgress').style.width=(pct*100)+'%';
   document.getElementById('pbTime').textContent=`${pbTime.toFixed(1)}s / ${pbDuration.toFixed(1)}s`;
   if(!pbPlaying)redraw();
+}
+
+/* ── Gesamte Sequenz abspielen (alle Phasen hintereinander, live auf dem Board) ── */
+let seqPlaying=false, seqRAF=null, seqPhases=null, seqElapsed=0, seqLastTS=null, seqTotal=0;
+function playFullSequence(){
+  if(seqPlaying){stopFullSequence();return;}
+  if(pbPlaying)pbStop();
+  seqPhases=buildSequencePhases();
+  seqTotal=seqPhases.reduce((a,ph)=>a+ph.seg,0);
+  if(seqTotal<=0){toast('Keine Bewegungen in der Sequenz','!');return;}
+  seqPlaying=true; seqElapsed=0; seqLastTS=null;
+  // DOM-Entities/Labels ausblenden, statische Zeichen-Ebene leeren – animiert wird auf animCanvas
+  entities.forEach(ent=>{if(ent.el)ent.el.style.opacity='0';});
+  document.querySelectorAll('.board-label-el').forEach(el=>el.style.opacity='0');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const btn=document.getElementById('pbSeqBtn');if(btn){btn.textContent='⏹';btn.classList.add('playing');btn.title='Sequenz stoppen';}
+  seqRAF=requestAnimationFrame(seqTick);
+}
+function stopFullSequence(){
+  seqPlaying=false;if(seqRAF)cancelAnimationFrame(seqRAF);
+  animCtx.clearRect(0,0,animCanvas.width,animCanvas.height);
+  entities.forEach(ent=>{if(ent.el)ent.el.style.opacity='1';});
+  document.querySelectorAll('.board-label-el').forEach(el=>el.style.opacity='1');
+  const btn=document.getElementById('pbSeqBtn');if(btn){btn.textContent='⏭';btn.classList.remove('playing');btn.title='Gesamte Sequenz abspielen (alle Phasen)';}
+  redraw();updatePlaybackUI();
+}
+function drawSeqAt(tGlobal){
+  const pr=fieldPx();
+  animCtx.clearRect(0,0,animCanvas.width,animCanvas.height);
+  let t=tGlobal, pi=0;
+  while(pi<seqPhases.length-1 && t>seqPhases[pi].seg){ t-=seqPhases[pi].seg; pi++; }
+  const ph=seqPhases[pi];
+  const tLocal=Math.min(t, ph.dur||0);
+  ph.paths.forEach(p=>drawStaticPathOn(animCtx,p));
+  drawSequenceFrame(animCtx,pr,ph.entities,ph.movements,tLocal);
+  return pi;
+}
+function seqTick(ts){
+  if(!seqPlaying)return;
+  if(!seqLastTS)seqLastTS=ts;
+  const speed=parseFloat(document.getElementById('pbSpeed').value)||1;
+  seqElapsed+=((ts-seqLastTS)/1000)*speed; seqLastTS=ts;
+  if(seqElapsed>=seqTotal){ drawSeqAt(seqTotal-0.001); stopFullSequence(); return; }
+  const pi=drawSeqAt(seqElapsed);
+  const pct=seqTotal>0?seqElapsed/seqTotal*100:0;
+  document.getElementById('pbProgress').style.width=pct+'%';
+  document.getElementById('pbTime').textContent=`Phase ${pi+1}/${seqPhases.length} · ${seqElapsed.toFixed(1)}s / ${seqTotal.toFixed(1)}s`;
+  seqRAF=requestAnimationFrame(seqTick);
 }
 
 /* ── Board actions ── */
@@ -5625,9 +5769,11 @@ function openSavedEx(id){
   },80);
 }
 
-/* ── Video export (canvas recording) ── */
+/* ── Video export (canvas recording) — alle Phasen als flüssige Sequenz ── */
 function exportVideo(){
-  if(!movements.length&&!paths.length){toast('Nichts zum Exportieren','!');return;}
+  const phases=buildSequencePhases();
+  const totalDur=phases.reduce((a,ph)=>a+ph.seg,0);
+  if(totalDur<=0){toast('Nichts zu animieren','!');return;}
   const prog=document.getElementById('saveProgress');
   prog.style.display='block';prog.textContent='Video wird aufgenommen…';
 
@@ -5635,11 +5781,6 @@ function exportVideo(){
   const pr=pitchRectFor(W,H,selectedFieldType);
   const offCanvas=document.createElement('canvas');offCanvas.width=W;offCanvas.height=H;
   const offCtx=offCanvas.getContext('2d');
-
-  // Draw field background onto offCanvas first frame
-  function drawFieldBg(){
-    drawBoardField(offCtx,W,H,selectedFieldType);
-  }
 
   const stream=offCanvas.captureStream(30);
   const chunks=[];
@@ -5657,69 +5798,25 @@ function exportVideo(){
   };
 
   rec.start();
-  const totalDur=Math.max(pbDuration,1)*1000; // ms
-  const FPS=30,totalFrames=Math.ceil(totalDur/1000*FPS);
-  let frame=0;
-
-  function renderFrame(){
-    if(frame>=totalFrames){rec.stop();return;}
-    const t=(frame/totalFrames)*pbDuration;
-    drawFieldBg();
-    // Draw static paths
-    paths.forEach(p=>{
-      if(p.pts.length<2)return;
-      offCtx.beginPath();offCtx.strokeStyle=p.color;offCtx.lineWidth=p.size;
-      offCtx.lineCap='round';offCtx.lineJoin='round';
-      offCtx.setLineDash(p.tool==='dashed'?[p.size*3,p.size*2]:[]);
-      offCtx.moveTo(p.pts[0].x,p.pts[0].y);
-      if(p.tool==='line'||p.tool==='arrow')offCtx.lineTo(p.pts[p.pts.length-1].x,p.pts[p.pts.length-1].y);
-      else p.pts.forEach(pt=>offCtx.lineTo(pt.x,pt.y));
-      offCtx.stroke();offCtx.setLineDash([]);
-    });
-    // Draw animated movement paths
-    movements.forEach(m=>{
-      if(m.pts.length<2)return;
-      const mt=Math.min(1,t/m.duration);
-      const showPts=Math.max(2,Math.floor(mt*m.pts.length));
-      const pts=m.pts.slice(0,showPts);
-      offCtx.beginPath();offCtx.strokeStyle=m.color;offCtx.lineWidth=3;
-      offCtx.lineCap='round';offCtx.lineJoin='round';
-      offCtx.setLineDash(m.type==='run'?[8,5]:[5,4]);
-      offCtx.moveTo(pts[0].x,pts[0].y);pts.forEach(pt=>offCtx.lineTo(pt.x,pt.y));
-      offCtx.stroke();offCtx.setLineDash([]);
-      const last=pts[pts.length-1];
-      offCtx.beginPath();offCtx.arc(last.x,last.y,9,0,Math.PI*2);
-      offCtx.fillStyle=m.color;offCtx.fill();
-      offCtx.strokeStyle='rgba(255,255,255,0.9)';offCtx.lineWidth=2;offCtx.stroke();
-    });
-    // Draw entities (auf das eingerückte Feld gemappt)
-    entities.forEach(ent=>{
-      const ex=pr.x+ent.x/100*pr.w,ey=pr.y+ent.y/100*pr.h;
-      if(ent.type==='attacker'||ent.type==='defender'||ent.type==='gk'){
-        const col=ent.color;offCtx.beginPath();offCtx.arc(ex,ey,14,0,Math.PI*2);
-        offCtx.fillStyle=col;offCtx.fill();
-        offCtx.strokeStyle='rgba(255,255,255,0.85)';offCtx.lineWidth=2;
-        if(ent.type==='gk'){offCtx.setLineDash([4,3]);}
-        offCtx.stroke();offCtx.setLineDash([]);
-        offCtx.fillStyle=isLight(col)?'#111':'#fff';
-        offCtx.font='bold 12px Oswald,sans-serif';offCtx.textAlign='center';offCtx.textBaseline='middle';
-        offCtx.fillText(ent.label,ex,ey);
-      } else if(ent.type==='ball'){
-        drawTelstarBall(offCtx,ex,ey,13);
-      } else if(ent.type==='cone'){
-        offCtx.font='26px sans-serif';offCtx.textAlign='center';offCtx.textBaseline='middle';
-        offCtx.fillText('',ex,ey);
-      } else if(ent.type==='pylon'){
-        offCtx.font='26px sans-serif';offCtx.textAlign='center';offCtx.textBaseline='middle';
-        offCtx.fillText('',ex,ey);
-      } else if(ent.type==='pole'){
-        offCtx.fillStyle='#f0bc2e';offCtx.fillRect(ex-5,ey-20,10,40);
-      }
-    });
-    frame++;
+  function drawAt(tGlobal){
+    let t=tGlobal, pi=0;
+    while(pi<phases.length-1 && t>phases[pi].seg){ t-=phases[pi].seg; pi++; }
+    const ph=phases[pi];
+    const tLocal=Math.min(t, ph.dur||0); // Halt am Phasenende zeigt Endpositionen
+    drawBoardField(offCtx,W,H,selectedFieldType);
+    ph.paths.forEach(p=>drawStaticPathOn(offCtx,p));
+    drawSequenceFrame(offCtx,pr,ph.entities,ph.movements,tLocal);
+  }
+  // In Echtzeit rendern, damit die Videolänge exakt der Sequenzdauer entspricht
+  let startTS=null;
+  function renderFrame(ts){
+    if(startTS==null)startTS=ts;
+    const t=(ts-startTS)/1000;
+    if(t>=totalDur){ drawAt(totalDur-0.001); setTimeout(()=>rec.stop(),120); return; }
+    drawAt(t);
     requestAnimationFrame(renderFrame);
   }
-  renderFrame();
+  requestAnimationFrame(renderFrame);
 }
 
 /* ── Merge point detection ── */
