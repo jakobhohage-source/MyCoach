@@ -3815,10 +3815,10 @@ function drawBoardField(ctx,W,H,type){
     const ps=11/105*W;
     ctx.beginPath();ctx.arc(ps,H/2,4,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(W-ps,H/2,4,0,Math.PI*2);ctx.fill();
-    // Penalty arcs
-    const parc=9.15/105*W;
-    ctx.beginPath();ctx.arc(ps,H/2,parc,-0.73,0.73);ctx.stroke();
-    ctx.beginPath();ctx.arc(W-ps,H/2,parc,Math.PI-0.73,Math.PI+0.73);ctx.stroke();
+    // Penalty arcs (nur der Teil außerhalb des Strafraums, direkt an der Linie)
+    const parc=9.15/105*W, pa=Math.acos(5.5/9.15);
+    ctx.beginPath();ctx.arc(ps,H/2,parc,-pa,pa);ctx.stroke();
+    ctx.beginPath();ctx.arc(W-ps,H/2,parc,Math.PI-pa,Math.PI+pa);ctx.stroke();
     // Goals: 7.32m wide
     const gw=7.32/68*H, gd=2.44/105*W;
     ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.6)';
@@ -3827,8 +3827,8 @@ function drawBoardField(ctx,W,H,type){
     ctx.strokeRect(W,(H-gw)/2,gd,gw);
     ctx.fillRect(W,(H-gw)/2,gd,gw);
     ctx.lineWidth=lw;ctx.strokeStyle=lc;
-    // Corner arcs
-    const ca=1/105*W*10;
+    // Corner arcs (Radius 1 m)
+    const ca=1/105*W;
     ctx.beginPath();ctx.arc(0,0,ca,0,Math.PI/2);ctx.stroke();
     ctx.beginPath();ctx.arc(W,0,ca,Math.PI/2,Math.PI);ctx.stroke();
     ctx.beginPath();ctx.arc(0,H,ca,-Math.PI/2,0);ctx.stroke();
@@ -3848,17 +3848,17 @@ function drawBoardField(ctx,W,H,type){
     // Penalty spot
     const ps=11/52.5*W;
     ctx.beginPath();ctx.arc(ps,H/2,4,0,Math.PI*2);ctx.fill();
-    // Penalty arc
-    const parc=9.15/52.5*W;
-    ctx.beginPath();ctx.arc(ps,H/2,parc,-0.73,0.73);ctx.stroke();
+    // Penalty arc (nur außerhalb des Strafraums, direkt an der Linie)
+    const parc=9.15/52.5*W, pa=Math.acos(5.5/9.15);
+    ctx.beginPath();ctx.arc(ps,H/2,parc,-pa,pa);ctx.stroke();
     // Goal
     const gw=7.32/68*H, gd=2.44/52.5*W;
     ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.6)';
     ctx.strokeRect(-gd,(H-gw)/2,gd,gw);
     ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(-gd,(H-gw)/2,gd,gw);
     ctx.lineWidth=lw;ctx.strokeStyle=lc;
-    // Corner arcs
-    const ca=1/52.5*W*10;
+    // Corner arcs (Radius 1 m)
+    const ca=1/52.5*W;
     ctx.beginPath();ctx.arc(0,0,ca,0,Math.PI/2);ctx.stroke();
     ctx.beginPath();ctx.arc(0,H,ca,-Math.PI/2,0);ctx.stroke();
   } else if(type==='small'){
