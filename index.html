@@ -5381,6 +5381,7 @@ function drawStaticPathOn(c,p){
 const SEQ_DEFAULT_BEAT=1.2; // Takt einer Phase ohne Ball-Aktion (Sekunden)
 const SEQ_TAIL_HOLD=1.1;    // Nachlauf am Ende der Sequenz
 const RECEIVE_THRESH=48;    // px: wie nah das Pass-Ziel am Laufweg liegen muss, um als Annahme zu gelten
+const RECV_TIME_TOL=3.0;    // s: max. Zeitversatz, damit ein Läufer als Empfänger gilt (sonst nur kreuzend)
 
 // Nächster Punkt auf einer Polylinie zu P; frac ist index-basiert (passend zu pointAlong)
 function closestOnPolyline(pts,P){
@@ -5418,42 +5419,41 @@ function buildGlobalTimeline(){
     T+=beat;
   });
 
-  // Empfänger-Erkennung: welcher Laufweg nimmt welchen Pass an (Abfangpunkt auf dem Pfad)?
+  const effEnd=m=> m.gStart + m.dur*((m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1);
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const balls=movs.filter(m=>m.type==='ballpath');
   const runs=movs.filter(m=>m.type==='run');
-  movs.forEach(B=>{
-    if(B.type!=='ballpath')return;
-    const be=B.pts[B.pts.length-1];
+
+  // 1) BALL = TAKTGEBER: Ballwege verketten sich NUR aneinander (Ball folgt dem Ball).
+  //    Ein Ballweg startet, sobald der vorige Ballweg (an dessen Ende er ansetzt) fertig ist –
+  //    unabhängig davon, ob irgendein Laufweg noch läuft. Laufwege blockieren den Ball NIE.
+  for(let pass=0; pass<balls.length+2; pass++){
+    balls.forEach(B=>{
+      const bs=B.pts[0];
+      balls.forEach(A=>{
+        if(A===B)return;
+        if(d(bs,A.pts[A.pts.length-1])<MERGE_THRESH) B.gStart=Math.max(B.gStart, A.gStart+A.dur);
+      });
+    });
+  }
+
+  // 2) Ballannahme (nur Optik, KEIN Timing-Zwang auf den Ball): ein Laufweg, dessen Pfad das
+  //    Pass-Ziel kreuzt UND der zeitlich zum Ball passt (|tLäufer − tBall| im Fenster), stoppt
+  //    am Abfangpunkt statt zu überlaufen. Ein zufällig kreuzender Langlauf wird NICHT gekoppelt.
+  balls.forEach(B=>{
+    const be=B.pts[B.pts.length-1], tBall=B.gStart+B.dur;
     let best=null;
     runs.forEach(R=>{
       if(R.entityId===B.entityId)return;
       const c=closestOnPolyline(R.pts,be);
-      if(c.dist<RECEIVE_THRESH && (!best||c.dist<best.dist)) best={R,frac:c.frac};
+      if(c.dist>=RECEIVE_THRESH) return;
+      const tR=R.gStart+c.frac*R.dur;      // wann der Läufer den Abfangpunkt erreicht
+      if(tR>tBall+RECV_TIME_TOL) return;   // Läufer viel zu spät → nur kreuzend, kein Empfänger
+      if(!best||c.dist<best.dist) best={R,frac:c.frac};
     });
-    if(best){
-      B.receiver=best.R; B.recvFrac=best.frac;
-      // Empfänger stoppt am (frühesten) Abfangpunkt seines Laufwegs
-      if(best.R.stopFrac==null || best.frac<best.R.stopFrac) best.R.stopFrac=best.frac;
-    }
+    if(best && (best.R.stopFrac==null || best.frac<best.R.stopFrac)) best.R.stopFrac=best.frac;
   });
 
-  // Effektives Ende einer Bewegung (Läufer: am Abfangpunkt gestoppt)
-  const effEnd=m=> m.gStart + m.dur*((m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1);
-  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-  // Relaxation: Verkettung (Start am Vorgänger-Ende) + Empfänger-Kopplung (Ball kommt an, wenn Läufer da ist)
-  for(let pass=0; pass<movs.length+3; pass++){
-    movs.forEach(B=>{
-      const bs=B.pts[0];
-      movs.forEach(A=>{
-        if(A===B)return;
-        if(d(bs,A.pts[A.pts.length-1])<MERGE_THRESH) B.gStart=Math.max(B.gStart, effEnd(A));
-      });
-      if(B.type==='ballpath' && B.receiver){
-        const R=B.receiver;
-        const tR = R.gStart + (B.recvFrac||1)*R.dur; // Zeit, zu der der Läufer den Abfangpunkt erreicht
-        B.gStart = Math.max(B.gStart, tR - B.dur);   // Pass verzögern → Ball trifft genau dann ein
-      }
-    });
-  }
   const total = movs.length ? Math.max(...movs.map(m=>effEnd(m)))+SEQ_TAIL_HOLD : Math.max(0.5,T);
   return {phasePos,phaseStart,movs,staticPaths,allIds:[...allIds],total};
 }
@@ -5471,11 +5471,10 @@ function entityPosAt(tl,id,t,pr,cp){
   const ms=tl.movs.filter(m=>m.entityId===id).sort((a,b)=>a.gStart-b.gStart);
   let pos=null;
   for(const m of ms){
-    if(t<m.gStart) break;                 // Bewegung noch nicht gestartet
+    if(t<m.gStart) break;                 // spätere Bewegung: die zuletzt gestartete gewinnt
     const cap=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
     const p=(t-m.gStart)/m.dur;           // roher Index-Fortschritt
-    if(p<cap) return pointAlong(m.pts,p); // in Bewegung (bis Abfangpunkt)
-    pos=pointAlong(m.pts,cap);            // fertig bzw. am Ball gehalten
+    pos=pointAlong(m.pts, Math.min(p,cap)); // laufend oder am Endpunkt/Abfangpunkt gehalten
   }
   if(pos) return pos;
   const e=metaOf(tl,id,cp);
