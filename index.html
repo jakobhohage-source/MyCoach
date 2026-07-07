@@ -5379,7 +5379,23 @@ function drawStaticPathOn(c,p){
    Laufweg). Laufwege laufen im Hintergrund über Phasengrenzen weiter.
    Synchronisiert wird nur am Treffpunkt (Ball endet am Ende eines Laufwegs). */
 const SEQ_DEFAULT_BEAT=1.2; // Takt einer Phase ohne Ball-Aktion (Sekunden)
-const SEQ_TAIL_HOLD=0.9;    // Nachlauf am Ende der Sequenz
+const SEQ_TAIL_HOLD=1.1;    // Nachlauf am Ende der Sequenz
+const RECEIVE_THRESH=48;    // px: wie nah das Pass-Ziel am Laufweg liegen muss, um als Annahme zu gelten
+
+// Nächster Punkt auf einer Polylinie zu P; frac ist index-basiert (passend zu pointAlong)
+function closestOnPolyline(pts,P){
+  let best={dist:Infinity,frac:0,point:pts[0]};
+  const n=pts.length;
+  for(let i=0;i<n-1;i++){
+    const a=pts[i],b=pts[i+1];
+    const dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy||1;
+    let s=((P.x-a.x)*dx+(P.y-a.y)*dy)/L2; s=Math.max(0,Math.min(1,s));
+    const px=a.x+dx*s,py=a.y+dy*s,dd=Math.hypot(P.x-px,P.y-py);
+    if(dd<best.dist) best={dist:dd,frac:(i+s)/(n-1),point:{x:px,y:py}};
+  }
+  return best;
+}
+
 function buildGlobalTimeline(){
   saveBoardPhaseState();
   const phasePos=[], phaseStart=[], movs=[], staticPaths=[];
@@ -5396,25 +5412,49 @@ function buildGlobalTimeline(){
     const beat=ballEnds.length?Math.max(...ballEnds):SEQ_DEFAULT_BEAT;
     ms.forEach(m=>{
       if(!m.pts||m.pts.length<2)return;
-      movs.push({entityId:m.entityId,type:m.type,pts:m.pts,dur:Math.max(0.2,m.duration||0.8),gStart:T+(m.startTime||0),color:m.color});
+      movs.push({entityId:m.entityId,type:m.type,pts:m.pts,dur:Math.max(0.2,m.duration||0.8),gStart:T+(m.startTime||0),color:m.color,stopFrac:null});
     });
     (p.paths||[]).forEach(pt=>{ if(pt.pts&&pt.pts.length>=2) staticPaths.push({path:pt,gStart:T,gEnd:T+beat+0.6}); });
     T+=beat;
   });
-  // Globale Relaxation: Verkettung (Start an Vorgänger-Ende) + Rendezvous (Ball trifft Läufer am Ziel)
+
+  // Empfänger-Erkennung: welcher Laufweg nimmt welchen Pass an (Abfangpunkt auf dem Pfad)?
+  const runs=movs.filter(m=>m.type==='run');
+  movs.forEach(B=>{
+    if(B.type!=='ballpath')return;
+    const be=B.pts[B.pts.length-1];
+    let best=null;
+    runs.forEach(R=>{
+      if(R.entityId===B.entityId)return;
+      const c=closestOnPolyline(R.pts,be);
+      if(c.dist<RECEIVE_THRESH && (!best||c.dist<best.dist)) best={R,frac:c.frac};
+    });
+    if(best){
+      B.receiver=best.R; B.recvFrac=best.frac;
+      // Empfänger stoppt am (frühesten) Abfangpunkt seines Laufwegs
+      if(best.R.stopFrac==null || best.frac<best.R.stopFrac) best.R.stopFrac=best.frac;
+    }
+  });
+
+  // Effektives Ende einer Bewegung (Läufer: am Abfangpunkt gestoppt)
+  const effEnd=m=> m.gStart + m.dur*((m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1);
   const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-  for(let pass=0; pass<movs.length+2; pass++){
+  // Relaxation: Verkettung (Start am Vorgänger-Ende) + Empfänger-Kopplung (Ball kommt an, wenn Läufer da ist)
+  for(let pass=0; pass<movs.length+3; pass++){
     movs.forEach(B=>{
-      const bs=B.pts[0], be=B.pts[B.pts.length-1];
+      const bs=B.pts[0];
       movs.forEach(A=>{
         if(A===B)return;
-        const ae=A.pts[A.pts.length-1];
-        if(d(bs,ae)<MERGE_THRESH) B.gStart=Math.max(B.gStart, A.gStart+A.dur);
-        if(B.type==='ballpath' && d(be,ae)<MERGE_THRESH) B.gStart=Math.max(B.gStart, A.gStart+A.dur-B.dur);
+        if(d(bs,A.pts[A.pts.length-1])<MERGE_THRESH) B.gStart=Math.max(B.gStart, effEnd(A));
       });
+      if(B.type==='ballpath' && B.receiver){
+        const R=B.receiver;
+        const tR = R.gStart + (B.recvFrac||1)*R.dur; // Zeit, zu der der Läufer den Abfangpunkt erreicht
+        B.gStart = Math.max(B.gStart, tR - B.dur);   // Pass verzögern → Ball trifft genau dann ein
+      }
     });
   }
-  const total = movs.length ? Math.max(...movs.map(m=>m.gStart+m.dur))+SEQ_TAIL_HOLD : Math.max(0.5,T);
+  const total = movs.length ? Math.max(...movs.map(m=>effEnd(m)))+SEQ_TAIL_HOLD : Math.max(0.5,T);
   return {phasePos,phaseStart,movs,staticPaths,allIds:[...allIds],total};
 }
 // Aktuelle Phase (nach Ball-Takt) zum Zeitpunkt t
@@ -5425,11 +5465,19 @@ function metaOf(tl,id,cp){
   for(let k=cp+1;k<tl.phasePos.length;k++){ if(tl.phasePos[k]&&tl.phasePos[k][id]) return tl.phasePos[k][id]; }
   return null;
 }
-// Kontinuierliche Position einer Entity zum Zeitpunkt t (aktive Bewegung schlägt Phasen-Ruheposition)
+// Kontinuierliche Position einer Entity zum Zeitpunkt t.
+// Läuft durch alle Bewegungen der Entity; Läufer werden am Abfangpunkt (stopFrac) gehalten (Ballannahme).
 function entityPosAt(tl,id,t,pr,cp){
-  let active=null;
-  tl.movs.forEach(m=>{ if(m.entityId===id && t>=m.gStart && t<m.gStart+m.dur){ if(!active||m.gStart>active.gStart) active=m; } });
-  if(active) return pointAlong(active.pts,(t-active.gStart)/active.dur);
+  const ms=tl.movs.filter(m=>m.entityId===id).sort((a,b)=>a.gStart-b.gStart);
+  let pos=null;
+  for(const m of ms){
+    if(t<m.gStart) break;                 // Bewegung noch nicht gestartet
+    const cap=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
+    const p=(t-m.gStart)/m.dur;           // roher Index-Fortschritt
+    if(p<cap) return pointAlong(m.pts,p); // in Bewegung (bis Abfangpunkt)
+    pos=pointAlong(m.pts,cap);            // fertig bzw. am Ball gehalten
+  }
+  if(pos) return pos;
   const e=metaOf(tl,id,cp);
   if(e) return {x:pr.x+e.x/100*pr.w, y:pr.y+e.y/100*pr.h};
   return {x:pr.x,y:pr.y};
@@ -5443,11 +5491,12 @@ function drawGlobalFrame(c,pr,tl,t){
     if(a<=0)return;
     c.save();c.globalAlpha=a;drawStaticPathOn(c,sp.path);c.restore();
   });
-  // Bewegungs-Spuren (aktiv + kurzes Nachleuchten)
+  // Bewegungs-Spuren (nur bis zum Abfangpunkt; aktiv + kurzes Nachleuchten)
   tl.movs.forEach(m=>{
     if(t<m.gStart)return;
-    const prog=Math.min(1,(t-m.gStart)/m.dur);
-    const over=t-(m.gStart+m.dur);
+    const cap=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
+    const prog=Math.min(cap,(t-m.gStart)/m.dur);
+    const over=t-(m.gStart+m.dur*cap);
     let a=1; if(over>0) a=Math.max(0,1-over/1.1);
     if(a<=0)return;
     const n=Math.max(2,Math.floor(prog*m.pts.length));
