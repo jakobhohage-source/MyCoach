@@ -5374,46 +5374,96 @@ function drawStaticPathOn(c,p){
 }
 // Kompletten Frame einer Phase auf c zeichnen (Feld muss vorher gezeichnet sein).
 // entities: [{id,type,x%,y%,...}], movs: Bewegungen der Phase, tLocal: Sekunden in der Phase.
-function drawSequenceFrame(c,pr,ents,movs,tLocal){
-  const movByEnt={};
-  (movs||[]).forEach(m=>{ if(m.entityId!=null&&m.entityId>=0) movByEnt[m.entityId]=m; });
-  // Bewegungs-Spuren bis tLocal
-  (movs||[]).forEach(m=>{
-    if(!m.pts||m.pts.length<2)return;
-    const lt=tLocal-(m.startTime||0);if(lt<=0)return;
-    const t=Math.min(1,lt/(m.duration||1));
-    const n=Math.max(2,Math.floor(t*m.pts.length));
+/* ── Globale, asynchrone Zeitachse über alle Phasen ──
+   Der Takt wird von der Ball-Aktion jeder Phase gesetzt (nicht vom längsten
+   Laufweg). Laufwege laufen im Hintergrund über Phasengrenzen weiter.
+   Synchronisiert wird nur am Treffpunkt (Ball endet am Ende eines Laufwegs). */
+const SEQ_DEFAULT_BEAT=1.2; // Takt einer Phase ohne Ball-Aktion (Sekunden)
+const SEQ_TAIL_HOLD=0.9;    // Nachlauf am Ende der Sequenz
+function buildGlobalTimeline(){
+  saveBoardPhaseState();
+  const phasePos=[], phaseStart=[], movs=[], staticPaths=[];
+  const allIds=new Set();
+  let T=0;
+  boardPhases.forEach((p,k)=>{
+    phaseStart[k]=T;
+    const pm={};
+    (p.entities||[]).forEach(e=>{ pm[e.id]={x:e.x,y:e.y,type:e.type,color:e.color,label:e.label,name:e.name,count:e.count}; allIds.add(e.id); });
+    phasePos[k]=pm;
+    const ms=(p.movements||[]).map(m=>({...m,pts:[...(m.pts||[])]}));
+    computeSequencingFor(ms);
+    const ballEnds=ms.filter(m=>m.type==='ballpath').map(m=>(m.startTime||0)+(m.duration||0));
+    const beat=ballEnds.length?Math.max(...ballEnds):SEQ_DEFAULT_BEAT;
+    ms.forEach(m=>{
+      if(!m.pts||m.pts.length<2)return;
+      movs.push({entityId:m.entityId,type:m.type,pts:m.pts,dur:Math.max(0.2,m.duration||0.8),gStart:T+(m.startTime||0),color:m.color});
+    });
+    (p.paths||[]).forEach(pt=>{ if(pt.pts&&pt.pts.length>=2) staticPaths.push({path:pt,gStart:T,gEnd:T+beat+0.6}); });
+    T+=beat;
+  });
+  // Globale Relaxation: Verkettung (Start an Vorgänger-Ende) + Rendezvous (Ball trifft Läufer am Ziel)
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  for(let pass=0; pass<movs.length+2; pass++){
+    movs.forEach(B=>{
+      const bs=B.pts[0], be=B.pts[B.pts.length-1];
+      movs.forEach(A=>{
+        if(A===B)return;
+        const ae=A.pts[A.pts.length-1];
+        if(d(bs,ae)<MERGE_THRESH) B.gStart=Math.max(B.gStart, A.gStart+A.dur);
+        if(B.type==='ballpath' && d(be,ae)<MERGE_THRESH) B.gStart=Math.max(B.gStart, A.gStart+A.dur-B.dur);
+      });
+    });
+  }
+  const total = movs.length ? Math.max(...movs.map(m=>m.gStart+m.dur))+SEQ_TAIL_HOLD : Math.max(0.5,T);
+  return {phasePos,phaseStart,movs,staticPaths,allIds:[...allIds],total};
+}
+// Aktuelle Phase (nach Ball-Takt) zum Zeitpunkt t
+function currentPhaseAt(tl,t){ let cp=0; for(let k=0;k<tl.phaseStart.length;k++){ if(t>=tl.phaseStart[k]-1e-6) cp=k; } return cp; }
+// Meta (Typ/Farbe/Label/Name) einer Entity in der nächstgelegenen Phase
+function metaOf(tl,id,cp){
+  for(let k=cp;k>=0;k--){ if(tl.phasePos[k]&&tl.phasePos[k][id]) return tl.phasePos[k][id]; }
+  for(let k=cp+1;k<tl.phasePos.length;k++){ if(tl.phasePos[k]&&tl.phasePos[k][id]) return tl.phasePos[k][id]; }
+  return null;
+}
+// Kontinuierliche Position einer Entity zum Zeitpunkt t (aktive Bewegung schlägt Phasen-Ruheposition)
+function entityPosAt(tl,id,t,pr,cp){
+  let active=null;
+  tl.movs.forEach(m=>{ if(m.entityId===id && t>=m.gStart && t<m.gStart+m.dur){ if(!active||m.gStart>active.gStart) active=m; } });
+  if(active) return pointAlong(active.pts,(t-active.gStart)/active.dur);
+  const e=metaOf(tl,id,cp);
+  if(e) return {x:pr.x+e.x/100*pr.w, y:pr.y+e.y/100*pr.h};
+  return {x:pr.x,y:pr.y};
+}
+// Einen Frame der globalen Sequenz zeichnen (Feld muss vorher gezeichnet sein)
+function drawGlobalFrame(c,pr,tl,t){
+  // Annotations-Pfade (mit Ausblenden)
+  tl.staticPaths.forEach(sp=>{
+    if(t<sp.gStart)return;
+    let a=1; if(t>sp.gEnd) a=Math.max(0,1-(t-sp.gEnd)/0.8);
+    if(a<=0)return;
+    c.save();c.globalAlpha=a;drawStaticPathOn(c,sp.path);c.restore();
+  });
+  // Bewegungs-Spuren (aktiv + kurzes Nachleuchten)
+  tl.movs.forEach(m=>{
+    if(t<m.gStart)return;
+    const prog=Math.min(1,(t-m.gStart)/m.dur);
+    const over=t-(m.gStart+m.dur);
+    let a=1; if(over>0) a=Math.max(0,1-over/1.1);
+    if(a<=0)return;
+    const n=Math.max(2,Math.floor(prog*m.pts.length));
     const pts=m.pts.slice(0,n);
+    c.save();c.globalAlpha=a;
     c.beginPath();c.strokeStyle=m.color;c.lineWidth=3;c.lineCap='round';c.lineJoin='round';
     c.setLineDash(m.type==='run'?[8,5]:[5,4]);
-    c.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>c.lineTo(p.x,p.y));
-    c.stroke();c.setLineDash([]);
+    c.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>c.lineTo(p.x,p.y));c.stroke();
+    c.setLineDash([]);c.restore();
   });
-  // Entities (mit Bewegung an animierter Position, sonst statisch)
-  (ents||[]).forEach(ent=>{
-    let ex,ey;const m=movByEnt[ent.id];
-    if(m&&m.pts&&m.pts.length>=2){
-      const lt=tLocal-(m.startTime||0);
-      const t=lt<=0?0:Math.min(1,lt/(m.duration||1));
-      const p=pointAlong(m.pts,t);ex=p.x;ey=p.y;
-    } else { ex=pr.x+ent.x/100*pr.w; ey=pr.y+ent.y/100*pr.h; }
-    drawBoardEntity(c,ent,ex,ey);
-  });
-}
-// Alle Phasen als eine Sequenz vorbereiten (mit Sequencing + Dauer je Phase)
-function buildSequencePhases(){
-  saveBoardPhaseState();
-  const HOLD=0.7; // Sekunden Halt am Ende jeder Phase
-  return boardPhases.map(p=>{
-    const movs=(p.movements||[]).map(m=>({...m,pts:[...(m.pts||[])]}));
-    computeSequencingFor(movs);
-    const dur=phaseDurationOf(movs);
-    return {
-      entities:(p.entities||[]).map(e=>({...e})),
-      movements:movs,
-      paths:(p.paths||[]).map(pt=>({...pt,pts:[...(pt.pts||[])]})),
-      dur, seg:Math.max(0.4,dur)+HOLD
-    };
+  // Entities an ihrer kontinuierlichen Position
+  const cp=currentPhaseAt(tl,t);
+  tl.allIds.forEach(id=>{
+    const meta=metaOf(tl,id,cp); if(!meta)return;
+    const pos=entityPosAt(tl,id,t,pr,cp);
+    drawBoardEntity(c,meta,pos.x,pos.y);
   });
 }
 
@@ -5501,12 +5551,12 @@ function pbSeek(e){
 }
 
 /* ── Gesamte Sequenz abspielen (alle Phasen hintereinander, live auf dem Board) ── */
-let seqPlaying=false, seqRAF=null, seqPhases=null, seqElapsed=0, seqLastTS=null, seqTotal=0;
+let seqPlaying=false, seqRAF=null, seqTL=null, seqElapsed=0, seqLastTS=null, seqTotal=0;
 function playFullSequence(){
   if(seqPlaying){stopFullSequence();return;}
   if(pbPlaying)pbStop();
-  seqPhases=buildSequencePhases();
-  seqTotal=seqPhases.reduce((a,ph)=>a+ph.seg,0);
+  seqTL=buildGlobalTimeline();
+  seqTotal=seqTL.total;
   if(seqTotal<=0){toast('Keine Bewegungen in der Sequenz','!');return;}
   seqPlaying=true; seqElapsed=0; seqLastTS=null;
   // DOM-Entities/Labels ausblenden, statische Zeichen-Ebene leeren – animiert wird auf animCanvas
@@ -5527,13 +5577,8 @@ function stopFullSequence(){
 function drawSeqAt(tGlobal){
   const pr=fieldPx();
   animCtx.clearRect(0,0,animCanvas.width,animCanvas.height);
-  let t=tGlobal, pi=0;
-  while(pi<seqPhases.length-1 && t>seqPhases[pi].seg){ t-=seqPhases[pi].seg; pi++; }
-  const ph=seqPhases[pi];
-  const tLocal=Math.min(t, ph.dur||0);
-  ph.paths.forEach(p=>drawStaticPathOn(animCtx,p));
-  drawSequenceFrame(animCtx,pr,ph.entities,ph.movements,tLocal);
-  return pi;
+  drawGlobalFrame(animCtx,pr,seqTL,tGlobal);
+  return currentPhaseAt(seqTL,tGlobal);
 }
 function seqTick(ts){
   if(!seqPlaying)return;
@@ -5544,7 +5589,7 @@ function seqTick(ts){
   const pi=drawSeqAt(seqElapsed);
   const pct=seqTotal>0?seqElapsed/seqTotal*100:0;
   document.getElementById('pbProgress').style.width=pct+'%';
-  document.getElementById('pbTime').textContent=`Phase ${pi+1}/${seqPhases.length} · ${seqElapsed.toFixed(1)}s / ${seqTotal.toFixed(1)}s`;
+  document.getElementById('pbTime').textContent=`Phase ${pi+1}/${seqTL.phaseStart.length} · ${seqElapsed.toFixed(1)}s / ${seqTotal.toFixed(1)}s`;
   seqRAF=requestAnimationFrame(seqTick);
 }
 
@@ -5821,8 +5866,8 @@ function openSavedEx(id){
 
 /* ── Video export (canvas recording) — alle Phasen als flüssige Sequenz ── */
 function exportVideo(){
-  const phases=buildSequencePhases();
-  const totalDur=phases.reduce((a,ph)=>a+ph.seg,0);
+  const tl=buildGlobalTimeline();
+  const totalDur=tl.total;
   if(totalDur<=0){toast('Nichts zu animieren','!');return;}
   const prog=document.getElementById('saveProgress');
   prog.style.display='block';prog.textContent='Video wird aufgenommen…';
@@ -5848,14 +5893,9 @@ function exportVideo(){
   };
 
   rec.start();
-  function drawAt(tGlobal){
-    let t=tGlobal, pi=0;
-    while(pi<phases.length-1 && t>phases[pi].seg){ t-=phases[pi].seg; pi++; }
-    const ph=phases[pi];
-    const tLocal=Math.min(t, ph.dur||0); // Halt am Phasenende zeigt Endpositionen
+  function drawAt(t){
     drawBoardField(offCtx,W,H,selectedFieldType);
-    ph.paths.forEach(p=>drawStaticPathOn(offCtx,p));
-    drawSequenceFrame(offCtx,pr,ph.entities,ph.movements,tLocal);
+    drawGlobalFrame(offCtx,pr,tl,t);
   }
   // In Echtzeit rendern, damit die Videolänge exakt der Sequenzdauer entspricht
   let startTS=null;
