@@ -5920,15 +5920,21 @@ function exportVideo(){
   const prog=document.getElementById('saveProgress');
   prog.style.display='block';prog.textContent='Video wird aufgenommen…';
 
+  // Im 1×-Koordinatenraum zeichnen, aber in hoher Auflösung rastern (scharfes Video)
   const W=canvas.width,H=canvas.height;
   const pr=pitchRectFor(W,H,selectedFieldType);
-  const offCanvas=document.createElement('canvas');offCanvas.width=W;offCanvas.height=H;
+  const S=Math.max(1, Math.min(4, 1920/W));          // Zielbreite ~1920 px
+  const offCanvas=document.createElement('canvas');
+  offCanvas.width=Math.round(W*S); offCanvas.height=Math.round(H*S);
   const offCtx=offCanvas.getContext('2d');
+  offCtx.imageSmoothingEnabled=true; offCtx.imageSmoothingQuality='high';
 
-  const stream=offCanvas.captureStream(30);
+  const FPS=30;
+  const bps=Math.min(16000000, Math.round(offCanvas.width*offCanvas.height*FPS*0.12));
+  const stream=offCanvas.captureStream(FPS);
   const chunks=[];
   const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
-  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2500000});
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:bps});
   rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
   rec.onstop=()=>{
     const blob=new Blob(chunks,{type:'video/webm'});
@@ -5942,6 +5948,7 @@ function exportVideo(){
 
   rec.start();
   function drawAt(t){
+    offCtx.setTransform(S,0,0,S,0,0);   // Hochskalierung; danach im 1×-Raum zeichnen
     drawBoardField(offCtx,W,H,selectedFieldType);
     drawGlobalFrame(offCtx,pr,tl,t);
   }
