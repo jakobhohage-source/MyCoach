@@ -3760,6 +3760,11 @@ function resizeBoard(){
   const fc=document.getElementById('fieldCanvas');
   fc.width=W;fc.height=H;
   drawBoardField(fc.getContext('2d'),W,H,selectedFieldType);
+  // playerLayer exakt auf das eingerückte Spielfeld legen, damit Entity-Prozente
+  // sich auf die Torlinien (nicht die Canvas-Kante) beziehen.
+  const pr=pitchRectFor(W,H,selectedFieldType);
+  const pl=document.getElementById('playerLayer');
+  if(pl){pl.style.left=pr.x+'px';pl.style.top=pr.y+'px';pl.style.width=pr.w+'px';pl.style.height=pr.h+'px';pl.style.right='auto';pl.style.bottom='auto';}
   redraw();
 }
 
@@ -3783,6 +3788,11 @@ function drawBoardField(ctx,W,H,type){
   const lc='rgba(255,255,255,0.9)';
   const lw=Math.max(2,W*0.0024);
   ctx.strokeStyle=lc;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';
+
+  // Linien/Tore/Eckbögen ins eingerückte Feld zeichnen (Rasen-Rand bleibt außen sichtbar)
+  const pr=pitchRectFor(W,H,type);
+  ctx.save();ctx.translate(pr.x,pr.y);
+  W=pr.w;H=pr.h;
 
   if(type==='full'){
     // Outline
@@ -3871,6 +3881,7 @@ function drawBoardField(ctx,W,H,type){
     ctx.strokeRect(W,(H-gw)/2,gd,gw);
     ctx.fillRect(W,(H-gw)/2,gd,gw);
   }
+  ctx.restore();
 }
 
 function screenToCanvas(sx,sy){
@@ -3882,11 +3893,11 @@ function getXY(e){
   return screenToCanvas(e.clientX-r.left, e.clientY-r.top);
 }
 
-// Convert canvas px → meters using field dimensions
+// Convert canvas px → meters using field dimensions (Feldrechteck, nicht Container)
 function canvasToMeters(dx,dy){
-  const c=document.getElementById('boardFieldContainer');
-  const mx = dx / (c.offsetWidth||1)  * currentFieldMeta.metersW;
-  const my = dy / (c.offsetHeight||1) * currentFieldMeta.metersH;
+  const f=fieldPx();
+  const mx = dx / f.w * currentFieldMeta.metersW;
+  const my = dy / f.h * currentFieldMeta.metersH;
   return Math.sqrt(mx*mx+my*my);
 }
 
@@ -3907,9 +3918,9 @@ function bDown(e){
       distPt2=pt;
       const dist=canvasToMeters(Math.abs(pt.x-distPt1.x),Math.abs(pt.y-distPt1.y));
       // Actually use Euclidean in meter-space
-      const c=document.getElementById('boardFieldContainer');
-      const mx=(pt.x-distPt1.x)/(c.offsetWidth||1)*currentFieldMeta.metersW;
-      const my=(pt.y-distPt1.y)/(c.offsetHeight||1)*currentFieldMeta.metersH;
+      const f=fieldPx();
+      const mx=(pt.x-distPt1.x)/f.w*currentFieldMeta.metersW;
+      const my=(pt.y-distPt1.y)/f.h*currentFieldMeta.metersH;
       const m=Math.sqrt(mx*mx+my*my).toFixed(1);
       toast(`Entfernung: ${m} m`,'');
       // Draw measurement line
@@ -4009,15 +4020,25 @@ function erase(e){
   redraw();updateBoardStatus();
 }
 
-// Spielfeld-Container-Maße (das tatsächlich gezeichnete Feld, nicht die äußere Fläche)
+// Eingerücktes Spielfeld-Rechteck innerhalb des Containers (Rasen-Rand für Tore/Eckbögen).
+// Behält das exakte Feld-Seitenverhältnis bei; alle Entity-Koordinaten beziehen sich hierauf.
+function pitchRectFor(W,H,type){
+  const fd=FIELD_SVGS[type]||FIELD_SVGS.full;
+  const ratio=(fd.metersW||105)/(fd.metersH||68);
+  const pad=Math.round(Math.min(W,H)*0.05);
+  let w=W-2*pad, h=w/ratio;
+  if(h>H-2*pad){h=H-2*pad; w=h*ratio;}
+  return {x:(W-w)/2, y:(H-h)/2, w:Math.max(1,w), h:Math.max(1,h), pad};
+}
+// Live-Feldrechteck (in Container-Pixeln)
 function fieldPx(){
   const c=document.getElementById('boardFieldContainer');
-  return{w:c.offsetWidth||1,h:c.offsetHeight||1};
+  return pitchRectFor(c.offsetWidth||1, c.offsetHeight||1, selectedFieldType);
 }
 function getEntityCenter(ent){
   if(fixedStartPt)return fixedStartPt;
   const f=fieldPx();
-  return{x:ent.x/100*f.w,y:ent.y/100*f.h};
+  return{x:f.x+ent.x/100*f.w, y:f.y+ent.y/100*f.h};
 }
 
 /* ── Smooth Catmull-Rom spline for free paths ── */
@@ -4063,9 +4084,9 @@ function drawDistPreview(p1,p2){
   ctx.setLineDash([6,4]);
   ctx.strokeStyle='#f0bc2e';ctx.lineWidth=2;ctx.globalAlpha=0.8;
   ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
-  const c=document.getElementById('boardFieldContainer');
-  const mx=(p2.x-p1.x)/(c.offsetWidth||1)*currentFieldMeta.metersW;
-  const my=(p2.y-p1.y)/(c.offsetHeight||1)*currentFieldMeta.metersH;
+  const f=fieldPx();
+  const mx=(p2.x-p1.x)/f.w*currentFieldMeta.metersW;
+  const my=(p2.y-p1.y)/f.h*currentFieldMeta.metersH;
   const m=Math.sqrt(mx*mx+my*my).toFixed(1);
   ctx.setLineDash([]);ctx.globalAlpha=1;
   ctx.fillStyle='#f0bc2e';ctx.font='bold 13px sans-serif';
@@ -4156,9 +4177,10 @@ async function exportBoardPng(){
   // 2. Draw paths & movements canvas
   octx.drawImage(canvas,0,0);
 
-  // 3. Render entities
+  // 3. Render entities (auf das eingerückte Feld gemappt)
+  const pr=pitchRectFor(W,H,selectedFieldType);
   entities.forEach(e=>{
-    const ex=e.x/100*W, ey=e.y/100*H;
+    const ex=pr.x+e.x/100*pr.w, ey=pr.y+e.y/100*pr.h;
     if(['attacker','defender','gk'].includes(e.type)){
       const isGK=e.type==='gk';
       octx.beginPath();octx.arc(ex,ey,15,0,Math.PI*2);
@@ -4184,7 +4206,7 @@ async function exportBoardPng(){
 
   // 4. Render labels
   if(typeof boardLabels!=='undefined') boardLabels.forEach(l=>{
-    const lx=l.x/100*W, ly=l.y/100*H;
+    const lx=pr.x+l.x/100*pr.w, ly=pr.y+l.y/100*pr.h;
     octx.font='13px sans-serif';
     const tw=octx.measureText(l.text).width;
     octx.fillStyle='rgba(17,24,39,0.78)';
@@ -4300,7 +4322,7 @@ let pendingLabelPos=null;
 
 function openLabelInput(rawX, rawY){
   const f=fieldPx();
-  pendingLabelPos={x:rawX/f.w*100, y:rawY/f.h*100};
+  pendingLabelPos={x:(rawX-f.x)/f.w*100, y:(rawY-f.y)/f.h*100};
   document.getElementById('labelInputText').value='';
   document.getElementById('labelInputOverlay').style.display='flex';
   setTimeout(()=>document.getElementById('labelInputText').focus(),60);
@@ -4318,7 +4340,7 @@ function confirmAddLabel(){
 
 function renderBoardLabels(){
   document.querySelectorAll('.board-label-el').forEach(el=>el.remove());
-  const area=document.getElementById('boardFieldContainer');if(!area||!boardLabels)return;
+  const area=document.getElementById('playerLayer');if(!area||!boardLabels)return;
   boardLabels.forEach(l=>{
     const el=document.createElement('div');
     el.className='board-label-el';
@@ -5047,8 +5069,7 @@ function toggleConeDistances(){
 
 function renderConeDistances(){
   if(!showConeDistances) return;
-  const c = document.getElementById('boardFieldContainer');
-  const W = c.offsetWidth, H = c.offsetHeight;
+  const f = fieldPx();
   const cones = entities.filter(e => e.type === 'cone');
   if(cones.length < 2) return;
 
@@ -5063,13 +5084,11 @@ function renderConeDistances(){
   for(let i = 0; i < cones.length; i++){
     for(let j = i+1; j < cones.length; j++){
       const a = cones[i], b = cones[j];
-      const ax = a.x/100*W, ay = a.y/100*H;
-      const bx = b.x/100*W, by = b.y/100*H;
-      const px_dist = Math.hypot(bx-ax, by-ay);
-      const mx = (ax+bx)/2*currentFieldMeta.metersW/W * W/W; // just midpoint
+      const ax = f.x + a.x/100*f.w, ay = f.y + a.y/100*f.h;
+      const bx = f.x + b.x/100*f.w, by = f.y + b.y/100*f.h;
       // Meter distance
-      const dmx = (bx-ax)/W * currentFieldMeta.metersW;
-      const dmy = (by-ay)/H * currentFieldMeta.metersH;
+      const dmx = (bx-ax)/f.w * currentFieldMeta.metersW;
+      const dmy = (by-ay)/f.h * currentFieldMeta.metersH;
       const meters = Math.sqrt(dmx*dmx + dmy*dmy).toFixed(1);
       // Only draw if reasonably close (< 40m)
       if(parseFloat(meters) > 40) continue;
@@ -5187,8 +5206,8 @@ function placeGroup(label,count,color){
 }
 
 function makeDraggableEntity(el,ent,container){
-  // Immer relativ zum Feld-Container positionieren (dort liegt playerLayer)
-  container=document.getElementById('boardFieldContainer');
+  // playerLayer ist exakt auf das eingerückte Spielfeld gelegt → Prozent = Feld-Prozent
+  container=document.getElementById('playerLayer');
   el.addEventListener('pointerdown',e=>{
     if(movementMode)return;
     e.stopPropagation();
@@ -5598,6 +5617,7 @@ function exportVideo(){
   prog.style.display='block';prog.textContent='Video wird aufgenommen…';
 
   const W=canvas.width,H=canvas.height;
+  const pr=pitchRectFor(W,H,selectedFieldType);
   const offCanvas=document.createElement('canvas');offCanvas.width=W;offCanvas.height=H;
   const offCtx=offCanvas.getContext('2d');
 
@@ -5657,9 +5677,9 @@ function exportVideo(){
       offCtx.fillStyle=m.color;offCtx.fill();
       offCtx.strokeStyle='rgba(255,255,255,0.9)';offCtx.lineWidth=2;offCtx.stroke();
     });
-    // Draw entities
+    // Draw entities (auf das eingerückte Feld gemappt)
     entities.forEach(ent=>{
-      const ex=ent.x/100*W,ey=ent.y/100*H;
+      const ex=pr.x+ent.x/100*pr.w,ey=pr.y+ent.y/100*pr.h;
       if(ent.type==='attacker'||ent.type==='defender'||ent.type==='gk'){
         const col=ent.color;offCtx.beginPath();offCtx.arc(ex,ey,14,0,Math.PI*2);
         offCtx.fillStyle=col;offCtx.fill();
@@ -5715,15 +5735,16 @@ function checkMergePoints(){
 }
 
 function addMergeIndicator(x,y){
-  const area=document.getElementById('boardArea');
   // Place in playerLayer so it sits ABOVE the canvas (not underneath it)
   const playerLayer=document.getElementById('playerLayer');
+  // playerLayer ist auf das eingerückte Feld gelegt → Container-Koordinaten in Feld-Offset umrechnen
+  const f=fieldPx();
 
   const div=document.createElement('div');
   // field-entity gives pointer-events:all and correct absolute positioning
   div.className='merge-indicator field-entity';
-  div.style.left=x+'px';
-  div.style.top=y+'px';
+  div.style.left=(x-f.x)+'px';
+  div.style.top=(y-f.y)+'px';
   div.style.cursor='pointer';
   div.style.zIndex='30';
   div.title='Treffpunkt – antippen für neuen Weg';
@@ -5744,8 +5765,8 @@ function addMergeIndicator(x,y){
         id:-1,
         type: movementMode==='run'?'attacker':'ball',
         el:div,
-        x: mx/fieldPx().w*100,
-        y: my/fieldPx().h*100,
+        x: (mx-fieldPx().x)/fieldPx().w*100,
+        y: (my-fieldPx().y)/fieldPx().h*100,
         color:'#fff', label:'✦'
       };
       document.querySelectorAll('.field-entity').forEach(d=>d.classList.remove('selected-source'));
@@ -5817,7 +5838,7 @@ function openMergeMenu(mx,my,cx,cy){
           document.getElementById('mtype-'+tp.type)?.classList.add('on');
           setMovementMode('run');
           fixedStartPt={x:mx,y:my};
-          selectedSource={id:-1,type:'attacker',el:null,x:mx/fieldPx().w*100,y:my/fieldPx().h*100,color:'#fff',label:'✦'};
+          selectedSource={id:-1,type:'attacker',el:null,x:(mx-fieldPx().x)/fieldPx().w*100,y:(my-fieldPx().y)/fieldPx().h*100,color:'#fff',label:'✦'};
           toast(`Laufweg (${tp.label}) → Weg ziehen`,'');
           if(canvas)canvas.style.cursor='crosshair';
         };
@@ -5848,7 +5869,7 @@ function openMergeMenu(mx,my,cx,cy){
         document.getElementById('ballModeLabel').textContent=BALL_TYPE_LABEL[o.btype];
         setMovementMode('ballpath');
         fixedStartPt={x:mx,y:my};
-        selectedSource={id:-1,type:'ball',el:null,x:mx/fieldPx().w*100,y:my/fieldPx().h*100,color:'#fff',label:'✦'};
+        selectedSource={id:-1,type:'ball',el:null,x:(mx-fieldPx().x)/fieldPx().w*100,y:(my-fieldPx().y)/fieldPx().h*100,color:'#fff',label:'✦'};
         toast(`${o.label} vom Treffpunkt → Weg ziehen`,'');
         if(canvas)canvas.style.cursor='crosshair';
       };
