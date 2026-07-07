@@ -3884,9 +3884,9 @@ function getXY(e){
 
 // Convert canvas px → meters using field dimensions
 function canvasToMeters(dx,dy){
-  const area=document.getElementById('boardArea');
-  const mx = dx / area.offsetWidth  * currentFieldMeta.metersW;
-  const my = dy / area.offsetHeight * currentFieldMeta.metersH;
+  const c=document.getElementById('boardFieldContainer');
+  const mx = dx / (c.offsetWidth||1)  * currentFieldMeta.metersW;
+  const my = dy / (c.offsetHeight||1) * currentFieldMeta.metersH;
   return Math.sqrt(mx*mx+my*my);
 }
 
@@ -3907,9 +3907,9 @@ function bDown(e){
       distPt2=pt;
       const dist=canvasToMeters(Math.abs(pt.x-distPt1.x),Math.abs(pt.y-distPt1.y));
       // Actually use Euclidean in meter-space
-      const area=document.getElementById('boardArea');
-      const mx=(pt.x-distPt1.x)/area.offsetWidth*currentFieldMeta.metersW;
-      const my=(pt.y-distPt1.y)/area.offsetHeight*currentFieldMeta.metersH;
+      const c=document.getElementById('boardFieldContainer');
+      const mx=(pt.x-distPt1.x)/(c.offsetWidth||1)*currentFieldMeta.metersW;
+      const my=(pt.y-distPt1.y)/(c.offsetHeight||1)*currentFieldMeta.metersH;
       const m=Math.sqrt(mx*mx+my*my).toFixed(1);
       toast(`Entfernung: ${m} m`,'');
       // Draw measurement line
@@ -4009,10 +4009,15 @@ function erase(e){
   redraw();updateBoardStatus();
 }
 
+// Spielfeld-Container-Maße (das tatsächlich gezeichnete Feld, nicht die äußere Fläche)
+function fieldPx(){
+  const c=document.getElementById('boardFieldContainer');
+  return{w:c.offsetWidth||1,h:c.offsetHeight||1};
+}
 function getEntityCenter(ent){
   if(fixedStartPt)return fixedStartPt;
-  const a=document.getElementById('boardArea');
-  return{x:ent.x/100*a.offsetWidth,y:ent.y/100*a.offsetHeight};
+  const f=fieldPx();
+  return{x:ent.x/100*f.w,y:ent.y/100*f.h};
 }
 
 /* ── Smooth Catmull-Rom spline for free paths ── */
@@ -4058,9 +4063,9 @@ function drawDistPreview(p1,p2){
   ctx.setLineDash([6,4]);
   ctx.strokeStyle='#f0bc2e';ctx.lineWidth=2;ctx.globalAlpha=0.8;
   ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
-  const area=document.getElementById('boardArea');
-  const mx=(p2.x-p1.x)/area.offsetWidth*currentFieldMeta.metersW;
-  const my=(p2.y-p1.y)/area.offsetHeight*currentFieldMeta.metersH;
+  const c=document.getElementById('boardFieldContainer');
+  const mx=(p2.x-p1.x)/(c.offsetWidth||1)*currentFieldMeta.metersW;
+  const my=(p2.y-p1.y)/(c.offsetHeight||1)*currentFieldMeta.metersH;
   const m=Math.sqrt(mx*mx+my*my).toFixed(1);
   ctx.setLineDash([]);ctx.globalAlpha=1;
   ctx.fillStyle='#f0bc2e';ctx.font='bold 13px sans-serif';
@@ -4138,8 +4143,8 @@ function drawSinglePath(p){
 ════════════════════════════════════ */
 async function exportBoardPng(){
   if(!canvas){toast('Kein Board aktiv','!');return;}
-  const area=document.getElementById('boardArea');
-  const W=area.offsetWidth, H=area.offsetHeight;
+  const fc=document.getElementById('boardFieldContainer');
+  const W=fc.offsetWidth, H=fc.offsetHeight;
   const out=document.createElement('canvas');
   out.width=W; out.height=H;
   const octx=out.getContext('2d');
@@ -4254,18 +4259,19 @@ function switchBoardPhase(idx){
 
 function addBoardPhase(){
   saveBoardPhaseState();
+  // Neue Phase erbt Spieler/Utensilien der aktuellen Phase (gleiche Positionen),
+  // startet aber mit leeren Zeichnungen/Bewegungen für den nächsten Sequenz-Schritt.
   boardPhases.push({
     paths:[],movements:[],
     entities:entities.map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count})),
-    labels:boardLabels?[...boardLabels]:[]
+    labels:[]
   });
   currentBoardPhase=boardPhases.length-1;
   renderBoardPhaseTabs();
-  // clear canvas/movements for new phase
-  paths=[];movements=[];boardLabels=[];
-  entities=[];document.getElementById('playerLayer').innerHTML='';
-  redraw();updateBoardStatus();
-  toast('Phase '+(currentBoardPhase+1)+' hinzugefügt','✓');
+  // Live-Ansicht aus den kopierten Phasendaten aufbauen (Aufstellung bleibt erhalten)
+  loadBoardPhaseState(currentBoardPhase);
+  updateBoardStatus();
+  toast('Phase '+(currentBoardPhase+1)+' hinzugefügt · Aufstellung übernommen','✓');
 }
 
 function removeBoardPhase(){
@@ -4293,8 +4299,8 @@ let boardLabels=[];
 let pendingLabelPos=null;
 
 function openLabelInput(rawX, rawY){
-  const area=document.getElementById('boardArea');
-  pendingLabelPos={x:rawX/area.offsetWidth*100, y:rawY/area.offsetHeight*100};
+  const f=fieldPx();
+  pendingLabelPos={x:rawX/f.w*100, y:rawY/f.h*100};
   document.getElementById('labelInputText').value='';
   document.getElementById('labelInputOverlay').style.display='flex';
   setTimeout(()=>document.getElementById('labelInputText').focus(),60);
@@ -4312,7 +4318,7 @@ function confirmAddLabel(){
 
 function renderBoardLabels(){
   document.querySelectorAll('.board-label-el').forEach(el=>el.remove());
-  const area=document.getElementById('boardArea');if(!area||!boardLabels)return;
+  const area=document.getElementById('boardFieldContainer');if(!area||!boardLabels)return;
   boardLabels.forEach(l=>{
     const el=document.createElement('div');
     el.className='board-label-el';
@@ -5041,8 +5047,8 @@ function toggleConeDistances(){
 
 function renderConeDistances(){
   if(!showConeDistances) return;
-  const area = document.getElementById('boardArea');
-  const W = area.offsetWidth, H = area.offsetHeight;
+  const c = document.getElementById('boardFieldContainer');
+  const W = c.offsetWidth, H = c.offsetHeight;
   const cones = entities.filter(e => e.type === 'cone');
   if(cones.length < 2) return;
 
@@ -5181,6 +5187,8 @@ function placeGroup(label,count,color){
 }
 
 function makeDraggableEntity(el,ent,container){
+  // Immer relativ zum Feld-Container positionieren (dort liegt playerLayer)
+  container=document.getElementById('boardFieldContainer');
   el.addEventListener('pointerdown',e=>{
     if(movementMode)return;
     e.stopPropagation();
@@ -5736,8 +5744,8 @@ function addMergeIndicator(x,y){
         id:-1,
         type: movementMode==='run'?'attacker':'ball',
         el:div,
-        x: mx/area.offsetWidth*100,
-        y: my/area.offsetHeight*100,
+        x: mx/fieldPx().w*100,
+        y: my/fieldPx().h*100,
         color:'#fff', label:'✦'
       };
       document.querySelectorAll('.field-entity').forEach(d=>d.classList.remove('selected-source'));
@@ -5809,7 +5817,7 @@ function openMergeMenu(mx,my,cx,cy){
           document.getElementById('mtype-'+tp.type)?.classList.add('on');
           setMovementMode('run');
           fixedStartPt={x:mx,y:my};
-          selectedSource={id:-1,type:'attacker',el:null,x:mx/area.offsetWidth*100,y:my/area.offsetHeight*100,color:'#fff',label:'✦'};
+          selectedSource={id:-1,type:'attacker',el:null,x:mx/fieldPx().w*100,y:my/fieldPx().h*100,color:'#fff',label:'✦'};
           toast(`Laufweg (${tp.label}) → Weg ziehen`,'');
           if(canvas)canvas.style.cursor='crosshair';
         };
@@ -5840,7 +5848,7 @@ function openMergeMenu(mx,my,cx,cy){
         document.getElementById('ballModeLabel').textContent=BALL_TYPE_LABEL[o.btype];
         setMovementMode('ballpath');
         fixedStartPt={x:mx,y:my};
-        selectedSource={id:-1,type:'ball',el:null,x:mx/area.offsetWidth*100,y:my/area.offsetHeight*100,color:'#fff',label:'✦'};
+        selectedSource={id:-1,type:'ball',el:null,x:mx/fieldPx().w*100,y:my/fieldPx().h*100,color:'#fff',label:'✦'};
         toast(`${o.label} vom Treffpunkt → Weg ziehen`,'');
         if(canvas)canvas.style.cursor='crosshair';
       };
