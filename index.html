@@ -898,6 +898,29 @@ textarea.de-input{resize:vertical;min-height:48px;}
   box-shadow:0 3px 10px rgba(0,0,0,0.55);
 }
 .fe-player.gk{border-style:dashed;border-color:rgba(255,255,255,0.9);}
+/* Optionales Namensschild unter der Spielfigur */
+.fe-name{
+  position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  background:rgba(17,24,39,0.82);color:#fff;font-family:'Source Sans 3',sans-serif;
+  font-size:10px;font-weight:600;line-height:1;padding:2px 6px;border-radius:5px;
+  white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;
+  pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+/* Inline-Eingabe beim Umbenennen */
+.fe-name-edit{
+  position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  width:100px;font-family:'Source Sans 3',sans-serif;font-size:11px;
+  padding:2px 6px;border:1px solid #1e5c2e;border-radius:5px;background:#fff;color:#111;
+  z-index:60;box-shadow:0 2px 8px rgba(0,0,0,0.25);
+}
+/* Optionales Namensfeld in der Toolbar */
+.player-name-input{
+  height:32px;width:120px;border:1px solid #d8ddd9;border-radius:8px;
+  padding:0 9px;font-family:'Source Sans 3',sans-serif;font-size:12.5px;color:#1f2a22;
+  background:#fff;flex-shrink:0;
+}
+.player-name-input::placeholder{color:#9aa39c;}
+.player-name-input:focus{outline:none;border-color:#1e5c2e;box-shadow:0 0 0 2px #e7f1e9;}
 /* Group of players */
 .fe-group{
   display:flex;flex-direction:column;align-items:center;gap:1px;
@@ -1735,9 +1758,10 @@ html, body {
           <div class="board-toolbar-row2">
             <!-- SPIELER -->
             <div class="tgroup"><span class="tglabel">Spieler</span><div class="trow">
-              <button class="entity-btn" id="btn-add-att" onclick="placeEntity('attacker')"><span style="width:12px;height:12px;border-radius:50%;background:#e8614e;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Angreifer</button>
-              <button class="entity-btn" id="btn-add-def" onclick="placeEntity('defender')"><span style="width:12px;height:12px;border-radius:50%;background:#4fa3e0;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Verteidiger</button>
-              <button class="entity-btn" id="btn-add-gk" onclick="placeEntity('gk')"><span style="width:12px;height:12px;border-radius:50%;border:2px dashed #e0a92e;flex:none"></span>Torwart</button>
+              <input id="playerNameInput" class="player-name-input" type="text" maxlength="18" placeholder="Name (optional)" title="Optional: Name für den nächsten Spieler – oder Spieler doppelklicken zum Umbenennen">
+              <button class="entity-btn" id="btn-add-att" onclick="addPlayer('attacker')"><span style="width:12px;height:12px;border-radius:50%;background:#e8614e;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Angreifer</button>
+              <button class="entity-btn" id="btn-add-def" onclick="addPlayer('defender')"><span style="width:12px;height:12px;border-radius:50%;background:#4fa3e0;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Verteidiger</button>
+              <button class="entity-btn" id="btn-add-gk" onclick="addPlayer('gk')"><span style="width:12px;height:12px;border-radius:50%;border:2px dashed #e0a92e;flex:none"></span>Torwart</button>
               <button class="entity-btn" id="btn-add-group" onclick="openGroupDialog()"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="2.8" stroke="currentColor" stroke-width="1.5"/><circle cx="11.2" cy="6.8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 14c0-2.3 2.1-3.8 4.5-3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gruppe…</button>
             </div></div>
             <!-- UTENSILIEN -->
@@ -4185,27 +4209,7 @@ async function exportBoardPng(){
   const pr=pitchRectFor(W,H,selectedFieldType);
   entities.forEach(e=>{
     const ex=pr.x+e.x/100*pr.w, ey=pr.y+e.y/100*pr.h;
-    if(['attacker','defender','gk'].includes(e.type)){
-      const isGK=e.type==='gk';
-      octx.beginPath();octx.arc(ex,ey,15,0,Math.PI*2);
-      octx.fillStyle=e.color||'#e8614e';octx.fill();
-      octx.strokeStyle='rgba(255,255,255,0.85)';octx.lineWidth=2;
-      if(isGK)octx.setLineDash([4,3]);
-      octx.stroke();octx.setLineDash([]);
-      octx.fillStyle=isLight(e.color||'#e8614e')?'#111':'#fff';
-      octx.font='bold 11px sans-serif';octx.textAlign='center';octx.textBaseline='middle';
-      octx.fillText(e.label||'',ex,ey);
-    } else if(e.type==='cone'){
-      octx.beginPath();octx.moveTo(ex,ey-13);octx.lineTo(ex+9,ey+10);octx.lineTo(ex-9,ey+10);
-      octx.closePath();octx.fillStyle='#f09a30';octx.fill();
-    } else if(e.type==='pylon'){
-      octx.beginPath();octx.moveTo(ex,ey-17);octx.lineTo(ex+12,ey+12);octx.lineTo(ex-12,ey+12);
-      octx.closePath();octx.fillStyle='#e04010';octx.fill();
-    } else if(e.type==='ball'){
-      drawTelstarBall(octx,ex,ey,13);
-    } else if(e.type==='pole'){
-      octx.fillStyle='#f0bc2e';octx.fillRect(ex-4,ey-20,8,40);
-    }
+    drawBoardEntity(octx,e,ex,ey);
   });
 
   // 4. Render labels
@@ -4238,7 +4242,7 @@ function saveBoardPhaseState(){
   boardPhases[currentBoardPhase]={
     paths:paths.map(p=>({...p,pts:[...p.pts]})),
     movements:movements.map(m=>({...m,pts:[...m.pts]})),
-    entities:entities.map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count})),
+    entities:entities.map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count,name:e.name})),
     labels:(typeof boardLabels!=='undefined')?[...boardLabels]:[]
   };
 }
@@ -4256,9 +4260,9 @@ function loadBoardPhaseState(idx){
     const wrap=document.createElement('div');wrap.className='field-entity';
     wrap.style.left=e.x+'%';wrap.style.top=e.y+'%';wrap.dataset.eid=e.id;
     let inner='';
-    if(e.type==='attacker')inner=playerHTML(e.color||'#e8614e',e.label||'A',false);
-    else if(e.type==='defender')inner=playerHTML(e.color||'#4fa3e0',e.label||'V',false);
-    else if(e.type==='gk')inner=playerHTML(e.color||'#f0bc2e',e.label||'T',true);
+    if(e.type==='attacker')inner=playerHTML(e.color||'#e8614e',e.label||'A',false,e.name);
+    else if(e.type==='defender')inner=playerHTML(e.color||'#4fa3e0',e.label||'V',false,e.name);
+    else if(e.type==='gk')inner=playerHTML(e.color||'#f0bc2e',e.label||'TW',true,e.name);
     else if(e.type==='cone')inner=`<div class="fe-cone"><svg viewBox="0 0 28 28" width="28" height="28"><polygon points="14,3 24,24 4,24" fill="#f09a30" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linejoin="round"/><line x1="7" y1="17" x2="21" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
     else if(e.type==='pole')inner='<div class="fe-pole"></div>';
     else if(e.type==='ball')inner=`<div class="fe-ball">${BALL_SVG}</div>`;
@@ -4267,6 +4271,9 @@ function loadBoardPhaseState(idx){
     const ent={...e,el:wrap};entities.push(ent);
     makeDraggableEntity(wrap,ent,area);
     wrap.addEventListener('click',ev=>{ev.stopPropagation();if(movementMode)selectEntityAsSource(ent);});
+    if(e.type==='attacker'||e.type==='defender'||e.type==='gk'){
+      wrap.addEventListener('dblclick',ev=>{ev.stopPropagation();renamePlayer(ent);});
+    }
     layer.appendChild(wrap);
   });
   renderBoardLabels();
@@ -4303,7 +4310,7 @@ function addBoardPhase(){
     paths:[],movements:[],
     entities:entities.map(e=>{
       const p=endPos[e.id];
-      return {id:e.id,type:e.type,x:p?p.x:e.x,y:p?p.y:e.y,color:e.color,label:e.label,count:e.count};
+      return {id:e.id,type:e.type,x:p?p.x:e.x,y:p?p.y:e.y,color:e.color,label:e.label,count:e.count,name:e.name};
     }),
     labels:[]
   });
@@ -5132,7 +5139,23 @@ function renderConeDistances(){
   ctx.setLineDash([]);
 }
 
-function placeEntity(type){
+// Nächste freie Rückennummer für einen Spielertyp in der aktuellen Phase
+function nextPlayerNum(type){
+  const nums=entities.filter(e=>e.type===type).map(e=>parseInt(e.label,10)).filter(n=>!isNaN(n));
+  return String((nums.length?Math.max(...nums):0)+1);
+}
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// Spieler über die Toolbar-Buttons hinzufügen (liest optionales Namensfeld)
+function addPlayer(type){
+  const inp=document.getElementById('playerNameInput');
+  const nm=inp?inp.value.trim():'';
+  placeEntity(type, nm);
+  if(inp)inp.value='';
+}
+
+function placeEntity(type, pname){
+  pname=pname||'';
   const area=document.getElementById('boardArea');
   let x=Math.random()*60+20, y=Math.random()*50+25;
 
@@ -5151,9 +5174,9 @@ function placeEntity(type){
   const wrap=document.createElement('div');wrap.className='field-entity';
   wrap.style.left=x+'%';wrap.style.top=y+'%';wrap.dataset.eid=id;
   let inner='',color='#888',label='';
-  if(type==='attacker'){color='#e8614e';label='A';inner=playerHTML(color,'A',false);}
-  else if(type==='defender'){color='#4fa3e0';label='V';inner=playerHTML(color,'V',false);}
-  else if(type==='gk'){color='#f0bc2e';label='T';inner=playerHTML(color,'T',true);}
+  if(type==='attacker'){color='#e8614e';label=nextPlayerNum('attacker');inner=playerHTML(color,label,false,pname);}
+  else if(type==='defender'){color='#4fa3e0';label=nextPlayerNum('defender');inner=playerHTML(color,label,false,pname);}
+  else if(type==='gk'){color='#f0bc2e';label='TW';inner=playerHTML(color,label,true,pname);}
   else if(type==='cone'){
     lastConeId = id;
     inner=`<div class="fe-cone"><svg viewBox="0 0 28 28" width="28" height="28"><polygon points="14,3 24,24 4,24" fill="#f09a30" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linejoin="round"/><line x1="7" y1="17" x2="21" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
@@ -5166,20 +5189,51 @@ function placeEntity(type){
     inner=`<div class="fe-pylon"><svg viewBox="0 0 36 36" width="36" height="36"><polygon points="18,3 31,32 5,32" fill="#e04010" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/><line x1="9" y1="22" x2="27" y2="22" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><line x1="12" y1="15" x2="24" y2="15" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
   }
   wrap.innerHTML=inner;
-  const ent={id,type,el:wrap,x,y,color,label};entities.push(ent);
+  const ent={id,type,el:wrap,x,y,color,label,name:pname};entities.push(ent);
   makeDraggableEntity(wrap,ent,area);
   wrap.addEventListener('click',e=>{
     e.stopPropagation();
     if(movementMode) selectEntityAsSource(ent);
     else if(type==='cone') lastConeId=id; // click cone to set as chain anchor
   });
+  if(type==='attacker'||type==='defender'||type==='gk'){
+    wrap.addEventListener('dblclick',e=>{e.stopPropagation();renamePlayer(ent);});
+  }
   document.getElementById('playerLayer').appendChild(wrap);
   updateBoardStatus();
   return ent;
 }
 
-function playerHTML(color,label,isGK){
-  return `<div class="fe-player${isGK?' gk':''}" style="background:${color};color:${isLight(color)?'#111':'#fff'}">${label}</div>`;
+function playerHTML(color,label,isGK,name){
+  const plate=name?`<div class="fe-name">${escHtml(name)}</div>`:'';
+  return `<div class="fe-player${isGK?' gk':''}" style="background:${color};color:${isLight(color)?'#111':'#fff'}">${label}</div>${plate}`;
+}
+function refreshPlayerEl(ent){
+  if(['attacker','defender','gk'].includes(ent.type)){
+    ent.el.innerHTML=playerHTML(ent.color,ent.label,ent.type==='gk',ent.name);
+  }
+}
+// Spieler per Doppelklick benennen/umbenennen (Inline-Eingabe über der Figur)
+function renamePlayer(ent){
+  ent.el.querySelector('.fe-name-edit')?.remove();
+  const inp=document.createElement('input');
+  inp.type='text';inp.className='fe-name-edit';inp.value=ent.name||'';
+  inp.placeholder='Name';inp.maxLength=18;
+  ent.el.appendChild(inp);
+  inp.focus();inp.select();
+  let done=false;
+  function finish(save){
+    if(done)return;done=true;
+    if(save)ent.name=inp.value.trim();
+    inp.remove();refreshPlayerEl(ent);
+  }
+  inp.addEventListener('keydown',e=>{
+    e.stopPropagation();
+    if(e.key==='Enter'){e.preventDefault();finish(true);}
+    else if(e.key==='Escape'){finish(false);}
+  });
+  inp.addEventListener('blur',()=>finish(true));
+  inp.addEventListener('pointerdown',e=>e.stopPropagation());
 }
 
 function openGroupDialog(){
@@ -5290,6 +5344,12 @@ function drawBoardEntity(c,ent,ex,ey){
     c.fillStyle=isLight(col)?'#111':'#fff';
     c.font='bold 12px Oswald,sans-serif';c.textAlign='center';c.textBaseline='middle';
     c.fillText(ent.label||'',ex,ey);
+    if(ent.name){
+      c.font='600 11px "Source Sans 3",sans-serif';
+      const tw=c.measureText(ent.name).width, ny=ey+24;
+      c.fillStyle='rgba(17,24,39,0.82)';c.fillRect(ex-tw/2-5,ny-8,tw+10,16);
+      c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(ent.name,ex,ny);
+    }
   } else if(ent.type==='ball'){
     drawTelstarBall(c,ex,ey,13);
   } else if(ent.type==='cone'){
@@ -5419,18 +5479,8 @@ function pbTick(ts){
     const last=pts[pts.length-1];
 
     if(m.type==='run'){
-      const ent=entities.find(e=>e.id===m.entityId);
-      const col=ent?ent.color:'#e8614e';
-      const lbl=ent?ent.label:'A';
-      const isGK=ent&&ent.type==='gk';
-      ctx.beginPath();ctx.arc(last.x,last.y,15,0,Math.PI*2);
-      ctx.fillStyle=col;ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=2.5;
-      if(isGK)ctx.setLineDash([4,3]);
-      ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle=isLight(col)?'#111':'#fff';
-      ctx.font='bold 12px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(lbl,last.x,last.y);
+      const ent=entities.find(e=>e.id===m.entityId)||{type:'attacker',color:'#e8614e',label:'A'};
+      drawBoardEntity(ctx,ent,last.x,last.y);
     } else {
       drawTelstarBall(ctx,last.x,last.y,14);
       ctx.beginPath();ctx.arc(last.x,last.y,17,0,Math.PI*2);
