@@ -4281,19 +4281,34 @@ function switchBoardPhase(idx){
 
 function addBoardPhase(){
   saveBoardPhaseState();
-  // Neue Phase erbt Spieler/Utensilien der aktuellen Phase (gleiche Positionen),
-  // startet aber mit leeren Zeichnungen/Bewegungen für den nächsten Sequenz-Schritt.
+  // Endpositionen der Bewegungen dieser Phase ermitteln:
+  // Ball ist seinen Pass gerollt, Spieler sind ihren Laufweg gelaufen.
+  const f=fieldPx();
+  const endPos={}; // entityId -> {x,y} in Feld-Prozent
+  movements.forEach(m=>{
+    if(m.entityId==null||m.entityId<0)return;
+    const end=m.pts&&m.pts[m.pts.length-1];
+    if(!end)return;
+    endPos[m.entityId]={
+      x:Math.max(1,Math.min(99,(end.x-f.x)/f.w*100)),
+      y:Math.max(1,Math.min(99,(end.y-f.y)/f.h*100))
+    };
+  });
+  // Neue Phase startet mit den neuen Positionen, aber ohne die alten Wege/Bewegungen.
   boardPhases.push({
     paths:[],movements:[],
-    entities:entities.map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,color:e.color,label:e.label,count:e.count})),
+    entities:entities.map(e=>{
+      const p=endPos[e.id];
+      return {id:e.id,type:e.type,x:p?p.x:e.x,y:p?p.y:e.y,color:e.color,label:e.label,count:e.count};
+    }),
     labels:[]
   });
   currentBoardPhase=boardPhases.length-1;
   renderBoardPhaseTabs();
-  // Live-Ansicht aus den kopierten Phasendaten aufbauen (Aufstellung bleibt erhalten)
   loadBoardPhaseState(currentBoardPhase);
   updateBoardStatus();
-  toast('Phase '+(currentBoardPhase+1)+' hinzugefügt · Aufstellung übernommen','✓');
+  const moved=Object.keys(endPos).length;
+  toast('Phase '+(currentBoardPhase+1)+(moved?` · ${moved} Endpositionen übernommen`:' · Aufstellung übernommen'),'✓');
 }
 
 function removeBoardPhase(){
