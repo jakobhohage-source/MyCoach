@@ -29,5 +29,10 @@ Der `tester`-Agent nach jeder Umsetzung und `/ship` vor jedem Merge. Jakob kann 
 ## Datenbankbezug
 Keine Schemaänderung. Die Tests schreiben und löschen echte Zeilen in `community_posts`, `post_comments`, `friendly_requests` und `tactics` des Testprojekts `mycoach-dev`, nur für das Testkonto und nur mit Marker `E2E-…`. Der XSS-Test ändert vorübergehend `user_metadata` des Testkontos. Voraussetzung: `mycoach-dev` hat dasselbe Schema, dieselben Policies und die Migration `202610191500` (Namen serverseitig). Sonst schlägt die Prüfung auf „Test Trainer · Testverein“ fehl.
 
+## Testbericht (19.10.2026)
+- `npx playwright test` ist aktuell **rot**: beide Tests scheitern an einem echten App-Fehler, nicht an den Tests. `submitPost` (und ebenso `submitFriendlyRequest` sowie der Login-Hinweis in `saveProfilData`) ruft `showToast(...)` auf, diese Funktion existiert nicht (vorhanden ist `toast(msg, icon)`). Der Eintrag wird gespeichert, danach bricht die Funktion mit `showToast is not defined` ab und lädt die Liste nicht neu. Im Live-Betrieb sieht ein Trainer seinen neuen Beitrag bzw. seine Testspiel-Anfrage erst nach einem Neuladen.
+- Gegenprobe mit einer nur im Testlauf eingefügten Ersatzfunktion für `showToast` (nicht committet): beide Tests grün (Smoke 4,5 s, XSS 4,4 s). Danach geprüft: keine `E2E-`-Einträge übrig, keine Nachricht gesendet, Profil wieder „Test Trainer“ / „Testverein“.
+- Sicherheitsprüfung „TESTUMGEBUNG“ greift in jedem Lauf vor dem Login.
+
 ## Verbundene Features
 Testumgebung (`docs/features/testumgebung.md`), Namen serverseitig setzen, XSS-Fix, `/ship`, `tester`-Agent.

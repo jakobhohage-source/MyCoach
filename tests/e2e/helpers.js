@@ -64,6 +64,11 @@ async function login(page) {
 async function openCommunityTab(page, tab) {
   await page.click('.tb-link:has-text("Community")');
   await page.click(tab === 'pinnwand' ? '#ctabPinnwand' : '#ctabTestspiele');
+  // Erst weitermachen, wenn beide Listen fertig geladen sind. Sonst überschreibt die
+  // noch laufende Erstladung später die Liste mit einem älteren Stand.
+  for (const list of ['#pinnwandList', '#friendlyList']) {
+    await expect(page.locator(list)).not.toContainText('Lade');
+  }
 }
 
 // Löscht alle Testdaten des angemeldeten Testkontos, die den Marker enthalten. Läuft auch nach Fehlern.
