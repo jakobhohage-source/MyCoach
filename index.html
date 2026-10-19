@@ -1316,11 +1316,17 @@ html, body {
 }
 /* Hinweis auf localhost: App läuft gegen das Testprojekt */
 #testEnvBadge {
-  position: fixed; top: 6px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 6px; left: 50%; transform: translateX(-50%);
   z-index: 10000; pointer-events: none;
   background: var(--red); color: #fff;
   font-size: 11px; font-weight: 700; letter-spacing: .08em;
   padding: 3px 10px; border-radius: 999px;
+}
+@media (max-width: 768px) {
+  #testEnvBadge { bottom: calc(60px + env(safe-area-inset-bottom) + 6px); }
+}
+@media (max-width: 768px) and (orientation: landscape) {
+  #testEnvBadge { bottom: calc(48px + env(safe-area-inset-bottom) + 6px); }
 }</style>
 </head>
 <body>
@@ -2585,7 +2591,7 @@ function toggleProfilClubFields(){
 
 /* ── Save profil data ── */
 async function saveProfilData(){
-  if(!currentUser){showToast('','Nur für eingeloggte Nutzer verfügbar.');return;}
+  if(!currentUser){toast('Nur für eingeloggte Nutzer verfügbar.','!');return;}
   const name  = document.getElementById('profilName').value.trim();
   const role  = document.getElementById('profilRole').value;
   const cType = document.getElementById('profilClubType').value;
@@ -6229,7 +6235,7 @@ function openFriendlyModal(){ document.getElementById('friendlyModalOverlay').st
 function closeFriendlyModal(){ document.getElementById('friendlyModalOverlay').style.display='none'; }
 
 async function submitFriendlyRequest(){
-  if(!currentUser){ showToast('','Bitte einloggen.'); return; }
+  if(!currentUser){ toast('Bitte einloggen.','!'); return; }
   const age  = document.getElementById('fmAge').value;
   const date = document.getElementById('fmDate').value.trim();
   const home = document.getElementById('fmHome').value;
@@ -6256,7 +6262,7 @@ async function submitFriendlyRequest(){
   document.getElementById('fmMessage').value='';
   document.getElementById('fmHome').value='both';
   closeFriendlyModal();
-  showToast('✅','Testspiel-Anfrage veröffentlicht!');
+  toast('Testspiel-Anfrage veröffentlicht!','✔');
   loadFriendlyRequests();
 }
 
@@ -6374,7 +6380,7 @@ function openPostModal(){ document.getElementById('postModalOverlay').style.disp
 function closePostModal(){ document.getElementById('postModalOverlay').style.display='none'; }
 
 async function submitPost(){
-  if(!currentUser){ showToast('','Bitte einloggen.'); return; }
+  if(!currentUser){ toast('Bitte einloggen.','!'); return; }
   const title = document.getElementById('pmTitle').value.trim();
   const body  = document.getElementById('pmBody').value.trim();
   const errEl = document.getElementById('pmError');
@@ -6389,7 +6395,7 @@ async function submitPost(){
   document.getElementById('pmTitle').value='';
   document.getElementById('pmBody').value='';
   closePostModal();
-  showToast('✅','Beitrag veröffentlicht!');
+  toast('Beitrag veröffentlicht!','✔');
   loadPosts();
 }
 
