@@ -1,6 +1,6 @@
 # Namen serverseitig setzen
 
-**Status:** Entschieden (19.10.2026, Variante A). Migration `supabase/migrations/202610191500_namen_serverseitig.sql` vom `db-architect` entworfen, **noch nicht angewendet**. Wartet auf Freigabe/Anwendung durch Jakob, danach App-Anpassung.
+**Status:** Umgesetzt auf Branch feature/namen-serverseitig, Migration entworfen, nicht angewendet. Push erst nach Anwendung der Migration durch Jakob.
 
 ## Was es tut
 Name und Verein bei neuen Beiträgen, Kommentaren, Nachrichten und Testspiel-Anfragen werden nicht mehr dem Browser geglaubt, sondern von der Datenbank aus dem Konto des Einfügenden gesetzt.
@@ -17,7 +17,7 @@ Betroffene Spalten (in der Datenbank verifiziert):
 - `messages`: `sender_name`, `sender_club`
 - `friendly_requests`: `club_name` (außerdem `club_team`, `lat`, `lng`, siehe offene Fragen)
 
-## Ist-Stand im Code (geprüft gegen `index.html`)
+## Ist-Stand im Code – Stand vor Umsetzung (Zeilennummern haben sich verschoben)
 Alle vier Tabellen haben genau eine Insert-Stelle. Alle lesen aus `currentUser.user_metadata` (`const meta = currentUser.user_metadata||{}`).
 
 | Tabelle | Funktion (Zeile) | Mitgeschickte Namensfelder | Metadaten-Schlüssel | Fallback |
@@ -110,3 +110,47 @@ Jakob hat alle Empfehlungen angenommen:
 3. `friendly_requests` ohne Vereinsnamen im Konto: Insert wird abgelehnt (Fehler mit verständlicher Meldung); die App-Prüfung bleibt als freundlicher Hinweis.
 4. Bestehende Einträge behalten den alten Namen, kein Backfill.
 5. Fallback bei fehlendem oder leerem Namen: `'Trainer'`; leerer Verein: `''`.
+
+## Funktionsweise (Umsetzung in der App)
+Die App sendet Name und Verein nicht mehr mit, der Trigger setzt sie serverseitig. Geändert in `index.html`:
+- `submitPost`: kein `author_name`/`club_name` mehr im Insert.
+- `submitComment`: kein `author_name`/`club_name` mehr im Insert.
+- `sendMessage`: kein `sender_name`/`sender_club` mehr im Insert.
+- `submitFriendlyRequest`: kein `club_name` mehr; `club_team`, `lat`, `lng` bleiben. Die Vereinsprüfung im Client bleibt als freundlicher Hinweis. Eine DB-Fehlermeldung (z. B. fehlender Verein) erscheint über das bestehende `fmError`-Feld als „Fehler: …“.
+- Die danach unbenutzte lokale Variable `meta` wurde in `submitPost`, `submitComment` und `sendMessage` entfernt (in `submitFriendlyRequest` wird sie weiter für `club` genutzt).
+
+## Testbericht (Tester, 19.10.2026)
+Methode: nur Code- und Logik-Durchgang (SQL und JS gelesen). Nichts im Browser ausgeführt, Migration nicht angewendet, kein DB-Zugriff. `node scripts/check-js.mjs`: OK.
+
+**Kriterien**
+- 1 Quelle Konto: im SQL erfüllt (set_author_from_profile, Zeilen der Funktion), nur nach Anwendung in der DB prüfbar.
+- 2 Fallback 'Trainer' (null/leer/Whitespace): im SQL erfüllt (btrim). Nur ASCII-Whitespace; geschütztes Leerzeichen (U+00A0) gilt als Name. Hinweis.
+- 3 Verein '' statt NULL: im SQL erfüllt. `->` / `->>` liefert bei club = null/String/Array NULL, kein Fehler.
+- 4 Testspiel ohne Verein: Client-Prüfung index.html:6221 bleibt; DB wirft check_violation, Anzeige über `fmError` ("Fehler: … (Code: 23514)", index.html:6232). Erfüllt, DB-Teil nur nach Anwendung prüfbar.
+- 5 Weggelassene Felder: BEFORE-Trigger läuft vor NOT-NULL-Prüfung, erfüllt (nach Anwendung prüfbar).
+- 6 Ohne Nutzerkontext unberührt: `auth.uid() is null -> return new`, erfüllt. Ein Insert ohne Namensfelder per SQL-Editor scheitert dann ggf. an NOT NULL (erwartet).
+- 7 Aktueller Kontostand: liest auth.users direkt, erfüllt (nach Anwendung prüfbar).
+- 8 Kein Backfill: erfüllt.
+- 9 Anzeige unverändert: im Code geprüft (Anzeige liest nur DB-Spalten, kein Insert nutzt die Rückgabezeile); manuell nach Anwendung prüfen.
+- 10 App sendet keine Namensfelder: erfüllt (Diff, 4 Stellen). Kein ReferenceError: `meta` wird nur noch in submitFriendlyRequest (6216/6217) genutzt und dort deklariert.
+- 11 Keine neuen Rechte: erfüllt, keine Policy-Änderung; EXECUTE entzogen.
+- 12 Doku/Rollback: erfüllt.
+
+**Weitere Schreibstellen:** nur `messages.update({read:true})` (index.html:6562), sonst insert (je 1) und delete. Kein upsert. Update-Trigger setzt Namensfelder auf OLD, also wirkungslos beim Gelesen-Markieren.
+
+**Mängel**
+- Wichtig: Rollout-Reihenfolge. Die App-Änderung ist im Arbeitsverzeichnis, Migration nicht angewendet. Wird die App vor der Migration deployt (Push = Deploy), speichern Posts/Kommentare/Nachrichten/Testspiele ohne Namen oder scheitern an NOT NULL. Migration zuerst anwenden, dann pushen. Zeile 3 dieser Datei ("danach App-Anpassung") ist veraltet formuliert.
+- Hinweis: Client-Prüfung (6221) nutzt Token-Metadaten (evtl. veraltet), DB den aktuellen Stand; Abweichung führt nur zu Hinweis bzw. DB-Fehlermeldung.
+- Hinweis: Namen werden unverändert (nicht getrimmt) übernommen; Anzeige maskiert per escHtml.
+
+**Gesamturteil:** bestanden (Code-Ebene), unter Vorbehalt der DB-Tests nach Anwendung. Keine Blocker.
+
+**Manuelle Tests für Jakob (nach Anwendung, vor Push)**
+1. Prüfabfragen am Dateiende der Migration: 8 Trigger sichtbar, prosecdef = true.
+2. Je ein Beitrag, Kommentar, Nachricht, Testspiel mit Profilname und Verein (alte App) -> Name/Verein stimmen.
+3. Konto ohne Namen/Verein: Beitrag zeigt "Trainer" ohne Zusatz; Testspiel zeigt Hinweis "Bitte zuerst deinen Verein…".
+4. Name im Profil ändern, sofort Beitrag schreiben -> neuer Name.
+5. Posteingang öffnen (Gelesen-Markierung) -> kein Fehler, Namen unverändert.
+6. Fälschung in der Browser-Konsole der eingeloggten App: `await sb.from('community_posts').insert({user_id: currentUser.id, title:'t', body:'b', author_name:'FAKE', club_name:'FAKE FC'})`, danach Beitrag laden: Name ist der eigene. Analog `post_comments`, `messages` (sender_name/sender_club) und `friendly_requests` (club_name).
+7. Update-Fälschung: `await sb.from('community_posts').update({author_name:'FAKE'}).eq('id', <eigene id>)` -> Name bleibt (bzw. 0 Zeilen).
+8. Danach neue App pushen und Schritte 2 und 3 wiederholen.
