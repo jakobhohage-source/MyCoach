@@ -10,6 +10,7 @@ Product Owner: Jakob. Jede Entscheidung mit Produktwirkung geht über ihn.
 - `zeichenboard-test.html` – gebündelte Testseite für das Zeichenboard, nicht Teil der Produktivlogik.
 - Vanilla JavaScript, kein Build-Schritt, kein Framework. Supabase-JS per CDN (`window.sb` ist der Client).
 - Backend: Supabase (Auth + Postgres). Hosting: GitHub Pages (Deploy = Push auf den Hauptbranch).
+- Zwei Supabase-Projekte: Live (`qnjebmbvkzssxaunzllm`) und Test `mycoach-dev` (`hqwmihjaoaptosjgnijy`). `index.html` wählt per Hostname: auf `localhost`/`127.0.0.1` (z. B. `python3 -m http.server 8000`) läuft die App gegen `mycoach-dev` und zeigt oben den Hinweis „TESTUMGEBUNG“, sonst gegen Live. Lokale Tests laufen deshalb ab jetzt gegen `mycoach-dev`, nie gegen Live-Daten.
 - Views sind `<div id="view-NAME" class="view">`; Navigation läuft über `showView(name)`. Aktuelle Views: home, bibliothek, planer, board, community, spieltag. Mobile-Bottom-Nav (`setMobileNav`) immer mitdenken.
 - Eingeloggter Nutzer: globale Variable `currentUser`.
 
@@ -32,7 +33,7 @@ Der Supabase-Key im Client ist ein öffentlicher Key. Die Sicherheit hängt desh
 3. Nur EIN Agent bearbeitet `index.html` zur selben Zeit. Parallelarbeit nur über getrennte Git-Worktrees und getrennte Dateien.
 4. Vor jeder Übergabe: `node scripts/check-js.mjs` ausführen (Syntax-Check der Inline-Skripte). Ein Fehler stoppt die Übergabe.
 5. Nie Secrets, Passwörter oder Service-Role-Keys in Code, Commits oder Chat schreiben.
-6. Datenbankänderungen nur als SQL-Migrationsdatei unter `supabase/migrations/` vorschlagen. Anwenden darf nur Jakob (oder nach seiner ausdrücklichen Freigabe).
+6. Datenbankänderungen nur als SQL-Migrationsdatei unter `supabase/migrations/` vorschlagen. Anwenden darf nur Jakob (oder nach seiner ausdrücklichen Freigabe). Migrationen werden immer zuerst im Testprojekt `mycoach-dev` angewendet und geprüft, erst danach live.
 7. Kein `git push` und kein Löschen von Daten ohne Freigabe von Jakob.
 8. Neue Features dokumentieren unter `docs/features/<name>.md` mit dem Template: Was es tut / Wer es nutzt / Funktionsweise / Datenbankbezug / Verbundene Features.
 9. Antworten und Doku auf Deutsch, Code-Bezeichner auf Englisch oder wie im Bestand.

@@ -1313,6 +1313,14 @@ html, body {
   .mobile-nav { display: none !important; }
   .app-body { padding-bottom: 0; }
   .topbar .tb-nav { display: flex; }
+}
+/* Hinweis auf localhost: App läuft gegen das Testprojekt */
+#testEnvBadge {
+  position: fixed; top: 6px; left: 50%; transform: translateX(-50%);
+  z-index: 10000; pointer-events: none;
+  background: var(--red); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 10px; border-radius: 999px;
 }</style>
 </head>
 <body>
@@ -2508,9 +2516,22 @@ window.addEventListener('resize',()=>{
 /* ════════════════════════════════════
    SUPABASE CONFIG
 ════════════════════════════════════ */
-const SUPABASE_URL = 'https://qnjebmbvkzssxaunzllm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuamVibWJ2a3pzc3hhdW56bGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTI5NDQsImV4cCI6MjA4ODcyODk0NH0.4gGjPkwxlpSDla2ZolBjzJ35rnrY6_P-D7Zfi2iEuVY';
+// Lokal (localhost/127.0.0.1) → Testprojekt mycoach-dev, sonst Live-Projekt
+const IS_TEST_ENV = ['localhost','127.0.0.1'].includes(location.hostname);
+const SUPABASE_URL = IS_TEST_ENV
+  ? 'https://hqwmihjaoaptosjgnijy.supabase.co'
+  : 'https://qnjebmbvkzssxaunzllm.supabase.co';
+const SUPABASE_KEY = IS_TEST_ENV
+  ? 'sb_publishable_GStVFlbLYs4LT1UbpiABmQ_UlhPIyc9'
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuamVibWJ2a3pzc3hhdW56bGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTI5NDQsImV4cCI6MjA4ODcyODk0NH0.4gGjPkwxlpSDla2ZolBjzJ35rnrY6_P-D7Zfi2iEuVY';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+if(IS_TEST_ENV){
+  const badge = document.createElement('div');
+  badge.id = 'testEnvBadge';
+  badge.textContent = 'TESTUMGEBUNG';
+  document.body.appendChild(badge);
+}
 
 let currentUser = null; // logged-in user object
 
