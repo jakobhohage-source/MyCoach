@@ -3514,8 +3514,8 @@ function renderPlaner(){
                ondragstart="dragItemIdx=${ii};dragItemPhase=${pi};dragDrillId=null">
             <span class="pi-handle">⠿</span>
             <span class="pi-icon" style="width:26px;height:26px;border-radius:5px;background:#f3f4f6;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg></span>
-            <span class="pi-name">${item.name}</span>
-            <span class="pi-dur">${item.dur} Min</span>
+            <span class="pi-name">${escHtml(item.name)}</span>
+            <span class="pi-dur">${escHtml(item.dur)} Min</span>
             <button class="pi-del" onclick="removeFromPhase(${pi},${ii})">✕</button>
           </div>`).join('')}
         ${ph.items.length===0?`<div class="drop-zone">Übung hierher ziehen oder über + hinzufügen</div>`:''}
@@ -4787,7 +4787,7 @@ function renderSpieltagKader(){
           oninput="stSetNum(${i},'${isHome?'home':'away'}',this.value)"
           ${!isHome?'disabled':''}>
         <div style="width:20px;height:20px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:Oswald,sans-serif;color:${tc};flex-shrink:0">${p.num}</div>
-        <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none;min-width:0" placeholder="${p.isGK?'Torwart':'Spieler '+p.num}" value="${p.name||''}" oninput="stSetName(${i},'${isHome?'home':'away'}',this.value)">
+        <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none;min-width:0" placeholder="${p.isGK?'Torwart':'Spieler '+p.num}" value="${escHtml(p.name||'')}" oninput="stSetName(${i},'${isHome?'home':'away'}',this.value)">
       </div>`;
     }).join('');
   }
@@ -4801,7 +4801,7 @@ function renderSpieltagKader(){
           style="width:34px;padding:2px 4px;border:1px solid #e5e7eb;border-radius:5px;font-size:12px;font-weight:700;font-family:'Oswald',sans-serif;color:#111827;text-align:center;background:#fff;flex-shrink:0"
           oninput="stSetBenchNum(${i},this.value)">
         <div style="width:20px;height:20px;border-radius:50%;background:#9ca3af;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:Oswald,sans-serif;color:#fff;flex-shrink:0">${p.num}</div>
-        <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none;min-width:0" placeholder="Ersatzspieler" value="${p.name||''}" oninput="stSetBenchName(${i},this.value)">
+        <input style="flex:1;border:none;background:transparent;font-size:13px;color:#111827;outline:none;min-width:0" placeholder="Ersatzspieler" value="${escHtml(p.name||'')}" oninput="stSetBenchName(${i},this.value)">
         <button onclick="stRemoveBench(${i})" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0">✕</button>
       </div>`).join('');
     html+=`<button onclick="stAddBench()" style="width:100%;padding:6px;border-radius:6px;border:1px dashed #d1d5db;background:transparent;color:#9ca3af;font-size:12px;cursor:pointer;margin-top:2px">+ Bankspieler hinzufügen</button>`;
@@ -4881,7 +4881,7 @@ function exportSpieltagPdf(){
   const pw=window.open('','_blank','width=900,height=700');
   pw.document.write(`<!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<title>Spieltag — ${gegner}</title>
+<title>Spieltag — ${escHtml(gegner)}</title>
 <style>
   @page{size:A4 landscape;margin:14mm}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -4904,8 +4904,8 @@ function exportSpieltagPdf(){
   .footer{margin-top:10px;font-size:9px;color:#aaa;text-align:right}
 </style>
 </head><body>
-<h1>Spieltagsvorbereitung — ${gegner}</h1>
-<div class="meta">${datum?'Datum: '+datum+' · ':''}Formation: ${formation}</div>
+<h1>Spieltagsvorbereitung — ${escHtml(gegner)}</h1>
+<div class="meta">${datum?'Datum: '+escHtml(datum)+' · ':''}Formation: ${escHtml(formation)}</div>
 <div class="layout">
   <div class="field-wrap" id="pfieldWrap">
     <img class="field-bg" src="${svgUrl}" id="pfieldImg">
@@ -4916,10 +4916,10 @@ function exportSpieltagPdf(){
     ${homeNames.map((n,i)=>{
       const p=stHomePlayers[i];
       const bg=p.isGK?'#f0bc2e':'#e8614e'; const tc=p.isGK?'#111':'#fff';
-      return '<div class="kader-row"><div class="num-badge" style="background:'+bg+';color:'+tc+'">'+p.num+'</div><span>'+( p.name||'—')+'</span></div>';
+      return '<div class="kader-row"><div class="num-badge" style="background:'+bg+';color:'+tc+'">'+p.num+'</div><span>'+escHtml(p.name||'—')+'</span></div>';
     }).join('')}
-    ${stBench.length?`<h2>Bank</h2>${stBench.map(p=>'<div class="kader-row"><div class="num-badge" style="background:#9ca3af;color:#fff">'+p.num+'</div><span>'+(p.name||'—')+'</span></div>').join('')}`:''}
-    ${notizen?`<h2>Notizen</h2><div class="notes">${notizen}</div>`:''}
+    ${stBench.length?`<h2>Bank</h2>${stBench.map(p=>'<div class="kader-row"><div class="num-badge" style="background:#9ca3af;color:#fff">'+p.num+'</div><span>'+escHtml(p.name||'—')+'</span></div>').join('')}`:''}
+    ${notizen?`<h2>Notizen</h2><div class="notes">${escHtml(notizen)}</div>`:''}
   </aside>
 </div>
 <div class="footer">MyCoach — Spieltagsvorbereitung</div>
@@ -5144,7 +5144,7 @@ function nextPlayerNum(type){
   const nums=entities.filter(e=>e.type===type).map(e=>parseInt(e.label,10)).filter(n=>!isNaN(n));
   return String((nums.length?Math.max(...nums):0)+1);
 }
-function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 // Spieler über die Toolbar-Buttons hinzufügen (liest optionales Namensfeld)
 function addPlayer(type){
@@ -5206,7 +5206,7 @@ function placeEntity(type, pname){
 
 function playerHTML(color,label,isGK,name){
   const plate=name?`<div class="fe-name">${escHtml(name)}</div>`:'';
-  return `<div class="fe-player${isGK?' gk':''}" style="background:${color};color:${isLight(color)?'#111':'#fff'}">${label}</div>${plate}`;
+  return `<div class="fe-player${isGK?' gk':''}" style="background:${escHtml(color)};color:${isLight(color)?'#111':'#fff'}">${escHtml(label)}</div>${plate}`;
 }
 function refreshPlayerEl(ent){
   if(['attacker','defender','gk'].includes(ent.type)){
@@ -5759,11 +5759,11 @@ async function loadSavedExercises(){
 
 async function deleteSavedEx(e, id){
   e.stopPropagation();
-  const ex = savedExercises.find(x=>x.id===id);
+  const ex = savedExercises.find(x=>String(x.id)===String(id));
   if(ex?.supabaseId && currentUser){
     await sb.from('tactics').delete().eq('id', ex.supabaseId);
   }
-  savedExercises = savedExercises.filter(x=>x.id!==id);
+  savedExercises = savedExercises.filter(x=>String(x.id)!==String(id));
   renderSavedExercises();
   toast('Übung gelöscht','×');
 }
@@ -5813,20 +5813,20 @@ function renderSavedExercises(){
     return;
   }
   el.innerHTML=savedExercises.map(ex=>`
-    <div class="saved-item" onclick="openSavedEx(${ex.id})">
+    <div class="saved-item" data-id="${escHtml(ex.id)}" onclick="openSavedEx(this.dataset.id)">
       <div class="saved-item-thumb">
-        ${ex.thumb?`<img src="${ex.thumb}" style="width:100%;height:100%;object-fit:cover;border-radius:3px">`:''}
+        ${ex.thumb?`<img src="${escHtml(ex.thumb)}" style="width:100%;height:100%;object-fit:cover;border-radius:3px">`:''}
       </div>
       <div class="saved-item-info">
-        <div class="saved-item-name">${ex.name}</div>
-        <div class="saved-item-meta">${ex.field} · ${ex.movCount} Bewegungen · ${ex.time}</div>
+        <div class="saved-item-name">${escHtml(ex.name)}</div>
+        <div class="saved-item-meta">${escHtml(ex.field)} · ${escHtml(ex.movCount)} Bewegungen · ${escHtml(ex.time)}</div>
       </div>
-      <button class="saved-item-del" onclick="deleteSavedEx(event,${ex.id})" title="Löschen">✕</button>
+      <button class="saved-item-del" data-id="${escHtml(ex.id)}" onclick="deleteSavedEx(event,this.dataset.id)" title="Löschen">✕</button>
     </div>`).join('');
 }
 
 function openSavedEx(id){
-  const ex = savedExercises.find(x=>x.id===id);
+  const ex = savedExercises.find(x=>String(x.id)===String(id));
   if(!ex||!ex.boardData){showView('board');return;}
   const bd = ex.boardData;
 
@@ -5880,7 +5880,7 @@ function openSavedEx(id){
       else if(e.type==='ball') inner=`<div class="fe-ball">${BALL_SVG}</div>`;
       else if(e.type==='pylon') inner=`<div class="fe-pylon"><svg viewBox="0 0 36 36" width="36" height="36"><polygon points="18,3 31,32 5,32" fill="#e04010" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/><line x1="9" y1="22" x2="27" y2="22" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/><line x1="12" y1="15" x2="24" y2="15" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>`;
       else if(e.type==='group'){
-        const count=e.count||4;const color=e.color||'#e8614e';const label=e.label||'Gruppe';
+        const count=parseInt(e.count)||4;const color=escHtml(e.color||'#e8614e');const label=escHtml(e.label||'Gruppe');
         const dots=Array.from({length:Math.min(count,5)},(_,i)=>
           `<div style="width:22px;height:22px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.8);margin-left:${i>0?'-6px':'0'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'Oswald',sans-serif;color:${isLight(color)?'#111':'#fff'};position:relative;z-index:${i+1}">${i+1}</div>`).join('');
         inner=`<div class="fe-group"><div class="fe-group-circles" style="display:flex">${dots}</div><div class="fe-group-badge">${label} (${count})</div></div>`;
@@ -6165,8 +6165,8 @@ async function nominatimSearch(val){
       const data = await r.json();
       if(!data.length){ res.style.display='none'; return; }
       res.innerHTML = data.map(d=>`
-        <div class="nom-result" onclick="selectAddress('${d.display_name.replace(/'/g,"\\'")}',${d.lat},${d.lon})">
-          ${d.display_name}
+        <div class="nom-result" data-name="${escHtml(d.display_name)}" data-lat="${escHtml(d.lat)}" data-lon="${escHtml(d.lon)}" onclick="selectAddress(this.dataset.name,this.dataset.lat,this.dataset.lon)">
+          ${escHtml(d.display_name)}
         </div>`).join('');
       res.style.display='block';
     } catch(e){ res.style.display='none'; }
@@ -6320,12 +6320,12 @@ async function loadFriendlyRequests(){
         <div style="flex:1;min-width:0">
           ${isOwn?'<div class="comm-own-badge">Meine Anfrage</div>':''}
           <div class="comm-card-title">${escHtml(i.club_name)}${i.club_team?` – ${escHtml(i.club_team)}`:''}  </div>
-          <div class="comm-card-meta">${escHtml(i.age_group)} · ${fmtDate(i.date_range)} · ${homeMap[i.home_pref]||i.home_pref}</div>
+          <div class="comm-card-meta">${escHtml(i.age_group)} · ${escHtml(fmtDate(i.date_range))} · ${escHtml(homeMap[i.home_pref]||i.home_pref)}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">
           ${dist}
           ${isOwn
-            ? `<button onclick="deleteFriendlyRequest('${i.id}')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1;padding:0">🗑</button>`
+            ? `<button data-id="${escHtml(i.id)}" onclick="deleteFriendlyRequest(this.dataset.id)" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1;padding:0">🗑</button>`
             : `<span class="comm-badge">${escHtml(i.age_group)}</span>`
           }
         </div>
@@ -6333,7 +6333,7 @@ async function loadFriendlyRequests(){
       ${i.message?`<div class="comm-card-body">${escHtml(i.message)}</div>`:''}
       <div class="comm-card-footer">
         <span style="font-size:12px;color:#9ca3af">${timeAgo(i.created_at)}</span>
-        ${!isOwn?`<button class="comm-contact-btn" onclick="contactFriendly('${i.id}','${escHtml(i.club_name)}','${i.user_id}')">Kontakt aufnehmen</button>`:''}
+        ${!isOwn?`<button class="comm-contact-btn" data-id="${escHtml(i.id)}" data-club="${escHtml(i.club_name)}" data-uid="${escHtml(i.user_id)}" onclick="contactFriendly(this.dataset.id,this.dataset.club,this.dataset.uid)">Kontakt aufnehmen</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -6390,7 +6390,7 @@ async function loadPosts(){
           <div class="comm-card-title">${escHtml(p.title)}</div>
           <div class="comm-card-meta">${escHtml(p.author_name)}${p.club_name?' · '+escHtml(p.club_name):''} · ${timeAgo(p.created_at)}</div>
         </div>
-        ${isOwn?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1">🗑</button>`:''}
+        ${isOwn?`<button data-id="${escHtml(p.id)}" onclick="deletePost(this.dataset.id)" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1">🗑</button>`:''}
       </div>
       <div class="comm-card-body">${escHtml(p.body)}</div>
     </div>`;
@@ -6413,33 +6413,33 @@ async function loadPosts(){
   list.innerHTML = data.map(p=>{
     const isOwn = currentUser && p.user_id===currentUser.id;
     const cnt = countMap[p.id]||0;
-    return `<div class="comm-card" id="post-${p.id}">
+    return `<div class="comm-card" id="post-${escHtml(p.id)}">
       <div class="comm-card-header">
         <div style="flex:1;min-width:0">
           <div class="comm-card-title">${escHtml(p.title)}</div>
           <div class="comm-card-meta">${escHtml(p.author_name)}${p.club_name?' · '+escHtml(p.club_name):''} · ${timeAgo(p.created_at)}</div>
         </div>
-        ${isOwn?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1;padding:0">🗑</button>`:''}
+        ${isOwn?`<button data-id="${escHtml(p.id)}" onclick="deletePost(this.dataset.id)" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;line-height:1;padding:0">🗑</button>`:''}
       </div>
       <div class="comm-card-body">${escHtml(p.body)}</div>
       <div class="comm-card-footer">
-        <button class="comm-comment-toggle" onclick="toggleComments('${p.id}','${escHtml(p.author_name)}')">
+        <button class="comm-comment-toggle" data-id="${escHtml(p.id)}" onclick="toggleComments(this.dataset.id)">
           ${cnt} Kommentar${cnt!==1?'e':''}
         </button>
       </div>
-      <div id="comments-${p.id}" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px">
-        <div id="comment-list-${p.id}" class="comment-list"></div>
+      <div id="comments-${escHtml(p.id)}" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px">
+        <div id="comment-list-${escHtml(p.id)}" class="comment-list"></div>
         ${currentUser?`
         <div class="comment-input-row">
-          <input class="form-input comment-input" type="text" id="comment-input-${p.id}" placeholder="Kommentar schreiben…" onkeydown="if(event.key==='Enter')submitComment('${p.id}')">
-          <button class="comment-send-btn" onclick="submitComment('${p.id}')">→</button>
+          <input class="form-input comment-input" type="text" id="comment-input-${escHtml(p.id)}" placeholder="Kommentar schreiben…" data-id="${escHtml(p.id)}" onkeydown="if(event.key==='Enter')submitComment(this.dataset.id)">
+          <button class="comment-send-btn" data-id="${escHtml(p.id)}" onclick="submitComment(this.dataset.id)">→</button>
         </div>`:'<div style="font-size:13px;color:#9ca3af;margin-top:8px">Einloggen um zu kommentieren</div>'}
       </div>
     </div>`;
   }).join('');
 }
 
-async function toggleComments(postId, authorName){
+async function toggleComments(postId){
   const box = document.getElementById('comments-'+postId);
   const isOpen = box.style.display !== 'none';
   box.style.display = isOpen ? 'none' : 'block';
@@ -6456,7 +6456,7 @@ async function loadComments(postId){
     return `<div class="comment-item">
       <div class="comment-meta">${escHtml(c.author_name)}${c.club_name?' · '+escHtml(c.club_name):''} · ${timeAgo(c.created_at)}</div>
       <div class="comment-body">${escHtml(c.body)}</div>
-      ${isOwn?`<button onclick="deleteComment('${c.id}','${postId}')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:13px;padding:0;margin-top:2px">✕</button>`:''}
+      ${isOwn?`<button data-id="${escHtml(c.id)}" data-post="${escHtml(postId)}" onclick="deleteComment(this.dataset.id,this.dataset.post)" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:13px;padding:0;margin-top:2px">✕</button>`:''}
     </div>`;
   }).join('');
 }
@@ -6560,7 +6560,7 @@ async function loadInbox(){
   if(error){ list.innerHTML='<div class="comm-empty" style="color:#e8614e">Fehler: '+escHtml(error.message)+'</div>'; return; }
   if(!data||!data.length){ list.innerHTML='<div class="comm-empty">Keine Nachrichten.</div>'; return; }
   list.innerHTML = data.map(m=>`
-    <div class="msg-item${m.read?'':' msg-unread'}" onclick="openMessage('${m.id}','inbox')">
+    <div class="msg-item${m.read?'':' msg-unread'}" data-id="${escHtml(m.id)}" onclick="openMessage(this.dataset.id,'inbox')">
       <div class="msg-item-header">
         <span class="msg-from">${escHtml(m.sender_name)}${m.sender_club?' · '+escHtml(m.sender_club):''}</span>
         <span class="msg-time">${timeAgo(m.created_at)}</span>
@@ -6579,7 +6579,7 @@ async function loadSent(){
   const {data,error} = await sb.from('messages').select('*').eq('sender_id',currentUser.id).order('created_at',{ascending:false});
   if(error||!data||!data.length){ list.innerHTML='<div class="comm-empty">Keine gesendeten Nachrichten.</div>'; return; }
   list.innerHTML = data.map(m=>`
-    <div class="msg-item" onclick="openMessage('${m.id}','sent')">
+    <div class="msg-item" data-id="${escHtml(m.id)}" onclick="openMessage(this.dataset.id,'sent')">
       <div class="msg-item-header">
         <span class="msg-from">An: ${escHtml(m.sender_name||'Unbekannt')}</span>
         <span class="msg-time">${timeAgo(m.created_at)}</span>
@@ -6621,8 +6621,6 @@ async function updateInboxBadge(){
   else { badge.style.display='none'; }
 }
 
-
-function escHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function timeAgo(iso){
   const s=Math.floor((Date.now()-new Date(iso))/1000);
   if(s<60) return 'gerade eben';
