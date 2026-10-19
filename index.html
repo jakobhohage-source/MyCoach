@@ -6221,7 +6221,6 @@ async function submitFriendlyRequest(){
   if(!club||!club.name){ errEl.textContent='Bitte zuerst deinen Verein im Profil eintragen.'; errEl.style.display='block'; return; }
   const {error} = await sb.from('friendly_requests').insert({
     user_id: currentUser.id,
-    club_name: club.name,
     club_team: club.team||'',
     lat: club.lat||null,
     lng: club.lng||null,
@@ -6361,11 +6360,8 @@ async function submitPost(){
   errEl.style.display='none';
   if(!title){ errEl.textContent='Bitte einen Titel eingeben.'; errEl.style.display='block'; return; }
   if(!body) { errEl.textContent='Bitte einen Beitrag schreiben.'; errEl.style.display='block'; return; }
-  const meta = currentUser.user_metadata||{};
   const {error} = await sb.from('community_posts').insert({
     user_id: currentUser.id,
-    author_name: meta.name||'Trainer',
-    club_name: meta.club?.name||'',
     title, body
   });
   if(error){ errEl.textContent='Fehler: '+error.message; errEl.style.display='block'; return; }
@@ -6466,13 +6462,10 @@ async function submitComment(postId){
   const input = document.getElementById('comment-input-'+postId);
   const body = input.value.trim();
   if(!body) return;
-  const meta = currentUser.user_metadata||{};
   input.value='';
   const {error} = await sb.from('post_comments').insert({
     post_id: postId,
     user_id: currentUser.id,
-    author_name: meta.name||'Trainer',
-    club_name: meta.club?.name||'',
     body
   });
   if(error){ toast('Fehler: '+error.message,'❌'); return; }
@@ -6517,12 +6510,9 @@ async function sendMessage(){
   const errEl   = document.getElementById('composeError');
   errEl.style.display='none';
   if(!body){ errEl.textContent='Bitte eine Nachricht schreiben.'; errEl.style.display='block'; return; }
-  const meta = currentUser.user_metadata||{};
   const {error} = await sb.from('messages').insert({
     sender_id:    currentUser.id,
     recipient_id: composeRecipient.id,
-    sender_name:  meta.name||'Trainer',
-    sender_club:  meta.club?.name||'',
     subject:      subject||'Kein Betreff',
     body
   });
