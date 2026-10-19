@@ -1,6 +1,6 @@
+-- STATUS: ANGEWENDET am 19.10.2026
 -- MyCoach: Name und Verein serverseitig setzen (Variante A, Trigger)
 -- Spezifikation: docs/features/namen-serverseitig-setzen.md
--- STATUS: ENTWURF, NICHT ANGEWENDET. Anwenden nur durch Jakob.
 --
 -- Was diese Migration tut
 -- 1. BEFORE INSERT auf community_posts, post_comments, messages, friendly_requests:

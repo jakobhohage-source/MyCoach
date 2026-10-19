@@ -1,6 +1,8 @@
 # Namen serverseitig setzen
 
-**Status:** Umgesetzt auf Branch feature/namen-serverseitig, Migration entworfen, nicht angewendet. Push erst nach Anwendung der Migration durch Jakob.
+**Status:** Umgesetzt und live (19.10.2026). Migration 202610191500 angewendet.
+
+Manuelle Tests: ERLEDIGT am 19.10.2026 (App-Test live und Fälschungstest in der Datenbank bestanden)
 
 ## Was es tut
 Name und Verein bei neuen Beiträgen, Kommentaren, Nachrichten und Testspiel-Anfragen werden nicht mehr dem Browser geglaubt, sondern von der Datenbank aus dem Konto des Einfügenden gesetzt.
