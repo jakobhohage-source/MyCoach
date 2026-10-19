@@ -39,11 +39,20 @@ Der Supabase-Key im Client ist ein öffentlicher Key. Die Sicherheit hängt desh
 9. Antworten und Doku auf Deutsch, Code-Bezeichner auf Englisch oder wie im Bestand.
 10. Jede Migrationsdatei beginnt mit der Zeile `-- STATUS: ENTWURF` oder `-- STATUS: ANGEWENDET am <Datum>`. Der `db-architect` schreibt immer `ENTWURF`. Sagt Jakob „Migration angewendet“, setzt der Haupt-Agent den Status der betroffenen Datei(en) auf `ANGEWENDET am <Datum>` und committet das.
 11. Sagt Jakob, die manuellen Tests eines Features sind erledigt, ergänzt der Haupt-Agent im Feature-Dokument die Zeile `Manuelle Tests: ERLEDIGT am <Datum>` und committet das. `/ship` prüft diese Zeile.
+12. Shell- und git-Befehle ohne vorangestelltes `cd` ausführen. Die Sitzung läuft bereits im Projektordner.
 
 ## Workflow der Factory
 
 `/feature <Beschreibung>` führt durch: Product Owner → UX-Designer → DB-Architekt (nur bei Datenbankbedarf) → Entwickler → Tester → Reviewer.
 `/bugfix <Beschreibung>`: Entwickler → Tester → Reviewer.
 `/review`: Reviewer prüft den aktuellen Diff.
-`/ship`: prüft den fertigen Branch (sauberer Stand, Syntax-Check, manuelle Tests, Migrationen angewendet), merged nach `main` und pusht erst nach Jakobs Ja.
+`/ship`: prüft den fertigen Branch (sauberer Stand, Syntax-Check, grüner Lauf von `npx playwright test`, manuelle Tests, Migrationen angewendet), merged nach `main` und pusht erst nach Jakobs Ja.
+
+## Browser-Tests (Playwright)
+
+- Tests liegen in `tests/e2e/` (`*.spec.js`, Hilfsfunktionen in `helpers.js`). Ausführen mit `npx playwright test` im Projektordner. Ein lokaler Server auf Port 8000 wird bei Bedarf automatisch gestartet.
+- Jeder Test ruft zuerst `openTestEnv` auf: Ist der Hinweis „TESTUMGEBUNG“ nicht sichtbar, bricht er ab. Browser-Tests laufen nie gegen die Live-Seite.
+- Zugangsdaten des Testkontos stehen in `tests/e2e/.account.local` (`TEST_EMAIL`, `TEST_PASSWORD`). Die Datei ist in `.gitignore`, wird nie gelesen, ausgegeben oder committet.
+- Testdaten tragen einen Marker (`E2E-…`) und werden im `afterEach` gelöscht. Das Testkonto hat im Profil den Namen „Test Trainer“ und den Verein „Testverein“.
+- Der `tester` führt die Tests nach jeder Umsetzung aus und ergänzt Tests für neue, browsertestbare Akzeptanzkriterien.
 Der Haupt-Agent koordiniert, delegiert über die Subagents in `.claude/agents/` und fasst am Ende kurz zusammen, was gebaut wurde und was Jakob entscheiden oder freigeben muss.

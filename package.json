@@ -1,0 +1,11 @@
+{
+  "name": "mycoach",
+  "private": true,
+  "description": "MyCoach – Web-App für Fußballtrainer. package.json nur für Entwicklungswerkzeuge (Browser-Tests).",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}
