@@ -56,7 +56,8 @@ async function login(page) {
   await page.fill('#loginEmail', email);
   await page.fill('#loginPassword', password);
   await page.click('#btnLogin');
-  await expect(page.locator('#appShell')).toHaveClass(/visible/);
+  // Die Anmeldung bei mycoach-dev dauert gelegentlich länger als das Standard-Timeout
+  await expect(page.locator('#appShell')).toHaveClass(/visible/, { timeout: 30_000 });
   // enterApp lädt Übungen und Pläne nach dem Einblenden
   await page.waitForFunction(() => typeof currentUser !== 'undefined' && currentUser && currentUser.id);
 }

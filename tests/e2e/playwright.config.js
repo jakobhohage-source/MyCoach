@@ -33,11 +33,15 @@ module.exports = defineConfig({
   reporter: [['list']],
   use: {
     baseURL: BASE_URL,
-    ...devices['Desktop Chrome'],
     // Kein Trace: er würde das eingegebene Passwort im Klartext speichern
     trace: 'off',
     screenshot: 'only-on-failure',
   },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // WebKit (Safari-Engine): nur für Tests, bei denen das Rendering browserabhängig ist
+    { name: 'webkit', use: { ...devices['Desktop Safari'] }, testMatch: '**/zeichenboard-ball.spec.js' },
+  ],
   webServer: {
     command: `python3 -m http.server ${PORT}`,
     cwd: ROOT,

@@ -54,5 +54,6 @@ Der Supabase-Key im Client ist ein öffentlicher Key. Die Sicherheit hängt desh
 - Jeder Test ruft zuerst `openTestEnv` auf: Ist der Hinweis „TESTUMGEBUNG“ nicht sichtbar, bricht er ab. Browser-Tests laufen nie gegen die Live-Seite.
 - Zugangsdaten des Testkontos stehen in `tests/e2e/.account.local` (`TEST_EMAIL`, `TEST_PASSWORD`). Die Datei ist in `.gitignore`, wird nie gelesen, ausgegeben oder committet.
 - Testdaten tragen einen Marker (`E2E-…`) und werden im `afterEach` gelöscht. Das Testkonto hat im Profil den Namen „Test Trainer“ und den Verein „Testverein“.
+- WebKit (Safari-Engine): Das Projekt `webkit` in `tests/e2e/playwright.config.js` führt nur `zeichenboard-ball.spec.js` aus (Chromium führt alle Tests aus). Voraussetzung: `npx playwright install webkit`.
 - Der `tester` führt die Tests nach jeder Umsetzung aus und ergänzt Tests für neue, browsertestbare Akzeptanzkriterien.
 Der Haupt-Agent koordiniert, delegiert über die Subagents in `.claude/agents/` und fasst am Ende kurz zusammen, was gebaut wurde und was Jakob entscheiden oder freigeben muss.
