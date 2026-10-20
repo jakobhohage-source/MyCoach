@@ -5358,6 +5358,21 @@ function pointAlong(pts,t){
   const a=pts[i],b=pts[Math.min(pts.length-1,i+1)];
   return{x:a.x+(b.x-a.x)*fr,y:a.y+(b.y-a.y)*fr};
 }
+// Easing (Z3): Zeitanteil u (0..1) -> Weganteil (0..1). Stärke/Kurve nur hier änderbar.
+// Läufe: easeInOutSine (sanft an- und auslaufen). Pässe: easeOutQuad (zügig los, läuft sanft aus).
+function easeInOutSine(u){ return 0.5-0.5*Math.cos(Math.PI*u); }
+function easeOutQuad(u){ return 1-(1-u)*(1-u); }
+function clamp01(v){ return Math.max(0,Math.min(1,v)); }
+// Weganteil einer Bewegung zum Zeitanteil u (der ungekürzten Dauer).
+// Läufer mit Abfangpunkt (stopFrac s<1): Kurve auf den gekürzten Weg gelegt, Weg = s*ease(u/s).
+// Er erreicht den Abfangpunkt also bei u=s (wie im linearen Modell) und bremst dort sanft auf 0.
+function moveEase(m,u){
+  u=clamp01(u);
+  if(m.type==='ballpath') return easeOutQuad(u);
+  const s=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
+  if(s>=1) return easeInOutSine(u);
+  return s>0 ? s*easeInOutSine(Math.min(1,u/s)) : 0;
+}
 // Dauer einer Phase (nach computeSequencingFor)
 function phaseDurationOf(movs){
   let d=0;(movs||[]).forEach(m=>{d=Math.max(d,(m.startTime||0)+(m.duration||0));});
@@ -5502,9 +5517,8 @@ function entityPosAt(tl,id,t,pr,cp){
   let pos=null;
   for(const m of ms){
     if(t<m.gStart) break;                 // spätere Bewegung: die zuletzt gestartete gewinnt
-    const cap=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
-    const p=(t-m.gStart)/m.dur;           // roher Index-Fortschritt
-    pos=pointAlong(m.pts, Math.min(p,cap)); // laufend oder am Endpunkt/Abfangpunkt gehalten
+    const p=moveEase(m,(t-m.gStart)/m.dur); // Weganteil nach Easing (Z3), hält selbst am Abfangpunkt
+    pos=pointAlong(m.pts, p); // laufend oder am Endpunkt/Abfangpunkt gehalten
   }
   if(pos) return pos;
   const e=metaOf(tl,id,cp);
@@ -5524,7 +5538,7 @@ function drawGlobalFrame(c,pr,tl,t){
   tl.movs.forEach(m=>{
     if(t<m.gStart)return;
     const cap=(m.type==='run'&&m.stopFrac!=null)?m.stopFrac:1;
-    const prog=Math.min(cap,(t-m.gStart)/m.dur);
+    const prog=moveEase(m,(t-m.gStart)/m.dur);
     const over=t-(m.gStart+m.dur*cap);
     let a=1; if(over>0) a=Math.max(0,1-over/1.1);
     if(a<=0)return;
@@ -5594,9 +5608,11 @@ function pbTick(ts){
     const localT=pbTime-m.startTime;
     if(localT<=0)return;  // not started yet — don't draw anything
 
-    const t=Math.min(1, localT/m.duration);
-    const showPts=Math.max(2,Math.floor(t*m.pts.length));
-    const pts=m.pts.slice(0,showPts);
+    // Easing (Z3) wie in der Sequenz; Figur exakt auf dem Weg, Spur endet an der Figur
+    const t=moveEase(m,localT/m.duration);
+    const cur=pointAlong(m.pts,t);
+    const pts=m.pts.slice(0,Math.floor(t*(m.pts.length-1))+1);
+    pts.push(cur);
 
     // Draw trail
     ctx.beginPath();ctx.strokeStyle=m.color;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';
@@ -5604,7 +5620,7 @@ function pbTick(ts){
     ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(pt=>ctx.lineTo(pt.x,pt.y));
     ctx.stroke();ctx.setLineDash([]);
 
-    const last=pts[pts.length-1];
+    const last=cur;
 
     if(m.type==='run'){
       const ent=entities.find(e=>e.id===m.entityId)||{type:'attacker',color:'#e8614e',label:'A'};
