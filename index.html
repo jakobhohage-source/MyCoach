@@ -5864,6 +5864,8 @@ function openSavedEx(id){
   const ft = bd.fieldType||'full';
   selectedFieldType = ft;
   document.getElementById('fieldPicker').style.display='none';
+  // boardOuter muss vor initBoard/resizeBoard sichtbar sein (showView blendet es bei !boardInited aus)
+  document.getElementById('boardOuter').style.display='flex';
 
   // 3. Init board (or reinit if already open)
   if(!boardInited){

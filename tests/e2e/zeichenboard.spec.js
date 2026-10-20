@@ -80,13 +80,15 @@ test.describe('Zeichenboard', () => {
     await expect.poll(async () => (await boardState(page)).paths.length).toBe(2);
     await expect(page.locator('#bsStats')).toContainText('Zeichnungen: 2');
 
-    // Ersten Spieler verschieben
-    const startPos = (await boardState(page)).entities[0];
-    const c0 = await page.locator('#playerLayer .field-entity').first().boundingBox();
-    await drag(page, { x: c0.x + c0.width / 2, y: c0.y + c0.height / 2 }, { x: cb.x + cb.width * 0.7, y: cb.y + cb.height * 0.5 });
+    // Zuletzt gesetzten Spieler verschieben. Er liegt im DOM zuoberst, auch wenn die App
+    // die Spieler zufällig übereinander platziert hat.
+    const before = (await boardState(page)).entities;
+    const last = before.length - 1;
+    const cl = await page.locator('#playerLayer .field-entity').last().boundingBox();
+    await drag(page, { x: cl.x + cl.width / 2, y: cl.y + cl.height / 2 }, { x: cb.x + cb.width * 0.7, y: cb.y + cb.height * 0.5 });
     await expect.poll(async () => {
-      const e = (await boardState(page)).entities[0];
-      return Math.hypot(e.x - startPos.x, e.y - startPos.y) > 3;
+      const e = (await boardState(page)).entities[last];
+      return Math.hypot(e.x - before[last].x, e.y - before[last].y) > 3;
     }).toBe(true);
 
     const state = await boardState(page);
@@ -117,12 +119,6 @@ test.describe('Zeichenboard', () => {
     expect(rows[0].board_data.entities[0].y).toBeCloseTo(expected.entities[0].y, 1);
 
     await reloadAndLogin(page);
-    // Umweg wegen bekanntem Fehler (siehe Test unten): erst das Board regulär öffnen,
-    // dann zurück zum Dashboard und die Taktik öffnen.
-    await page.click('.tb-link:has-text("Zeichenboard")');
-    await page.click('.fp-start-btn');
-    await expect(page.locator('#boardOuter')).toBeVisible();
-    await page.click('.tb-link:has-text("Dashboard")');
     await page.locator('#savedExercisesList .saved-item', { hasText: marker }).click();
 
     // Sichtbarer Zustand: Board da, 4 Spieler im DOM, Statuszeile stimmt
@@ -142,16 +138,119 @@ test.describe('Zeichenboard', () => {
     expectNoProblems(problems);
   });
 
-  // Bekannter App-Fehler: Nach einem Seiten-Reload zeigt das direkte Öffnen einer gespeicherten Taktik
-  // eine leere Ansicht, weil openSavedEx das Board (boardOuter) nicht einblendet, solange boardInited false ist.
-  // test.fail() hält die Suite grün und schlägt Alarm (unerwartet bestanden), sobald der Fehler behoben ist.
-  test('Taktik direkt nach Reload öffnen (bekannter Fehler)', async ({ page }) => {
-    test.fail();
+  // Gemeinsame Prüfung für Kriterium 2 und 3: Board sichtbar, Feldauswahl nicht, Canvas hat Größe
+  async function expectBoardOpen(page) {
+    await expect(page.locator('#boardOuter')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('#fieldPicker')).not.toBeVisible();
+    await expect.poll(() => page.evaluate(() => {
+      const c = document.getElementById('drawCanvas');
+      return c.width > 0 && c.height > 0;
+    })).toBe(true);
+    const box = await page.locator('#drawCanvas').boundingBox();
+    expect(box.width).toBeGreaterThan(0);
+    expect(box.height).toBeGreaterThan(0);
+  }
+
+  test('Taktik direkt nach Reload öffnen', async ({ page }) => {
     const expected = await buildAndSave(page);
     await reloadAndLogin(page);
     await page.locator('#savedExercisesList .saved-item', { hasText: marker }).click();
-    await expect(page.locator('#boardOuter')).toBeVisible({ timeout: 3000 });
+    await expectBoardOpen(page);
     await expect(page.locator('#playerLayer .field-entity')).toHaveCount(4);
     expectRestored(await boardState(page), expected);
+    expectNoProblems(problems);
   });
+
+  test('Im selben Besuch erneut öffnen, auch mit anderem Feldtyp (Kriterium 4)', async ({ page }) => {
+    const expected = await buildAndSave(page);
+    await reloadAndLogin(page);
+    const item = page.locator('#savedExercisesList .saved-item', { hasText: marker });
+    await item.click();
+    await expectBoardOpen(page);
+    expectRestored(await boardState(page), expected);
+
+    // Zurück zum Dashboard, erneut öffnen (Board ist initialisiert)
+    await page.click('.tb-link:has-text("Dashboard")');
+    await item.click();
+    await expectBoardOpen(page);
+    await expect(page.locator('#playerLayer .field-entity')).toHaveCount(4);
+    expectRestored(await boardState(page), expected);
+
+    // Synthetische Taktik (nur im Speicher, nicht in der DB) mit anderem Feldtyp
+    await page.click('.tb-link:has-text("Dashboard")');
+    await page.evaluate(() => {
+      savedExercises.push({ id: 'synthetic-full', name: 'synthetic', field: 'full', movCount: 0, time: '',
+        boardData: { fieldType: 'full', entities: [], paths: [], movements: [] } });
+      openSavedEx('synthetic-full');
+    });
+    await expectBoardOpen(page);
+    await expect.poll(async () => (await boardState(page)).field).toBe('full');
+    await expect(page.locator('#playerLayer .field-entity')).toHaveCount(0);
+    await page.evaluate(() => { savedExercises = savedExercises.filter((x) => x.id !== 'synthetic-full'); });
+    expectNoProblems(problems);
+  });
+
+  test('Edge Cases: ohne boardData Feldauswahl, ohne fieldType Fallback full', async ({ page }) => {
+    // frisch nach Login, Board nicht initialisiert; erst warten, bis loadSavedExercises die Liste gesetzt hat
+    await page.waitForFunction(() => document.querySelector('#savedExercisesList .saved-item, #savedExercisesList .saved-empty'));
+    await page.evaluate(() => {
+      savedExercises.push({ id: 'syn-null', name: 'syn-null', field: 'x', movCount: 0, time: '', boardData: null });
+      savedExercises.push({ id: 'syn-nofield', name: 'syn-nofield', field: 'x', movCount: 0, time: '',
+        boardData: { entities: [{ id: 1, type: 'ball', x: 50, y: 50 }] } });
+      openSavedEx('syn-null');
+    });
+    await expect(page.locator('#fieldPicker')).toBeVisible();
+    await expect(page.locator('#boardOuter')).not.toBeVisible();
+
+    await page.click('.tb-link:has-text("Dashboard")');
+    await page.evaluate(() => openSavedEx('syn-nofield'));
+    // Hinweis: Eintrag bleibt nur im Speicher der Seite
+    await expectBoardOpen(page);
+    await expect.poll(async () => (await boardState(page)).field).toBe('full');
+    await expect(page.locator('#playerLayer .field-entity')).toHaveCount(1);
+    expectNoProblems(problems);
+  });
+
+  // Kriterium 1 zusätzlich für Tablet und Handy (Touch). Größe des Felds auf dem Handy gehört zu Z8.
+  for (const vp of [
+    { name: 'Tablet 820x1180', viewport: { width: 820, height: 1180 } },
+    { name: 'Handy 390x844', viewport: { width: 390, height: 844 } },
+  ]) {
+    test.describe(vp.name, () => {
+      test.use({ viewport: vp.viewport, hasTouch: true, isMobile: true });
+
+      // Tablet und Handy: Aufbau per Maus ist dort nicht praktikabel (Handy-Feld winzig, Z8).
+      // Die Taktik wird deshalb in beiden Fällen direkt in der Testumgebung angelegt, geöffnet wird per Klick in der Liste.
+      test('Taktik direkt nach Reload öffnen', async ({ page }) => {
+        const entitiesSeed = [
+          { id: 1, type: 'attacker', x: 20, y: 30, color: '#e8614e', label: 'A' },
+          { id: 2, type: 'attacker', x: 40, y: 60, color: '#e8614e', label: 'A' },
+          { id: 3, type: 'defender', x: 60, y: 30, color: '#4fa3e0', label: 'V' },
+          { id: 4, type: 'defender', x: 80, y: 60, color: '#4fa3e0', label: 'V' },
+        ];
+        await page.evaluate(async ({ m, ents }) => {
+          const pts = (a, b) => [{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }];
+          const { error } = await sb.from('tactics').insert({
+            user_id: currentUser.id, name: m, field_type: 'half', created_at: new Date().toISOString(),
+            board_data: {
+              fieldType: 'half', movements: [], entities: ents,
+              paths: [
+                { color: '#f0bc2e', size: 2, tool: 'arrow', pts: pts([10, 10], [60, 10]) },
+                { color: '#f0bc2e', size: 2, tool: 'arrow', pts: pts([10, 80], [60, 60]) },
+              ],
+            },
+          });
+          if (error) throw new Error(error.message);
+        }, { m: marker, ents: entitiesSeed });
+        await reloadAndLogin(page);
+        await page.locator('#savedExercisesList .saved-item', { hasText: marker }).click();
+        await expectBoardOpen(page);
+        await expect(page.locator('#playerLayer .field-entity')).toHaveCount(4);
+        const st = await boardState(page);
+        expect(st.field).toBe('half');
+        expect(st.paths.map((x) => x.tool)).toEqual(['arrow', 'arrow']);
+        expectNoProblems(problems);
+      });
+    });
+  }
 });
