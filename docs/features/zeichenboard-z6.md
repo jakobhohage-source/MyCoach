@@ -2,6 +2,8 @@
 
 **Status:** Umgesetzt auf Branch feature/zeichenboard-z6.
 
+Manuelle Tests: ERLEDIGT am 20.10.2026
+
 ## Problem
 Jeder Klick auf „Angreifer“, „Hütchen“ usw. setzt das Objekt an eine Zufallsposition (`placeEntity`, `Math.random`). Der Trainer muss jedes Objekt nachziehen. Das ist die größte Zeitbremse beim Aufbauen einer Übung, am Laptop wie am Tablet.
 
