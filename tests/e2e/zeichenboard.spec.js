@@ -66,10 +66,17 @@ test.describe('Zeichenboard', () => {
     await page.waitForFunction(() => boardInited && document.getElementById('drawCanvas').width > 0);
 
     // 4 Spieler setzen
+    // (Tap-to-place: Werkzeug wählen, auf feste Feldpunkte klicken, Werkzeug beenden)
+    const pl = await page.locator('#playerLayer').boundingBox();
+    const at = (px, py) => ({ x: pl.x + pl.width * px / 100, y: pl.y + pl.height * py / 100 });
     await page.click('#btn-add-att');
-    await page.click('#btn-add-att');
+    await page.mouse.click(at(20, 30).x, at(20, 30).y);
+    await page.mouse.click(at(20, 60).x, at(20, 60).y);
     await page.click('#btn-add-def');
+    await page.mouse.click(at(60, 30).x, at(60, 30).y);
+    await page.mouse.click(at(60, 60).x, at(60, 60).y);
     await page.click('#btn-add-def');
+    await expect(page.locator('#btn-add-def')).not.toHaveClass(/\bon\b/);
     await expect(page.locator('#playerLayer .field-entity')).toHaveCount(4);
     await expect(page.locator('#bsStats')).toContainText('Objekte: 4');
 
@@ -80,8 +87,7 @@ test.describe('Zeichenboard', () => {
     await expect.poll(async () => (await boardState(page)).paths.length).toBe(2);
     await expect(page.locator('#bsStats')).toContainText('Zeichnungen: 2');
 
-    // Zuletzt gesetzten Spieler verschieben. Er liegt im DOM zuoberst, auch wenn die App
-    // die Spieler zufällig übereinander platziert hat.
+    // Zuletzt gesetzten Spieler verschieben (liegt im DOM zuoberst).
     const before = (await boardState(page)).entities;
     const last = before.length - 1;
     const cl = await page.locator('#playerLayer .field-entity').last().boundingBox();

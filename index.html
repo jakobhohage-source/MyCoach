@@ -1773,17 +1773,17 @@ html, body {
             <!-- SPIELER -->
             <div class="tgroup"><span class="tglabel">Spieler</span><div class="trow">
               <input id="playerNameInput" class="player-name-input" type="text" maxlength="18" placeholder="Name (optional)" title="Optional: Name für den nächsten Spieler – oder Spieler doppelklicken zum Umbenennen">
-              <button class="entity-btn" id="btn-add-att" onclick="addPlayer('attacker')"><span style="width:12px;height:12px;border-radius:50%;background:#e8614e;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Angreifer</button>
-              <button class="entity-btn" id="btn-add-def" onclick="addPlayer('defender')"><span style="width:12px;height:12px;border-radius:50%;background:#4fa3e0;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Verteidiger</button>
-              <button class="entity-btn" id="btn-add-gk" onclick="addPlayer('gk')"><span style="width:12px;height:12px;border-radius:50%;border:2px dashed #e0a92e;flex:none"></span>Torwart</button>
-              <button class="entity-btn" id="btn-add-group" onclick="openGroupDialog()"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="2.8" stroke="currentColor" stroke-width="1.5"/><circle cx="11.2" cy="6.8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 14c0-2.3 2.1-3.8 4.5-3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gruppe…</button>
+              <button class="entity-btn" id="btn-add-att" aria-pressed="false" onclick="togglePlacing('attacker')"><span style="width:12px;height:12px;border-radius:50%;background:#e8614e;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Angreifer</button>
+              <button class="entity-btn" id="btn-add-def" aria-pressed="false" onclick="togglePlacing('defender')"><span style="width:12px;height:12px;border-radius:50%;background:#4fa3e0;border:1.5px solid rgba(255,255,255,0.7);flex:none"></span>Verteidiger</button>
+              <button class="entity-btn" id="btn-add-gk" aria-pressed="false" onclick="togglePlacing('gk')"><span style="width:12px;height:12px;border-radius:50%;border:2px dashed #e0a92e;flex:none"></span>Torwart</button>
+              <button class="entity-btn" id="btn-add-group" aria-pressed="false" onclick="openGroupDialog()"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="2.8" stroke="currentColor" stroke-width="1.5"/><circle cx="11.2" cy="6.8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 14c0-2.3 2.1-3.8 4.5-3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gruppe…</button>
             </div></div>
             <!-- UTENSILIEN -->
             <div class="tgroup"><span class="tglabel">Utensilien</span><div class="trow">
-              <button class="entity-btn" id="btn-add-cone" onclick="placeEntity('cone')"><svg viewBox="0 0 16 16" fill="none"><polygon points="8,2.5 13.5,13.5 2.5,13.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Hütchen</button>
-              <button class="entity-btn" onclick="placeEntity('pole')"><svg viewBox="0 0 16 16" fill="none"><rect x="6.6" y="2" width="2.8" height="12" rx="1.4" stroke="currentColor" stroke-width="1.4"/></svg>Stange</button>
-              <button class="entity-btn" id="btn-add-ball" onclick="placeEntity('ball')"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.5"/><path d="M4.6 4.6 8 7 11.4 4.6M4.6 11.4 8 9l3.4 2.4M8 2.4V13.6" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>Ball</button>
-              <button class="entity-btn" onclick="placeEntity('pylon')"><svg viewBox="0 0 16 16" fill="none"><polygon points="8,2 14,14 2,14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="4.4" y1="10" x2="11.6" y2="10" stroke="currentColor" stroke-width="1.2"/></svg>Pylone</button>
+              <button class="entity-btn" id="btn-add-cone" aria-pressed="false" onclick="togglePlacing('cone')"><svg viewBox="0 0 16 16" fill="none"><polygon points="8,2.5 13.5,13.5 2.5,13.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Hütchen</button>
+              <button class="entity-btn" id="btn-add-pole" aria-pressed="false" onclick="togglePlacing('pole')"><svg viewBox="0 0 16 16" fill="none"><rect x="6.6" y="2" width="2.8" height="12" rx="1.4" stroke="currentColor" stroke-width="1.4"/></svg>Stange</button>
+              <button class="entity-btn" id="btn-add-ball" aria-pressed="false" onclick="togglePlacing('ball')"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.5"/><path d="M4.6 4.6 8 7 11.4 4.6M4.6 11.4 8 9l3.4 2.4M8 2.4V13.6" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>Ball</button>
+              <button class="entity-btn" id="btn-add-pylon" aria-pressed="false" onclick="togglePlacing('pylon')"><svg viewBox="0 0 16 16" fill="none"><polygon points="8,2 14,14 2,14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="4.4" y1="10" x2="11.6" y2="10" stroke="currentColor" stroke-width="1.2"/></svg>Pylone</button>
               <button class="entity-btn" id="btn-cone-dist" onclick="toggleConeDistances()" title="Abstände zwischen Hütchen ein-/ausblenden" style="border-style:dashed"><svg viewBox="0 0 16 16" fill="none"><line x1="2.5" y1="8" x2="13.5" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2.5" y1="5.5" x2="2.5" y2="10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13.5" y1="5.5" x2="13.5" y2="10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Abstände</button>
               <div class="split-btn-wrap" style="position:relative">
                 <button class="entity-btn" id="btn-presets" onclick="togglePresetMenu()" title="Vordefinierte Aufstellungen"><svg viewBox="0 0 16 16" fill="none"><rect x="2.4" y="2.4" width="4.4" height="4.4" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9.2" y="2.4" width="4.4" height="4.4" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2.4" y="9.2" width="4.4" height="4.4" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9.2" y="9.2" width="4.4" height="4.4" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Vorlage<svg viewBox="0 0 16 16" fill="none" style="margin-left:1px"><polyline points="4,6 8,10 12,6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1855,7 +1855,7 @@ html, body {
           <span id="bsTool">↗ Pfeil</span>
           <span><span class="status-dot" id="bsColorDot" style="background:#fff"></span><span id="bsColorName">Weiß</span></span>
           <span id="bsStats">Objekte: 0 · Zeichnungen: 0 · Bewegungen: 0</span>
-          <span style="margin-left:auto;color:#9ca3af" id="bsHint">Spieler/Ball auswählen → Weg-Typ → auf Feld klicken &amp; ziehen</span>
+          <span style="margin-left:auto;color:#9ca3af" id="bsHint" aria-live="polite">Spieler/Ball auswählen → Weg-Typ → auf Feld klicken &amp; ziehen</span>
         </div>
       </div><!-- end boardOuter -->
 
@@ -2777,6 +2777,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
    NAVIGATION
 ════════════════════════════════════ */
 function showView(name){
+  if(placeType)setMovementMode(null); // Platzier-Modus (Z6) endet bei jedem Ansichtswechsel, auch beim Öffnen einer Übung
   currentView = name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tb-link').forEach(l=>l.classList.remove('active'));
@@ -3954,6 +3955,8 @@ function canvasToMeters(dx,dy){
 }
 
 function bDown(e){
+  // Tap-to-place: Objekt an der Tap-Position setzen, nichts zeichnen
+  if(placeType){if(e.button!==0||!e.isPrimary)return;placeAtPointer(e);return;}
   // Pointer-Capture: der Zug bleibt am Canvas, auch wenn man über einen Spieler fährt
   // (sonst bricht ein Pfeil/Weg ab, sobald der Cursor eine Figur berührt)
   try{canvas.setPointerCapture(e.pointerId);}catch(_){}
@@ -5025,6 +5028,7 @@ function setMoveType(t,el){
 
 /* ── Movement mode ── */
 function setMovementMode(mode){
+  stopPlacing();
   movementMode=mode;selectedSource=null;drawingMovement=false;movePt1=null;movePt2=null;
   fixedStartPt=null;
   document.querySelectorAll('.field-entity').forEach(e=>e.classList.remove('selected-source'));
@@ -5173,21 +5177,70 @@ function nextPlayerNum(type){
 }
 function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-// Spieler über die Toolbar-Buttons hinzufügen (liest optionales Namensfeld)
-function addPlayer(type){
+// Spieler setzen (liest optionales Namensfeld)
+function addPlayer(type,pos){
   const inp=document.getElementById('playerNameInput');
   const nm=inp?inp.value.trim():'';
-  placeEntity(type, nm);
+  placeEntity(type, nm, pos);
   if(inp)inp.value='';
 }
 
-function placeEntity(type, pname){
+/* ── Tap-to-place: Werkzeug wählen, aufs Feld tippen/klicken ── */
+let placeType=null;       // null | attacker | defender | gk | cone | pole | ball | pylon | group
+let placeGroupOpts=null;  // Gruppe: {label,count,color}, wird einmalig gesetzt
+const PLACE_BTN={attacker:'btn-add-att',defender:'btn-add-def',gk:'btn-add-gk',cone:'btn-add-cone',pole:'btn-add-pole',ball:'btn-add-ball',pylon:'btn-add-pylon',group:'btn-add-group'};
+const PLACE_NAME={attacker:'Angreifer',defender:'Verteidiger',gk:'Torwart',cone:'Hütchen',pole:'Stange',ball:'Ball',pylon:'Pylone',group:'Gruppe'};
+const PLACE_HINT={attacker:'Spieler',defender:'Spieler',gk:'Torwart',cone:'Hütchen',pole:'Stange',ball:'Ball',pylon:'Pylone'};
+function stopPlacing(){
+  placeType=null;placeGroupOpts=null;
+  Object.values(PLACE_BTN).forEach(id=>{const b=document.getElementById(id);if(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');}});
+}
+function startPlacing(type){
+  setMovementMode(null); // beendet andere Modi, setzt Pill/Hinweis zurück
+  placeType=type;
+  const b=document.getElementById(PLACE_BTN[type]);
+  if(b){b.classList.add('on');b.setAttribute('aria-pressed','true');}
+  const pill=document.getElementById('modePill');
+  pill.className='mode-pill mode-draw';pill.textContent='Platzieren: '+PLACE_NAME[type];
+  const touch=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;
+  document.getElementById('bsHint').textContent=type==='group'
+    ?'Gruppe setzen – einmal aufs Feld tippen'
+    :PLACE_HINT[type]+' setzen – '+(touch?'tippen zum Platzieren, Button erneut tippen zum Beenden':'klicken zum Platzieren, Esc zum Beenden');
+  if(canvas)canvas.style.cursor='crosshair';
+}
+function togglePlacing(type){
+  if(placeType===type)setMovementMode(null);else startPlacing(type);
+}
+function placeAtPointer(e){
+  const cr=document.getElementById('playerLayer').getBoundingClientRect();
+  if(!cr.width||!cr.height)return;
+  const pos={
+    x:Math.max(1,Math.min(99,(e.clientX-cr.left)/cr.width*100)),
+    y:Math.max(1,Math.min(99,(e.clientY-cr.top)/cr.height*100))
+  };
+  if(placeType==='group'){
+    const o=placeGroupOpts;setMovementMode(null);
+    if(o)placeGroup(o.label,o.count,o.color,pos);
+  }else if(['attacker','defender','gk'].includes(placeType)){
+    addPlayer(placeType,pos);
+  }else{
+    placeEntity(placeType,'',pos);
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape'||!placeType)return;
+  const t=e.target;
+  if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+  setMovementMode(null);
+});
+
+function placeEntity(type, pname, pos){
   pname=pname||'';
   const area=document.getElementById('boardArea');
   let x=Math.random()*60+20, y=Math.random()*50+25;
 
-  // Chain cones: place near last cone
-  if(type==='cone' && lastConeId !== null){
+  // Chain cones: place near last cone (nur ohne feste Position, z. B. Vorlagen)
+  if(!pos && type==='cone' && lastConeId !== null){
     const prev = entities.find(e=>e.id===lastConeId);
     if(prev){
       x = Math.min(95, prev.x + 8 + Math.random()*4);
@@ -5195,7 +5248,8 @@ function placeEntity(type, pname){
     }
   }
 
-  if(type==='gk'){ x=2.5; y=50; }
+  if(type==='gk' && !pos){ x=2.5; y=50; }
+  if(pos){ x=pos.x; y=pos.y; }
 
   const id=++entityIdCounter;
   const wrap=document.createElement('div');wrap.className='field-entity';
@@ -5264,6 +5318,7 @@ function renamePlayer(ent){
 }
 
 function openGroupDialog(){
+  if(placeType)setMovementMode(null);
   // Auto-assign next label and color based on existing groups
   const GROUP_PRESETS=[
     {label:'Gruppe A',color:'#e8614e'},
@@ -5288,11 +5343,11 @@ function selectGdColor(el,c){gdColor=c;document.querySelectorAll('.gd-color').fo
 function confirmGroupDialog(){
   const label=document.getElementById('gdLabel').value||'Gruppe';
   const count=Math.max(2,Math.min(11,parseInt(document.getElementById('gdCount').value)||4));
-  closeGroupDialog();placeGroup(label,count,gdColor);
+  closeGroupDialog();startPlacing('group');placeGroupOpts={label,count,color:gdColor};
 }
-function placeGroup(label,count,color){
+function placeGroup(label,count,color,pos){
   const area=document.getElementById('boardArea');
-  const x=Math.random()*55+22,y=Math.random()*45+27,id=++entityIdCounter;
+  const x=pos?pos.x:Math.random()*55+22,y=pos?pos.y:Math.random()*45+27,id=++entityIdCounter;
   const wrap=document.createElement('div');wrap.className='field-entity';wrap.dataset.eid=id;
   wrap.style.left=x+'%';wrap.style.top=y+'%';
   const dots=Array.from({length:Math.min(count,5)},(_,i)=>
