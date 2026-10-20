@@ -953,6 +953,9 @@ textarea.de-input{resize:vertical;min-height:48px;}
   width:52px;height:52px;display:flex;align-items:center;justify-content:center;
   font-size:42px;filter:drop-shadow(0 3px 10px rgba(0,0,0,0.8));
 }
+/* Elemente mit CSS-filter auf eigene Ebene: Safari lässt sonst beim Ziehen (left/top) Streifen
+   des Filter-Überhangs (Schatten) an alten Positionen zurück. Spieler (box-shadow) brauchen das nicht. */
+.fe-ball,.fe-cone,.fe-pylon{will-change:transform;}
 
 /* Playback bar */
 .playback-bar{
@@ -5880,6 +5883,8 @@ function openSavedEx(id){
   const ft = bd.fieldType||'full';
   selectedFieldType = ft;
   document.getElementById('fieldPicker').style.display='none';
+  // boardOuter muss vor initBoard/resizeBoard sichtbar sein (showView blendet es bei !boardInited aus)
+  document.getElementById('boardOuter').style.display='flex';
 
   // 3. Init board (or reinit if already open)
   if(!boardInited){
