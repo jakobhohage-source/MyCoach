@@ -2,6 +2,8 @@
 
 **Status:** Umgesetzt auf Branch feature/browser-tester.
 
+Manuelle Tests: ERLEDIGT am 20.10.2026
+
 ## Was es tut
 Automatische Browser-Tests mit Playwright (Chromium). Sie bedienen die App wie ein Trainer: einloggen, Beiträge, Kommentare, Testspiel-Anfragen und Taktiken anlegen und wieder löschen. Dabei prüfen sie, dass keine Dialoge aufgehen und keine Fehler in der Konsole stehen.
 
