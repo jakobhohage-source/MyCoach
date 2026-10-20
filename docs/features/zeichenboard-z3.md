@@ -1,6 +1,8 @@
 # Zeichenboard Z3: Easing für Läufe und Pässe
 
-Status: umgesetzt, getestet, Sichtprüfung durch Jakob offen (Branch `feature/zeichenboard-z3`)
+Status: umgesetzt, getestet, Sichtprüfung durch Jakob erledigt (Branch `feature/zeichenboard-z3`)
+
+Manuelle Tests: ERLEDIGT am 20.10.2026
 Quelle: Analyse Zeichenboard, Punkt Z3.
 
 ## Problem
