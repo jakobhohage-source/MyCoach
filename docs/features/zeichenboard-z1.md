@@ -1,6 +1,8 @@
 # Zeichenboard Z1: Gespeicherte Taktik nach Reload öffnen
 
 Status: Umgesetzt auf Branch feature/zeichenboard-z1
+
+Manuelle Tests: ERLEDIGT am 20.10.2026
 Branch: `feature/zeichenboard-z1`
 Quelle: Backlog-Punkt Z1 der Zeichenboard-Analyse, Frage F1 (Annahme unwidersprochen: Öffnen landet direkt im Board mit der Taktik).
 
