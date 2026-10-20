@@ -23,7 +23,12 @@ for (const { name, btn, sel } of [
     await page.click('#fp-half');
     await page.click('.fp-start-btn');
     await page.waitForFunction(() => boardInited && document.getElementById('drawCanvas').width > 0);
+    // Tap-to-place (Z6): Werkzeug wählen, Objekt an fester Stelle setzen, Werkzeug beenden
+    const pl = await page.locator('#playerLayer').boundingBox();
     await page.click(btn);
+    await page.mouse.click(pl.x + pl.width * 0.3, pl.y + pl.height * 0.3);
+    await page.click(btn);
+    await expect(page.locator(btn)).not.toHaveClass(/\bon\b/);
     await expect(page.locator(`#playerLayer ${sel}`)).toHaveCount(1);
     // Toast ("platziert") liegt evtl. im Bildausschnitt und würde das Ergebnis verfälschen
     await page.addStyleTag({ content: '#toastEl{visibility:hidden !important}' });

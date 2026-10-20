@@ -18,8 +18,14 @@ test.describe('Zeichenboard Z3 Easing', () => {
     await page.click('.fp-start-btn');
     await expect(page.locator('#boardOuter')).toBeVisible();
     await page.waitForFunction(() => boardInited && document.getElementById('drawCanvas').width > 0);
+    // Tap-to-place (Z6): Werkzeug wählen, auf feste Feldpunkte klicken, Werkzeug beenden
+    const pl = await page.locator('#playerLayer').boundingBox();
     await page.click('#btn-add-att');
+    await page.mouse.click(pl.x + pl.width * 0.3, pl.y + pl.height * 0.4);
     await page.click('#btn-add-def');
+    await page.mouse.click(pl.x + pl.width * 0.6, pl.y + pl.height * 0.4);
+    await page.click('#btn-add-def');
+    await expect(page.locator('#btn-add-def')).not.toHaveClass(/\bon\b/);
     await expect(page.locator('#playerLayer .field-entity')).toHaveCount(2);
   });
 

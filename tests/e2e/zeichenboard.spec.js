@@ -66,10 +66,17 @@ test.describe('Zeichenboard', () => {
     await page.waitForFunction(() => boardInited && document.getElementById('drawCanvas').width > 0);
 
     // 4 Spieler setzen
+    // (Tap-to-place: Werkzeug wählen, auf feste Feldpunkte klicken, Werkzeug beenden)
+    const pl = await page.locator('#playerLayer').boundingBox();
+    const at = (px, py) => ({ x: pl.x + pl.width * px / 100, y: pl.y + pl.height * py / 100 });
     await page.click('#btn-add-att');
-    await page.click('#btn-add-att');
+    await page.mouse.click(at(20, 30).x, at(20, 30).y);
+    await page.mouse.click(at(20, 60).x, at(20, 60).y);
     await page.click('#btn-add-def');
+    await page.mouse.click(at(60, 30).x, at(60, 30).y);
+    await page.mouse.click(at(60, 60).x, at(60, 60).y);
     await page.click('#btn-add-def');
+    await expect(page.locator('#btn-add-def')).not.toHaveClass(/\bon\b/);
     await expect(page.locator('#playerLayer .field-entity')).toHaveCount(4);
     await expect(page.locator('#bsStats')).toContainText('Objekte: 4');
 
@@ -80,8 +87,7 @@ test.describe('Zeichenboard', () => {
     await expect.poll(async () => (await boardState(page)).paths.length).toBe(2);
     await expect(page.locator('#bsStats')).toContainText('Zeichnungen: 2');
 
-    // Zuletzt gesetzten Spieler verschieben. Er liegt im DOM zuoberst, auch wenn die App
-    // die Spieler zufällig übereinander platziert hat.
+    // Zuletzt gesetzten Spieler verschieben (liegt im DOM zuoberst).
     const before = (await boardState(page)).entities;
     const last = before.length - 1;
     const cl = await page.locator('#playerLayer .field-entity').last().boundingBox();
@@ -191,8 +197,10 @@ test.describe('Zeichenboard', () => {
   });
 
   test('Edge Cases: ohne boardData Feldauswahl, ohne fieldType Fallback full', async ({ page }) => {
-    // frisch nach Login, Board nicht initialisiert; erst warten, bis loadSavedExercises die Liste gesetzt hat
-    await page.waitForFunction(() => document.querySelector('#savedExercisesList .saved-item, #savedExercisesList .saved-empty'));
+    // frisch nach Login, Board nicht initialisiert. Erst warten, bis enterApp fertig geladen hat
+    // (#inboxBtn wird nach loadSavedExercises/loadTrainingPlans eingeblendet), sonst überschreibt
+    // ein später eintreffendes loadSavedExercises die synthetischen Einträge.
+    await expect(page.locator('#inboxBtn')).toBeVisible({ timeout: 30_000 });
     await page.evaluate(() => {
       savedExercises.push({ id: 'syn-null', name: 'syn-null', field: 'x', movCount: 0, time: '', boardData: null });
       savedExercises.push({ id: 'syn-nofield', name: 'syn-nofield', field: 'x', movCount: 0, time: '',
